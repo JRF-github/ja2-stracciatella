@@ -207,6 +207,9 @@ UINT8 *gubPatrolReinforcementsDenied = NULL;
 //Unsaved vars
 BOOLEAN gfDisplayStrategicAILogs = FALSE;
 
+
+BOOLEAN gfIsStrategicAIActive = FALSE;
+
 extern INT16 sWorldSectorLocationOfFirstBattle;
 
 //returns the number of reinforcements permitted to be sent.  Will increased if the denied counter is non-zero.
@@ -381,6 +384,26 @@ static void ValidateLargeGroup(GROUP* pGroup)
 
 void InitStrategicAI()
 {
+	if (GCM->getGarrisonGroups().empty() && GCM->getPatrolGroups().empty())
+	{
+		SLOGI("Strategic AI disabled");
+		return;
+	}
+
+	//Initialize the sectorinfo structure so all sectors don't point to a garrisonID.
+	FOR_EACH(SECTORINFO, i, SectorInfo)
+	{
+		i->ubGarrisonID = NO_GARRISON;
+	}
+
+	if (GCM->getGarrisonGroups().empty() && GCM->getPatrolGroups().empty())
+	{
+		SLOGI("Strategic AI disabled");
+		gfIsStrategicAIActive = FALSE;
+		return;
+	}
+
+	gfIsStrategicAIActive = TRUE;
 	gfExtraElites                      = FALSE;
 	gubNumAwareBattles                 = 0;
 	gfQueenAIAwake                     = FALSE;
@@ -433,11 +456,6 @@ void InitStrategicAI()
 	}
 	AddStrategicEvent(EVENT_EVALUATE_QUEEN_SITUATION, evaluate_time, 0);
 
-	//Initialize the sectorinfo structure so all sectors don't point to a garrisonID.
-	FOR_EACH(SECTORINFO, i, SectorInfo)
-	{
-		i->ubGarrisonID = NO_GARRISON;
-	}
 
 	/* Copy over the original army composition as it does get modified during the
 	 * campaign. This bulletproofs starting the game over again. */
@@ -658,6 +676,8 @@ void InitStrategicAI()
 
 void KillStrategicAI()
 {
+	gfIsStrategicAIActive = FALSE;
+
 	gPatrolGroup.clear();
 	gGarrisonGroup.clear();
 
@@ -3047,6 +3067,8 @@ static UINT8 RedirectEnemyGroupsMovingThroughSector(UINT8 ubSectorX, UINT8 ubSec
 
 void StrategicHandleQueenLosingControlOfSector( INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ )
 {
+	if (!gfIsStrategicAIActive) return;
+
 	SECTORINFO *pSector;
 	UINT8 ubSectorID;
 	if( sSectorZ )
