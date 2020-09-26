@@ -43,6 +43,7 @@
 #include "Logger.h"
 
 #include <string_theory/string>
+#include <externalized/scripting/ScriptingExtensions.h>
 
 
 // The InitializeGame function is responsible for setting up all data and Gaming Engine
@@ -96,6 +97,8 @@ try
 	InitTileCache( );
 
 	InitMercPopupBox( );
+
+	InitScriptingEngine();
 
 	if(GameState::getInstance()->isEditorMode())
 	{
