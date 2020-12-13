@@ -162,9 +162,9 @@ public:
 	virtual const MineModel* getMine(uint8_t mineId) const override;
 	virtual const std::vector<const MineModel*>& getMines() const override;
 	virtual const std::vector<const SamSiteModel*>& getSamSites() const override;
-	virtual const int8_t findSamIDBySector(uint8_t sectorId) const override;
+	virtual       int8_t findSamIDBySector(uint8_t sectorId) const override;
 	virtual const SamSiteModel* findSamSiteBySector(uint8_t sectorId) const override;
-	virtual const int8_t getControllingSamSite(uint8_t sectorId) const override;
+	virtual       int8_t getControllingSamSite(uint8_t sectorId) const override;
 	virtual const TownModel* getTown(int8_t townId) const  override;
 	virtual const std::map<int8_t, const TownModel*>& getTowns() const override;
 	virtual const ST::string getTownName(uint8_t townId) const override;
