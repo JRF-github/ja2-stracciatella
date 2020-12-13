@@ -17,7 +17,7 @@ SamSiteModel::SamSiteModel(uint8_t sectorId_, std::array<GridNo, 2> gridNos_)
 	graphicIndex = (gridNos[0] - gridNos[1] == WORLD_COLS) ? SAM_GRAPHIC_INDEX_NE_SW : SAM_GRAPHIC_INDEX_NW_SE;
 }
 
-const bool SamSiteModel::doesSamExistHere(INT16 const x, INT16 const y, GridNo const gridNo) const
+bool SamSiteModel::doesSamExistHere(INT16 const x, INT16 const y, GridNo const gridNo) const
 {
 	return x == SECTORX(sectorId) 
 		&& y == SECTORY(sectorId) 

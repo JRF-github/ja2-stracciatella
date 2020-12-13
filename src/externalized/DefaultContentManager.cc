@@ -1359,7 +1359,7 @@ const std::vector<const SamSiteModel*>& DefaultContentManager::getSamSites() con
 	return m_samSites;
 }
 
-const int8_t DefaultContentManager::findSamIDBySector(uint8_t sectorId) const
+int8_t DefaultContentManager::findSamIDBySector(uint8_t sectorId) const
 {
 	for (size_t i = 0; i < m_samSites.size(); i++)
 	{
@@ -1377,7 +1377,7 @@ const SamSiteModel* DefaultContentManager::findSamSiteBySector(uint8_t sectorId)
 	return (i > -1) ? m_samSites[i] : NULL;
 }
 
-const int8_t DefaultContentManager::getControllingSamSite(uint8_t sectorId) const
+int8_t DefaultContentManager::getControllingSamSite(uint8_t sectorId) const
 {
 	return m_samSitesAirControl->getControllingSamSiteID(sectorId);
 }

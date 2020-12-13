@@ -15,25 +15,25 @@ void readIntIntoVector(const rapidjson::Value& jsonArray, IntIntVector& vec, siz
 MovementCostsModel::MovementCostsModel(IntIntVector traverseWE_, IntIntVector traverseNS_, IntIntVector traverseThrough_, IntIntVector travelRatings_)
 	:traverseWE(traverseWE_), traverseNS(traverseNS_), traverseThrough(traverseThrough_), travelRatings(travelRatings_) {}
 
-const uint8_t MovementCostsModel::getTraversibilityWestEast(uint8_t x, uint8_t y) const
+uint8_t MovementCostsModel::getTraversibilityWestEast(uint8_t x, uint8_t y) const
 {
 	Assert(y < 16 && x <= 16);
 	return traverseWE[y][x];
 }
 
-const uint8_t MovementCostsModel::getTraversibilityNorthSouth(uint8_t x, uint8_t y) const
+uint8_t MovementCostsModel::getTraversibilityNorthSouth(uint8_t x, uint8_t y) const
 {
 	Assert(y <= 16 && x < 16);
 	return traverseNS[y][x];
 }
 
-const uint8_t MovementCostsModel::getTraversibilityThrough(uint8_t x, uint8_t y) const
+uint8_t MovementCostsModel::getTraversibilityThrough(uint8_t x, uint8_t y) const
 {
 	Assert(y < 16 && x < 16);
 	return traverseThrough[y][x];
 }
 
-const uint8_t MovementCostsModel::getTravelRating(uint8_t x, uint8_t y) const
+uint8_t MovementCostsModel::getTravelRating(uint8_t x, uint8_t y) const
 {
 	Assert(y < 16 && x < 16);
 	return travelRatings[y][x];
