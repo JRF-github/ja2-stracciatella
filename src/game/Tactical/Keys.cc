@@ -546,7 +546,7 @@ void HandleDoorTrap(SOLDIERTYPE& s, DOOR const& d)
 			// play siren sound effect but otherwise treat as silent alarm, calling
 			// available enemies to this location
 			PlayLocationJA2Sample(d.sGridNo, KLAXON_ALARM, MIDVOLUME, 5);
-			/* FALLTHROUGH */
+			[[fallthrough]];
 
 		case SILENT_ALARM:
 			// Get all available enemies running here

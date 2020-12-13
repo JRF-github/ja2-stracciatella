@@ -273,10 +273,10 @@ static void OffSetQuestionForFemaleSpecificQuestions(INT32* iCurrentOffset)
 	INT32 iExtraOffSet = 0;
 	switch (giCurrentPersonalityQuizQuestion)
 	{
-		case 13: iExtraOffSet += iIMPQuestionLengths[9]; /* FALLTHROUGH */
-		case  9: iExtraOffSet += iIMPQuestionLengths[8]; /* FALLTHROUGH */
-		case  8: iExtraOffSet += iIMPQuestionLengths[3]; /* FALLTHROUGH */
-		case  3: iExtraOffSet += iIMPQuestionLengths[0]; /* FALLTHROUGH */
+		case 13: iExtraOffSet += iIMPQuestionLengths[9]; [[fallthrough]];
+		case  9: iExtraOffSet += iIMPQuestionLengths[8]; [[fallthrough]];
+		case  8: iExtraOffSet += iIMPQuestionLengths[3]; [[fallthrough]];
+		case  3: iExtraOffSet += iIMPQuestionLengths[0]; [[fallthrough]];
 		case  0: break;
 
 		default: return;

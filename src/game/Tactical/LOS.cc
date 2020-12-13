@@ -3764,14 +3764,14 @@ void MoveBullet(BULLET* const pBullet)
 										{
 											break;
 										}
-										// else fall through
+										[[fallthrough]];
 									case ANIM_CROUCH:
 										// 1/4 chance of avoiding suppression pt
 										if (PreRandom( 4 ) == 0)
 										{
 											break;
 										}
-										// else fall through
+										[[fallthrough]];
 									default:
 										tgt.ubSuppressionPoints++;
 										tgt.suppressor = pBullet->pFirer;
@@ -3858,14 +3858,14 @@ void MoveBullet(BULLET* const pBullet)
 											{
 												break;
 											}
-											// else fall through
+											[[fallthrough]];
 										case ANIM_CROUCH:
 											// 1/4 chance of avoiding suppression pt
 											if (PreRandom( 4 ) == 0)
 											{
 												break;
 											}
-											// else fall through
+											[[fallthrough]];
 										default:
 											pTarget->ubSuppressionPoints++;
 											pTarget->suppressor = pBullet->pFirer;

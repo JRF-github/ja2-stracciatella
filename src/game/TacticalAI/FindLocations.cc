@@ -1620,7 +1620,7 @@ INT8 SearchForItems(SOLDIERTYPE& s, ItemSearchReason const reason, UINT16 const 
 								temp_value = 100 * new_rating / EffectiveArmour(&cur_armour);
 							}
 						}
-						/* FALLTHROUGH */
+						[[fallthrough]];
 
 					case SEARCH_WEAPONS:
 					{

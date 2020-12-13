@@ -652,7 +652,7 @@ static void BtnIMPCancelCallback(GUI_BUTTON *btn, INT32 reason)
 
 			case IMP_ATTRIBUTE_PAGE:
 				SetAttributes();
-				/* FALLTHROUGH */
+				[[fallthrough]];
 
 			default:
 				iCurrentImpPage = IMP_MAIN_PAGE;

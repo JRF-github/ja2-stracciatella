@@ -361,7 +361,7 @@ void InitStrategicAI()
 		case DIF_LEVEL_EASY:
 			gArmyComp[LEVEL2_DEFENCE].bDesiredPopulation = 0;
 			gArmyComp[LEVEL2_DEFENCE].bStartPopulation   = 0;
-			/* FALLTHROUGH */
+			[[fallthrough]];
 		case DIF_LEVEL_MEDIUM:
 			gArmyComp[LEVEL3_DEFENCE].bDesiredPopulation = 0;
 			gArmyComp[LEVEL3_DEFENCE].bStartPopulation   = 0;

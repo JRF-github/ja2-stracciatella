@@ -4507,7 +4507,7 @@ static void SquadMenuBtnCallback(MOUSE_REGION* const pRegion, INT32 const reason
 				if (exiting_helicopter) SetSoldierExitHelicopterInsertionData(&s); // XXX TODO001D
 				MakeSoldiersTacticalAnimationReflectAssignment(&s);
 			}
-				// fallthrough
+				[[fallthrough]];
 			case CHARACTER_CANT_JOIN_SQUAD_ALREADY_IN_IT:
 				// Stop displaying, leave
 				fShowAssignmentMenu      = FALSE;

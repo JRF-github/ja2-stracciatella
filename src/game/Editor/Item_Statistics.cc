@@ -425,7 +425,7 @@ void SpecifyItemToEdit( OBJECTTYPE *pItem, INT32 iMapIndex )
 				break;
 			}
 			// else act as nothing
-			// fallthrough
+			[[fallthrough]];
 		case IC_NONE:
 			gbEditingMode = EDITING_NOTHING;
 			if( !(gpItem->fFlags & OBJECT_UNDROPPABLE) )

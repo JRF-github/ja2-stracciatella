@@ -818,7 +818,7 @@ static ST::string ProcessTransactionString(const FinanceUnit* f)
 	{
 		case DEPOSIT_FROM_SILVER_MINE:
 			code = DEPOSIT_FROM_GOLD_MINE;
-			/* FALLTHROUGH */
+			[[fallthrough]];
 
 		case ACCRUED_INTEREST:
 		case ANONYMOUS_DEPOSIT:
