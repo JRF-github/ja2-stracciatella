@@ -764,7 +764,7 @@ static void ChooseGrenadesForSoldierCreateStruct(SOLDIERCREATE_STRUCT* pp, INT8 
 						break;
 					}
 					// if grenade launcher, pick regular instead
-					// fallthrough
+					[[fallthrough]];
 				case 1:
 					ubNumReg++;
 					sNumPoints -= 9;
@@ -777,7 +777,7 @@ static void ChooseGrenadesForSoldierCreateStruct(SOLDIERCREATE_STRUCT* pp, INT8 
 						break;
 					}
 					// if grenade launcher, pick tear instead
-					// fallthrough
+					[[fallthrough]];
 				case 3:
 					ubNumTear++;
 					sNumPoints -= 6;

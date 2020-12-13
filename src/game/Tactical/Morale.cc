@@ -493,7 +493,7 @@ void HandleMoraleEvent( SOLDIERTYPE *pSoldier, INT8 bMoraleEvent, INT16 sMapX, I
 						case ATT_AGGRESSIVE:
 							// Double the penalty - these guys REALLY hate running away
 							HandleMoraleEventForSoldier(&s, MORALE_RAN_AWAY);
-							/* FALLTHROUGH */
+							[[fallthrough]];
 						default:
 							HandleMoraleEventForSoldier(&s, MORALE_RAN_AWAY);
 							break;
@@ -607,7 +607,7 @@ void HandleMoraleEvent( SOLDIERTYPE *pSoldier, INT8 bMoraleEvent, INT16 sMapX, I
 					{
 						case VERY_SEXIST: // handle twice
 							HandleMoraleEventForSoldier(&other, MORALE_MERC_MARRIED);
-							/* FALLTHROUGH */
+							[[fallthrough]];
 						case SOMEWHAT_SEXIST:
 							HandleMoraleEventForSoldier(&other, MORALE_MERC_MARRIED);
 							break;

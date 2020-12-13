@@ -276,7 +276,7 @@ UINT8 CheckOneMilitiaForPromotion(INT16 const x, INT16 const y, UINT8 &current_r
 			++n_promotions;
 			// Attempt another level up
 			kill_points -= 2;
-			/* FALLTHROUGH */
+			[[fallthrough]];
 		case REGULAR_MILITIA:
 			// 5 kill points minimum, 10% chance per kill point
 			if (kill_points < 5)           break;

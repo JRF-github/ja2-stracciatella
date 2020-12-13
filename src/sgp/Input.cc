@@ -363,7 +363,7 @@ void KeyUp(const SDL_Keysym* KeySym)
 				VideoToggleFullScreen();
 				break;
 			}
-			/* FALLTHROUGH */
+			[[fallthrough]];
 
 		default:
 			KeyChange(KeySym, false);

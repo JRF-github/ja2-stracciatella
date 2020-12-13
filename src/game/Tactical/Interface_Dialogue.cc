@@ -1830,7 +1830,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 			case NPC_ACTION_RECRUIT:
 				// gonna work for free!
 				gMercProfiles[ ubTargetNPC ].sSalary = 0;
-				// fallthrough
+				[[fallthrough]];
 
 			case NPC_ACTION_RECRUIT_WITH_SALARY:
 
@@ -2046,7 +2046,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 				}
 				// and face the nearest merc!
 			}
-				// fallthrough
+				[[fallthrough]];
 
 			case NPC_ACTION_TURN_TO_FACE_NEAREST_MERC:
 			{
@@ -2140,7 +2140,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 
 			case NPC_ACTION_REDUCE_CONRAD_SALARY_CONDITIONS:
 				gMercProfiles[ CONRAD ].sSalary = 3300;
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_ASK_ABOUT_ESCORTING_EPC:
 				// Confirm if we want to start escorting or not....
 			case NPC_ACTION_ASK_ABOUT_PAYING_RPC:
@@ -2326,7 +2326,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 				{
 					TriggerNPCRecord( MADAME, 14 );
 				}
-				// else fall through
+				[[fallthrough]];
 			case NPC_ACTION_POSSIBLY_ADVERTISE_BAMBI:
 				if ( CheckFact( FACT_BAMBI_AVAILABLE, 0 ) )
 				{
@@ -2347,7 +2347,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 					break;
 				}
 				// else
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_LAYLAS_NEXT_LINE_AFTER_CARLA:
 				if ( CheckFact( FACT_CINDY_AVAILABLE, 0 ) )
 				{
@@ -2356,7 +2356,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 					break;
 				}
 				// else
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_LAYLAS_NEXT_LINE_AFTER_CINDY:
 				if ( CheckFact( FACT_BAMBI_AVAILABLE, 0 ) )
 				{
@@ -2365,7 +2365,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 					break;
 				}
 				// else
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_LAYLAS_NEXT_LINE_AFTER_BAMBI:
 				if ( gubQuest[ QUEST_RESCUE_MARIA ] == QUESTINPROGRESS )
 				{
@@ -2374,7 +2374,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 					break;
 				}
 				// else
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_LAYLAS_NEXT_LINE_AFTER_MARIA:
 				if ( CheckFact( FACT_MULTIPLE_MERCS_CLOSE, MADAME ) )
 				{
@@ -2686,7 +2686,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 
 			case NPC_ACTION_CARMEN_LEAVES_FOR_GOOD:
 				gMercProfiles[ ubTargetNPC ].ubMiscFlags2 |= PROFILE_MISC_FLAG2_LEFT_COUNTRY;
-				// fall through!
+				[[fallthrough]];
 			case NPC_ACTION_CARMEN_LEAVES_FOR_C13:
 				// set "don't add to sector" cause he'll only appear after an event...
 				gMercProfiles[ ubTargetNPC ].ubMiscFlags2 |= PROFILE_MISC_FLAG2_DONT_ADD_TO_SECTOR;
@@ -3759,7 +3759,7 @@ action_punch_pc:
 					TriggerNPCRecord( DARREN, 25 );
 				}
 				// else check for Kingpin being impressed
-				// fallthrough
+				[[fallthrough]];
 			case NPC_ACTION_TRIGGER_KINGPIN_IMPRESSED:
 				if ( gfLastBoxingMatchWonByPlayer && !BoxerAvailable() )
 				{

@@ -610,7 +610,7 @@ void CreatureAttackTown(UINT8 ubSectorID, BOOLEAN fSpecificSector)
 	{
 		case CREATURE_BATTLE_CODE_AUTORESOLVE:
 			gfAutomaticallyStartAutoResolve = TRUE;
-			/* FALLTHROUGH */
+			[[fallthrough]];
 		case CREATURE_BATTLE_CODE_PREBATTLEINTERFACE:
 			InitPreBattleInterface(0, true);
 			break;

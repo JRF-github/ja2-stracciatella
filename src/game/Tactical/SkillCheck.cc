@@ -354,7 +354,7 @@ INT32 SkillCheck( SOLDIERTYPE * pSoldier, INT8 bReason, INT8 bChanceMod )
 				iChance = 0;
 				break;
 			}
-			// else fall through
+			[[fallthrough]];
 		default:
 			iChance += GetMoraleModifier( pSoldier );
 			break;

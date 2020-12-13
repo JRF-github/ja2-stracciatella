@@ -124,7 +124,7 @@ static INT8 DecideActionSchedule(SOLDIERTYPE* pSoldier)
 						pSoldier->sAbsoluteFinalDestination = pSoldier->usActionData;
 						return( AI_ACTION_SCHEDULE_MOVE );
 					}
-					// fall through
+					[[fallthrough]];
 				case 1:
 					// start the door open: find the door...
 					usGridNo1 = FindDoorAtGridNoOrAdjacent( usGridNo1 );
@@ -191,7 +191,7 @@ static INT8 DecideActionSchedule(SOLDIERTYPE* pSoldier)
 
 					// the door is already in the desired state, or it doesn't exist!
 					pSoldier->bAIScheduleProgress++;
-					// fall through
+					[[fallthrough]];
 
 				case 2:
 					if (pSoldier->sGridNo == usGridNo2 || pSoldier->sGridNo == NOWHERE)
@@ -240,7 +240,7 @@ static INT8 DecideActionSchedule(SOLDIERTYPE* pSoldier)
 						pSoldier->sAbsoluteFinalDestination = pSoldier->usActionData;
 						return( AI_ACTION_SCHEDULE_MOVE );
 					}
-					// fall through
+					[[fallthrough]];
 				case 1:
 					// start the door open: find the door...
 					usGridNo1 = FindDoorAtGridNoOrAdjacent( usGridNo1 );
@@ -336,7 +336,7 @@ static INT8 DecideActionSchedule(SOLDIERTYPE* pSoldier)
 
 					// the door is already in the desired state, or it doesn't exist!
 					pSoldier->bAIScheduleProgress++;
-					// fall through
+					[[fallthrough]];
 
 				case 2:
 					if (pSoldier->sGridNo == usGridNo2 || pSoldier->sGridNo == NOWHERE)
@@ -408,8 +408,7 @@ static INT8 DecideActionSchedule(SOLDIERTYPE* pSoldier)
 						pSoldier->sAbsoluteFinalDestination = pSoldier->usActionData;
 						return( AI_ACTION_SCHEDULE_MOVE );
 					}
-
-					// fall through
+					[[fallthrough]];
 
 				case 1: // near edge
 

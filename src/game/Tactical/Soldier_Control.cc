@@ -7561,7 +7561,7 @@ void ReLoadSoldierAnimationDueToHandItemChange(SOLDIERTYPE* const s, UINT16 cons
 				break;
 			}
 		}
-			// fallthrough
+			[[fallthrough]];
 
 		case ANIM_CROUCH:
 		case ANIM_PRONE:
