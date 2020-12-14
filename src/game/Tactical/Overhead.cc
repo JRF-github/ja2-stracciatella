@@ -4131,8 +4131,9 @@ void ExitCombatMode( )
 
 	// Make sure next opplist decay DOES happen right after we go to RT
 	// since this would be the same as what would happen at the end of the turn
-	gTacticalStatus.uiTimeSinceLastOpplistDecay = __max( 0, GetWorldTotalSeconds() - TIME_BETWEEN_RT_OPPLIST_DECAYS );
-	NonCombatDecayPublicOpplist( GetWorldTotalSeconds() );
+	UINT32 wts = GetWorldTotalSeconds();
+	gTacticalStatus.uiTimeSinceLastOpplistDecay = wts > TIME_BETWEEN_RT_OPPLIST_DECAYS ? wts - TIME_BETWEEN_RT_OPPLIST_DECAYS : 0;
+	NonCombatDecayPublicOpplist( wts );
 }
 
 

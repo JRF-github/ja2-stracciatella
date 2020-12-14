@@ -36,6 +36,7 @@
 #include "Text.h"
 #include "Timer_Control.h"
 #include "WeaponModels.h"
+#include <algorithm>
 #include <string_theory/format>
 #include <string_theory/string>
 
@@ -1046,7 +1047,7 @@ static UINT8 HandleNPCBeingGivenMoneyByPlayer(UINT8 const ubNPC, UINT32 const ui
 
 					if ( giHospitalRefund > 0 )
 					{
-						giHospitalRefund = __max( 0, giHospitalRefund - iCost + uiMoneyAmount );
+						giHospitalRefund = std::max<INT32>(0, giHospitalRefund - iCost + static_cast<INT32>(uiMoneyAmount));
 					}
 					giHospitalTempBalance = 0;
 				}
