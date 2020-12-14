@@ -467,10 +467,6 @@ static void FillRingBuffer(SOUNDTAG* channel) {
 			return;
 		}
 		auto bytesToWrite = ma_pcm_rb_available_write(channel->pRingBuffer);
-		if (bytesToWrite < 0) {
-			throw std::runtime_error("Read pointer is after write pointer, this should not happen");
-		}
-
 		void* pFramesInClientFormat;
 		auto result = ma_pcm_rb_acquire_write(channel->pRingBuffer, &bytesToWrite, &pFramesInClientFormat);
 		if (result != MA_SUCCESS) {

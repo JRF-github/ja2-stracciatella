@@ -3535,13 +3535,12 @@ static void SendGroupToPool(GROUP** pGroup)
 
 static void ReassignAIGroup(GROUP** pGroup)
 {
-	UINT32 i, iRandom;
-	UINT32 iWeight;
+	INT32 iRandom, iWeight;
 	UINT16 usDefencePoints;
-	size_t iReloopLastIndex = -1;
+	INT32 iReloopLastIndex = -1;
 	UINT8 ubSectorID;
 
-	ubSectorID = (UINT8)SECTOR( (*pGroup)->ubSectorX, (*pGroup)->ubSectorY );
+	ubSectorID = SECTOR( (*pGroup)->ubSectorX, (*pGroup)->ubSectorY );
 
 	(*pGroup)->ubSectorIDOfLastReassignment = ubSectorID;
 
@@ -3559,12 +3558,12 @@ static void ReassignAIGroup(GROUP** pGroup)
 
 	//now randomly choose who gets the reinforcements.
 	// giRequestPoints is the combined sum of all the individual weights of all garrisons and patrols requesting reinforcements
-	iRandom = Random( giRequestPoints );
+	iRandom = static_cast<INT32>(Random( giRequestPoints ));
 
 	//go through garrisons first and begin considering where the random value dictates.  If that garrison doesn't require
 	//reinforcements, it'll continue on considering all subsequent garrisons till the end of the array.  If it fails at that
 	//point, it'll restart the loop at zero, and consider all garrisons to the index that was first considered by the random value.
-	for( i = 0; i < gGarrisonGroup.size(); i++ )
+	for( INT32 i = 0; i < static_cast<INT32>(gGarrisonGroup.size()); i++ )
 	{
 		RecalculateGarrisonWeight( i );
 		iWeight = gGarrisonGroup[ i ].bWeight;
@@ -3582,7 +3581,7 @@ static void ReassignAIGroup(GROUP** pGroup)
 						return;
 					}
 				}
-				if( iReloopLastIndex == (size_t)-1 )
+				if( iReloopLastIndex == -1 )
 				{ //go to the next garrison and clear the iRandom value so it attempts to use all subsequent groups.
 					iReloopLastIndex = i - 1;
 					iRandom = 0;
@@ -3596,7 +3595,7 @@ static void ReassignAIGroup(GROUP** pGroup)
 	if( iReloopLastIndex >= 0 )
 	{ //Process the loop again to the point where the original random slot started considering, and consider
 		//all of the garrisons.  If this fails, all patrol groups will be considered next.
-		for( i = 0; i <= iReloopLastIndex; i++ )
+		for( INT32 i = 0; i <= iReloopLastIndex; i++ )
 		{
 			RecalculateGarrisonWeight( i );
 			iWeight = gGarrisonGroup[ i ].bWeight;
@@ -3615,10 +3614,10 @@ static void ReassignAIGroup(GROUP** pGroup)
 			}
 		}
 	}
-	if( iReloopLastIndex == (size_t)-1 )
+	if( iReloopLastIndex == -1 )
 	{
 		//go through the patrol groups
-		for( i = 0; i < gPatrolGroup.size(); i++ )
+		for( INT32 i = 0; i < static_cast<INT32>(gPatrolGroup.size()); i++ )
 		{
 			RecalculatePatrolWeight(gPatrolGroup[i]);
 			iWeight = gPatrolGroup[ i ].bWeight;
@@ -3632,7 +3631,7 @@ static void ReassignAIGroup(GROUP** pGroup)
 						return;
 					}
 				}
-				if( iReloopLastIndex == (size_t)-1 )
+				if( iReloopLastIndex == -1 )
 				{
 					iReloopLastIndex = i - 1;
 					iRandom = 0;
@@ -3646,7 +3645,7 @@ static void ReassignAIGroup(GROUP** pGroup)
 		iReloopLastIndex = gPatrolGroup.size() - 1;
 	}
 
-	for( i = 0; i <= iReloopLastIndex; i++ )
+	for( INT32 i = 0; i <= iReloopLastIndex; i++ )
 	{
 		RecalculatePatrolWeight(gPatrolGroup[i]);
 		iWeight = gPatrolGroup[ i ].bWeight;
