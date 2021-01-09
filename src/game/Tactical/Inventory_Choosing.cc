@@ -1522,36 +1522,17 @@ static BOOLEAN PlaceObjectInSoldierCreateStruct(SOLDIERCREATE_STRUCT* pp, OBJECT
 
 static void MakeOneItemOfClassDroppable(SOLDIERCREATE_STRUCT* const sc, UINT32 const item_class)
 {
-	// XXX TODO001B: OBJECT_NO_OVERWRITE test should probably continue instead of
-	// break, but it was this way in the original code.  This is even more
-	// plausible, because the OBJECT_NO_OVERWRITE condition in the second loop
-	// never can be true in the current configuration.  A comment below says that
-	// no object of that class should be dropped if any has this flag set, but the
-	// code did not do this.
-	UINT8 n_matches = 0;
-	for (INT32 i = 0; i != NUM_INV_SLOTS; ++i)
-	{
-		OBJECTTYPE const& o = sc->Inv[i];
-		if (!(GCM->getItem(o.usItem)->getItemClass() & item_class))
-			continue;
-		if (o.fFlags & OBJECT_NO_OVERWRITE)
-			break;
-		++n_matches;
-	}
-	if (n_matches == 0) return;
+	UINT32 n_matches = 0;
+	OBJECTTYPE* possibleObjects[NUM_INV_SLOTS];
 
-	for (INT32 i = 0; i != NUM_INV_SLOTS; ++i)
+	for (OBJECTTYPE& o : sc->Inv)
 	{
-		OBJECTTYPE& o = sc->Inv[i];
-		if (!(GCM->getItem(o.usItem)->getItemClass() & item_class))
-			continue;
-		if (o.fFlags & OBJECT_NO_OVERWRITE)
-			break;
-		if (Random(n_matches--) != 0)
-			continue;
-		o.fFlags &= ~OBJECT_UNDROPPABLE;
-		break;
+		if (GCM->getItem(o.usItem)->getItemClass() & item_class && !(o.fFlags & OBJECT_NO_OVERWRITE))
+			possibleObjects[n_matches++] = &o;
 	}
+
+	if (n_matches > 0)
+		possibleObjects[Random(n_matches)]->fFlags &= ~OBJECT_UNDROPPABLE;
 }
 
 
