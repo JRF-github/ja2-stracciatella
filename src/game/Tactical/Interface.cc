@@ -1172,7 +1172,6 @@ void DrawSelectedUIAboveGuy(SOLDIERTYPE& s)
 static void DrawBarsInUIBox(const SOLDIERTYPE* pSoldier, INT16 sXPos, INT16 sYPos, INT16 sWidth, INT16 sHeight)
 {
 	FLOAT  dWidth, dPercentage;
-	//UINT16 usLineColor;
 	UINT16 usLineColor;
 	INT8   bBandage;
 
@@ -1186,7 +1185,8 @@ static void DrawBarsInUIBox(const SOLDIERTYPE* pSoldier, INT16 sXPos, INT16 sYPo
 	// get amt bandaged
 	bBandage = pSoldier->bLifeMax - pSoldier->bLife - pSoldier->bBleeding;
 
-
+	sXPos += 3;
+	sYPos += 1;
 
 	// NOW DO BLEEDING
 	if ( pSoldier->bBleeding )
@@ -1194,7 +1194,7 @@ static void DrawBarsInUIBox(const SOLDIERTYPE* pSoldier, INT16 sXPos, INT16 sYPo
 		dPercentage = (FLOAT)( pSoldier->bBleeding +  pSoldier->bLife + bBandage )/ (FLOAT)100;
 		dWidth = dPercentage * sWidth;
 		usLineColor = Get16BPPColor(FROMRGB(240, 240, 20));
-		RectangleDraw(TRUE, sXPos + 3, sYPos + 1, (INT32)(sXPos + dWidth + 3), sYPos + 1, usLineColor, pDestBuf);
+		LineDraw(TRUE, sXPos, sYPos, (INT32)(sXPos + dWidth), sYPos, usLineColor, pDestBuf);
 	}
 
 	if( bBandage )
@@ -1202,30 +1202,24 @@ static void DrawBarsInUIBox(const SOLDIERTYPE* pSoldier, INT16 sXPos, INT16 sYPo
 		dPercentage = (FLOAT)( pSoldier->bLife + bBandage ) / (FLOAT)100;
 		dWidth = dPercentage * sWidth;
 		usLineColor = Get16BPPColor( FROMRGB( 222, 132, 132 ) );
-		RectangleDraw(TRUE, sXPos + 3, sYPos + 1, (INT32)(sXPos + dWidth + 3), sYPos + 1, usLineColor, pDestBuf);
+		LineDraw(TRUE, sXPos, sYPos, (INT32)(sXPos + dWidth), sYPos, usLineColor, pDestBuf);
 	}
 
 	dPercentage = (FLOAT)pSoldier->bLife / (FLOAT)100;
 	dWidth = dPercentage * sWidth;
 	usLineColor = Get16BPPColor(FROMRGB(200, 0, 0));
-	RectangleDraw(TRUE, sXPos + 3, sYPos + 1, (INT32)(sXPos + dWidth + 3), sYPos + 1, usLineColor, pDestBuf);
+	LineDraw(TRUE, sXPos, sYPos, (INT32)(sXPos + dWidth), sYPos, usLineColor, pDestBuf);
 
+	sYPos += 3;
 	dPercentage = (FLOAT)( pSoldier->bBreathMax ) / (FLOAT)100;
 	dWidth = dPercentage * sWidth;
 	usLineColor = Get16BPPColor(FROMRGB(20, 20, 150));
-	RectangleDraw(TRUE, sXPos + 3, sYPos + 4, (INT32)(sXPos + dWidth + 3), sYPos + 4, usLineColor, pDestBuf);
+	LineDraw(TRUE, sXPos, sYPos, (INT32)(sXPos + dWidth + 3), sYPos, usLineColor, pDestBuf);
 
 	dPercentage = (FLOAT)( pSoldier->bBreath ) / (FLOAT)100;
 	dWidth = dPercentage * sWidth;
 	usLineColor = Get16BPPColor(FROMRGB(100, 100, 220));
-	RectangleDraw(TRUE, sXPos + 3, sYPos + 4, (INT32)(sXPos + dWidth + 3), sYPos + 4, usLineColor, pDestBuf);
-
-	/*
-	// morale
-	dPercentage = (FLOAT)pSoldier->bMorale / (FLOAT)100;
-	dWidth = dPercentage * sWidth;
-	usLineColor = Get16BPPColor(FROMRGB(0, 250, 0));
-	RectangleDraw(TRUE, sXPos + 1, sYPos + 7, (INT32)(sXPos + dWidth + 1), sYPos + 7, usLineColor, pDestBuf);*/
+	LineDraw(TRUE, sXPos, sYPos, (INT32)(sXPos + dWidth), sYPos, usLineColor, pDestBuf);
 }
 
 void ClearInterface( )
