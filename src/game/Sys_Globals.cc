@@ -10,7 +10,6 @@ char g_filename[200];
 ST::string gubErrorText;
 BOOLEAN gfEditMode             = FALSE;
 BOOLEAN fFirstTimeInGameScreen = TRUE;
-INT8    gbFPSDisplay           = SHOW_MIN_FPS;
 BOOLEAN gfGlobalError          = FALSE;
 
 UINT32	guiGameCycleCounter = 0;

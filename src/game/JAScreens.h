@@ -28,7 +28,7 @@ typedef void (*RENDER_HOOK)( void );
 void SetRenderHook( RENDER_HOOK pRenderOverride );
 void SetDebugRenderHook( RENDER_HOOK pDebugRenderOverride, INT8 ubPage );
 
-void EnableFPSOverlay(BOOLEAN fEnable);
+void ToggleFPSOverlay(void);
 
 extern BOOLEAN gfExitDebugScreen;
 extern INT8    gCurDebugPage;

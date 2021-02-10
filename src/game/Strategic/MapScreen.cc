@@ -3042,8 +3042,7 @@ static void HandleModAlt(UINT32 const key)
 		case 'f':
 			if (INFORMATION_CHEAT_LEVEL())
 			{ // Toggle Frame Rate Display
-				gbFPSDisplay = !gbFPSDisplay;
-				EnableFPSOverlay(gbFPSDisplay);
+				ToggleFPSOverlay();
 			}
 			break;
 

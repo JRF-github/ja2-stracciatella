@@ -1601,8 +1601,7 @@ static void HandleKeyboardShortcuts(void)
 					}
 					break;
 				case 'f':
-					gbFPSDisplay = !gbFPSDisplay;
-					EnableFPSOverlay(gbFPSDisplay);
+					ToggleFPSOverlay();
 					break;
 				case 'g':	// ground
 					if( EditorInputEvent.usKeyState & CTRL_DOWN )

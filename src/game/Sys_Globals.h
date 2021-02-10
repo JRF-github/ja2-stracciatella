@@ -4,13 +4,9 @@
 #include <string_theory/string>
 
 
-#define SHOW_MIN_FPS	0
-#define SHOW_FULL_FPS	1
-
 extern ST::string gubErrorText;
 extern BOOLEAN gfEditMode;
 extern BOOLEAN fFirstTimeInGameScreen;
-extern INT8    gbFPSDisplay;
 extern BOOLEAN gfGlobalError;
 
 extern UINT32  guiGameCycleCounter;

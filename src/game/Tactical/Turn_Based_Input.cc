@@ -1671,17 +1671,7 @@ static void HandleModCtrl(UINT32 const key, UIEventKind* const new_event)
 		}
 		break;
 
-		case 'f':
-			if (INFORMATION_CHEAT_LEVEL())
-			{
-				// Toggle frame rate display
-				SLOGD("Toggle FPS Overlay");
-				gbFPSDisplay = !gbFPSDisplay;
-				EnableFPSOverlay(gbFPSDisplay);
-				if (!gbFPSDisplay)
-					SetRenderFlags(RENDER_FLAG_FULL);
-			}
-			break;
+		case 'f': if (INFORMATION_CHEAT_LEVEL()) ToggleFPSOverlay();   break;
 
 		case 'h': if (CHEATER_CHEAT_LEVEL()) *new_event = I_TESTHIT;   break;
 

@@ -58,6 +58,9 @@ BOOLEAN gfExitDebugScreen = FALSE;
 static BOOLEAN FirstTime = TRUE;
 BOOLEAN gfDoneWithSplashScreen = FALSE;
 
+// VIDEO OVERLAYS
+static VIDEO_OVERLAY* g_fps_overlay            = nullptr;
+static VIDEO_OVERLAY* g_counter_period_overlay = nullptr;
 
 INT8 gCurDebugPage = 0;
 
@@ -94,15 +97,49 @@ void DisplayFrameRate( )
 		uiFrameCount = 0;
 	}
 
-	if ( gbFPSDisplay == SHOW_FULL_FPS )
+	if ( g_fps_overlay )
 	{
 		// FRAME RATE
-		SetVideoOverlayText(g_fps_overlay, ST::format("FPS: {}", __min(uiFPS, 1000)));
+		SetVideoOverlayText(g_fps_overlay, ST::format("FPS: {}", std::min<int>(uiFPS, 1000)));
 
 		// TIMER COUNTER
-		SetVideoOverlayText(g_counter_period_overlay, ST::format("Game Loop Time: {}", __min(giTimerDiag, 1000)));
+		SetVideoOverlayText(g_counter_period_overlay, ST::format("Game Loop Time: {}", std::min(giTimerDiag, 1000)));
 	}
 }
+
+
+static void BlitMFont(VIDEO_OVERLAY* const ovr)
+{
+	SetFontAttributes(ovr->uiFontID, ovr->ubFontFore, DEFAULT_SHADOW, ovr->ubFontBack);
+	SGPVSurface::Lock l(ovr->uiDestBuff);
+	MPrintBuffer(l.Buffer<UINT16>(), l.Pitch(), ovr->sX, ovr->sY, ovr->codepoints);
+}
+
+
+void ToggleFPSOverlay(void)
+{
+	if (!g_fps_overlay)
+	{
+		// Init Video Overlays
+		// FIRST, FRAMERATE
+		g_fps_overlay = RegisterVideoOverlay(BlitMFont,	DEBUG_PAGE_SCREEN_OFFSET_X, DEBUG_PAGE_SCREEN_OFFSET_Y,
+			DEBUG_PAGE_FONT, DEBUG_PAGE_TEXT_COLOR,	0, ST_LITERAL("FPS: 999"));
+
+		// SECOND, PERIOD COUNTER
+		g_counter_period_overlay = RegisterVideoOverlay(BlitMFont, DEBUG_PAGE_SCREEN_OFFSET_X, DEBUG_PAGE_SCREEN_OFFSET_Y + DEBUG_PAGE_LINE_HEIGHT,
+			DEBUG_PAGE_FONT, DEBUG_PAGE_TEXT_COLOR,	0, ST_LITERAL("Game Loop Time: 999"));
+	}
+	else
+	{
+		RemoveVideoOverlay(g_fps_overlay);
+		RemoveVideoOverlay(g_counter_period_overlay);
+		g_fps_overlay = nullptr;
+		g_counter_period_overlay = nullptr;
+	}
+
+	SetRenderFlags(RENDER_FLAG_FULL);
+}
+
 
 ScreenID ErrorScreenHandle(void)
 {
