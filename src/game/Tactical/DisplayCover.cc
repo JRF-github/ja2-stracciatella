@@ -125,9 +125,9 @@ void DisplayCoverOfSelectedGridNo()
 
 
 static void AddCoverObjectToWorld(INT16 sGridNo, UINT16 usGraphic, BOOLEAN fRoof);
+static void RemoveCoverObjectFromWorld(INT16 sGridNo, UINT16 usGraphic, BOOLEAN fRoof);
 
-
-static void AddCoverTileToEachGridNo(void)
+static void AddOrRemoveCoverTileToEachGridNo(void (*addOrRemove)(INT16, UINT16, BOOLEAN))
 {
 	BOOLEAN const roof = gsInterfaceLevel != I_GROUND_LEVEL;
 	for (UINT32 y = 0; y < DC_MAX_COVER_RANGE; ++y)
@@ -145,38 +145,22 @@ static void AddCoverTileToEachGridNo(void)
 				cover <= 60 ? SPECIALTILE_COVER_3 :
 				cover <= 80 ? SPECIALTILE_COVER_4 :
 						SPECIALTILE_COVER_5;
-			AddCoverObjectToWorld(cr.sGridNo, gfx, roof);
+			addOrRemove(cr.sGridNo, gfx, roof);
 		}
 	}
 }
 
+static void AddCoverTileToEachGridNo(void)
+{
+	AddOrRemoveCoverTileToEachGridNo(AddCoverObjectToWorld);
+}
 
-static void RemoveCoverObjectFromWorld(INT16 sGridNo, UINT16 usGraphic, BOOLEAN fRoof);
 
-
-void RemoveCoverOfSelectedGridNo()
+void RemoveCoverOfSelectedGridNo(void)
 {
 	if (gsLastCoverGridNo == NOWHERE) return;
 
-	BOOLEAN const roof = gsInterfaceLevel != I_GROUND_LEVEL;
-	for (UINT32 y = 0; y < DC_MAX_COVER_RANGE; ++y)
-	{
-		for (UINT32 x = 0; x < DC_MAX_COVER_RANGE; ++x)
-		{
-			BEST_COVER_STRUCT const& cr    = gCoverRadius[x][y];
-			INT8              const  cover = cr.bCover;
-			if (cover == -1) continue; // Valid cover?
-			Assert(0 <= cover && cover <= 100);
-
-			UINT16 const gfx =
-				cover <= 20 ? SPECIALTILE_COVER_1 :
-				cover <= 40 ? SPECIALTILE_COVER_2 :
-				cover <= 60 ? SPECIALTILE_COVER_3 :
-				cover <= 80 ? SPECIALTILE_COVER_4 :
-						SPECIALTILE_COVER_5;
-			RemoveCoverObjectFromWorld(cr.sGridNo, gfx, roof);
-		}
-	}
+	AddOrRemoveCoverTileToEachGridNo(RemoveCoverObjectFromWorld);
 
 	// Re-render the scene!
 	SetRenderFlags(RENDER_FLAG_FULL);
@@ -591,110 +575,70 @@ static void CalculateVisibleToSoldierAroundGridno(INT16 sTargetGridNo, INT8 bSea
 }
 
 
-static void AddVisibleToSoldierToEachGridNo(void)
+static void AddOrRemoveVisibleToSoldierToEachGridNo(void (*addOrRemove)(INT16, UINT16, BOOLEAN))
 {
-	UINT32  uiCntX, uiCntY;
-	INT8    bVisibleToSoldier=0;
-	BOOLEAN fRoof;
-	INT16   sGridNo;
-
 	//loop through all the gridnos
-	for(uiCntY=0; uiCntY<DC_MAX_COVER_RANGE ;uiCntY++)
+	for(UINT32 uiCntY=0; uiCntY<DC_MAX_COVER_RANGE ;uiCntY++)
 	{
-		for(uiCntX=0; uiCntX<DC_MAX_COVER_RANGE ;uiCntX++)
+		for(UINT32 uiCntX=0; uiCntX<DC_MAX_COVER_RANGE ;uiCntX++)
 		{
-			bVisibleToSoldier = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].bVisibleToSoldier;
+			INT8 bVisibleToSoldier = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].bVisibleToSoldier;
 			if( bVisibleToSoldier == -1 )
 			{
 				continue;
 			}
 
-			fRoof = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].fRoof;
-			sGridNo = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo;
+			BOOLEAN fRoof = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].fRoof;
+			INT16 sGridNo = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo;
 
 			//if the soldier can easily see this gridno.  Can see all 3 positions
 			if( bVisibleToSoldier == DC__SEE_3_STANCE )
 			{
-				AddCoverObjectToWorld( sGridNo, SPECIALTILE_COVER_5, fRoof );
+				addOrRemove( sGridNo, SPECIALTILE_COVER_5, fRoof );
 			}
 
 			//cant see a thing
 			else if( bVisibleToSoldier == DC__SEE_NO_STANCES )
 			{
-				AddCoverObjectToWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_1, fRoof );
+				addOrRemove( sGridNo, SPECIALTILE_COVER_1, fRoof );
 			}
 
 			//can only see prone
 			else if( bVisibleToSoldier == DC__SEE_1_STANCE )
 			{
-				AddCoverObjectToWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_2, fRoof );
+				addOrRemove( sGridNo, SPECIALTILE_COVER_2, fRoof );
 			}
 
 			//can see crouch or prone
 			else if( bVisibleToSoldier == DC__SEE_2_STANCE )
 			{
-				AddCoverObjectToWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_3, fRoof );
+				addOrRemove( sGridNo, SPECIALTILE_COVER_3, fRoof );
 			}
 
 			else
 			{
-				SLOGA("AddVisibleToSoldierToEachGridNo: invalid VisibleToSoldier");
+				SLOGA("AddOrRemoveVisibleToSoldierToEachGridNo: invalid VisibleToSoldier");
 			}
 		}
 	}
 }
 
 
+static void AddVisibleToSoldierToEachGridNo(void)
+{
+	AddOrRemoveVisibleToSoldierToEachGridNo(AddCoverObjectToWorld);
+}
+
+
 void RemoveVisibleGridNoAtSelectedGridNo()
 {
-	UINT32  uiCntX, uiCntY;
-	INT8    bVisibleToSoldier;
-	BOOLEAN fRoof;
-
 	//make sure to only remove it when its right
 	if( gsLastVisibleToSoldierGridNo == NOWHERE )
 	{
 		return;
 	}
 
-	//loop through all the gridnos
-	for(uiCntY=0; uiCntY<DC_MAX_COVER_RANGE ;uiCntY++)
-	{
-		for(uiCntX=0; uiCntX<DC_MAX_COVER_RANGE ;uiCntX++)
-		{
-			bVisibleToSoldier = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].bVisibleToSoldier;
-			fRoof = gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].fRoof;
-
-			//if there is a valid cover at this gridno
-			if( bVisibleToSoldier == DC__SEE_3_STANCE )
-			{
-				RemoveCoverObjectFromWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_5, fRoof );
-			}
-
-			//cant see a thing
-			else if( bVisibleToSoldier == DC__SEE_NO_STANCES )
-			{
-				RemoveCoverObjectFromWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_1, fRoof );
-			}
-
-			//can only see prone
-			else if( bVisibleToSoldier == DC__SEE_1_STANCE )
-			{
-				RemoveCoverObjectFromWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_2, fRoof );
-			}
-
-			//can see crouch or prone
-			else if( bVisibleToSoldier == DC__SEE_2_STANCE )
-			{
-				RemoveCoverObjectFromWorld( gVisibleToSoldierStruct[ uiCntX ][ uiCntY ].sGridNo, SPECIALTILE_COVER_3, fRoof );
-			}
-
-			else
-			{
-				SLOGA("RemoveVisibleGridNoAtSelectedGridNo: invalid VisibleToSoldier");
-			}
-		}
-	}
+	AddOrRemoveVisibleToSoldierToEachGridNo(RemoveCoverObjectFromWorld);
 
 	// Re-render the scene!
 	SetRenderFlags( RENDER_FLAG_FULL );
