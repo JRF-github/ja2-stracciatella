@@ -36,6 +36,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 /* view directions */
 #define DLEFT           0
@@ -55,7 +56,7 @@ UINT8 gubFOVDebugInfoInfo[ WORLD_MAX ];
 #endif
 
 
-UINT8  ViewPath[MAXVIEWPATHS][VIEWPATHLENGTH] = {
+static UINT8 const ViewPath[MAXVIEWPATHS][VIEWPATHLENGTH] {
 	{NOVIEW,  UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP    },
 	{UP,      UP,     UP,     UP,     DRIGHT, UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP    },
 	{UP,      UP,     UP,     UP,     DLEFT,  UP,     UP,     UP,     UP,     UP,     UP,     UP,     UP    },
@@ -75,7 +76,7 @@ UINT8  ViewPath[MAXVIEWPATHS][VIEWPATHLENGTH] = {
 	{RIGHT,   RIGHT,  RIGHT,  UP,     RIGHT,  NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW}
 };
 
-UINT8  ViewPath2[MAXVIEWPATHS][VIEWPATHLENGTH]= {
+static UINT8 const ViewPath2[MAXVIEWPATHS][VIEWPATHLENGTH] {
 	{NOVIEW,  UP,     UP,     UP,     UP,     UP,     UP,     NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW},
 	{UP,      UP,     DLEFT,  UP,     UP,     UP,     DLEFT,  DRIGHT, NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW},
 	{UP,      UP,     DLEFT,  UP,     UP,     UP,     DRIGHT, DLEFT,  NOVIEW, NOVIEW, NOVIEW, NOVIEW, NOVIEW},
@@ -161,97 +162,29 @@ static void BuildSightDir(UINT32 dir, UINT32* One, UINT32* Two, UINT32* Three, U
 	}
 }
 
-#define NUM_SLANT_ROOF_SLOTS  200
+static std::vector<GridNo> gSlantRoofData;
 
-struct SLANT_ROOF_FOV_TYPE
-{
-	INT16   sGridNo;
-	BOOLEAN fAllocated;
-};
-
-SLANT_ROOF_FOV_TYPE gSlantRoofData[ NUM_SLANT_ROOF_SLOTS ];
-UINT32              guiNumSlantRoofs = 0;
-
-static INT32 GetFreeSlantRoof(void)
-{
-	UINT32 uiCount;
-
-	for(uiCount=0; uiCount < guiNumSlantRoofs; uiCount++)
-	{
-		if( gSlantRoofData[uiCount].fAllocated==FALSE  )
-			return( (INT32)uiCount );
-	}
-
-	if( guiNumSlantRoofs < NUM_SLANT_ROOF_SLOTS )
-		return( (INT32) guiNumSlantRoofs++ );
-
-	return( -1 );
-}
 
 void ClearSlantRoofs( void )
 {
-	UINT32 uiCount;
-
-	for( uiCount = 0; uiCount < guiNumSlantRoofs; uiCount++ )
-	{
-		if( ( gSlantRoofData[uiCount].fAllocated ) )
-		{
-			gSlantRoofData[uiCount].fAllocated = FALSE;
-		}
-	}
-	guiNumSlantRoofs = 0;
+	gSlantRoofData.clear();
 }
 
-static BOOLEAN FindSlantRoofSlot(INT16 sGridNo)
-{
-	UINT32 uiCount;
-
-	for( uiCount = 0; uiCount < guiNumSlantRoofs; uiCount++ )
-	{
-		if( ( gSlantRoofData[uiCount].fAllocated ) )
-		{
-			if ( gSlantRoofData[uiCount].sGridNo == sGridNo )
-			{
-				return( TRUE );
-			}
-		}
-	}
-	return( FALSE );
-}
 
 void AddSlantRoofFOVSlot( INT16 sGridNo )
 {
-	INT32               iSlantRoofSlot;
-	SLANT_ROOF_FOV_TYPE *pSlantRoof;
-
 	// Check if this is a duplicate!
-	if ( FindSlantRoofSlot( sGridNo ) )
+	if (std::find(gSlantRoofData.begin(), gSlantRoofData.end(), sGridNo) == gSlantRoofData.end())
 	{
-		return;
-	}
-
-	iSlantRoofSlot = GetFreeSlantRoof( );
-
-	if ( iSlantRoofSlot != -1 )
-	{
-		pSlantRoof = &gSlantRoofData[ iSlantRoofSlot ];
-		pSlantRoof->sGridNo = sGridNo;
-		pSlantRoof->fAllocated = TRUE;
+		gSlantRoofData.push_back(sGridNo);
 	}
 }
 
+
 void ExamineSlantRoofFOVSlots( )
 {
-	UINT32 uiCount;
-
-	for( uiCount = 0; uiCount < guiNumSlantRoofs; uiCount++ )
-	{
-		if( ( gSlantRoofData[uiCount].fAllocated ) )
-		{
-			ExamineGridNoForSlantRoofExtraGraphic( gSlantRoofData[uiCount].sGridNo );
-		}
-	}
-	ClearSlantRoofs( );
+	std::for_each(gSlantRoofData.begin(), gSlantRoofData.end(), ExamineGridNoForSlantRoofExtraGraphic);
+	gSlantRoofData.clear();
 }
 
 
@@ -259,10 +192,11 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 {
 	const UINT8 ubLevel = pSoldier->bLevel;
 	STRUCTURE*  pStructure, *pDummy;
-	UINT32  maincnt,markercnt,marker,tilesLeftToSee,cnt,prevmarker;
+	UINT32  maincnt,markercnt,tilesLeftToSee,cnt;
+	GridNo  marker, prevmarker;
 	INT8    Blocking, markerDir;
 	INT8    nextDir = 0;
-	UINT8   dir,range,Path2;
+	UINT8   dir,range;
 	UINT8   ubRoomNo;
 	UINT8   ubMovementCost;
 	BOOLEAN fTravelCostObs;
@@ -333,11 +267,8 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 	Inc[5] = 0;
 	Dir[5] = pSoldier->bDirection;
 
-	if (dir % 2 == 1)     /* even numbers use ViewPath2 */
-		Path2 = TRUE;
-	else
-		Path2 = FALSE;
-
+	// even numbers use ViewPath, odd numbers use ViewPath2
+	auto const& viewPath = (dir % 2 == 0) ? ViewPath : ViewPath2;
 
 	// ATE: if in this special cercumstance... our guys are moving on their own...
 	// Stop sighting items
@@ -363,8 +294,6 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 
 		for (markercnt = 0; markercnt < range; markercnt++)
 		{
-			//fGoneThroughDoor = FALSE;
-			//fThroughWindow   = FALSE;
 			prevmarker = marker;
 
 			nextDir = 99;
@@ -374,18 +303,9 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 				fRevealItems = FALSE;
 				fStopRevealingItemsAfterThisTile = FALSE;
 			}
-			if (Path2)
-			{
-				markerDir = ViewPath2[maincnt][markercnt];
-				if (markercnt < 12)
-					nextDir = ViewPath2[maincnt][markercnt+1];
-			}
-			else
-			{
-				markerDir = ViewPath[maincnt][markercnt];
-				if (markercnt < 12)
-					nextDir = ViewPath[maincnt][markercnt+1];
-			}
+			markerDir = viewPath[maincnt][markercnt];
+			if (markercnt < 12)
+				nextDir = viewPath[maincnt][markercnt+1];
 
 			// OK, check flags for going through door/window last tile
 			if ( fThroughWindow == 1 )
@@ -423,7 +343,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 				nextDir = 99;
 			}
 
-			marker = NewGridNo((INT16)marker,(INT16)Inc[markerDir]);
+			marker = NewGridNo(marker,(INT16)Inc[markerDir]);
 
 			// End if this is a no view...
 			if ( markerDir == NOVIEW && markercnt != 0 )
@@ -489,7 +409,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 				else
 				{
 					// walls are handled above, so the blocking object is guaranteed not to be a wall
-					bTallestStructureHeight = GetTallestStructureHeight( (INT16) marker, FALSE );
+					bTallestStructureHeight = GetTallestStructureHeight( marker, FALSE );
 					if (bTallestStructureHeight >= 3)
 					{
 						fTravelCostObs = TRUE;
@@ -511,7 +431,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 				}
 				else
 				{
-					bTallestStructureHeight = GetTallestStructureHeight( (INT16) marker, FALSE );
+					bTallestStructureHeight = GetTallestStructureHeight( marker, FALSE );
 					if (bTallestStructureHeight >= 3)
 					{
 						fTravelCostObs = TRUE;
@@ -552,13 +472,13 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 					// if there IS a direction after this one, nextdir WILL NOT be 99
 					if (nextDir != 99)
 					{
-						Blocking = GetBlockingStructureInfo( (INT16)marker, (INT8)Dir[ markerDir ], (INT8)Dir[ nextDir ], ubLevel, &bStructHeight, &pDummy, FALSE );
+						Blocking = GetBlockingStructureInfo( marker, (INT8)Dir[ markerDir ], (INT8)Dir[ nextDir ], ubLevel, &bStructHeight, &pDummy, FALSE );
 					}
 					else
 					{
 						// no "next" direction, so pass in a NOWHERE so that
 						// "SpecialViewObstruction" will know not to take it UINT32o consideration
-						Blocking = GetBlockingStructureInfo( (INT16)marker, (INT8)Dir[markerDir], (INT8)30, ubLevel, &bStructHeight, &pDummy, FALSE  );
+						Blocking = GetBlockingStructureInfo( marker, (INT8)Dir[markerDir], (INT8)30, ubLevel, &bStructHeight, &pDummy, FALSE  );
 					}
 
 					if ( gfCaves )
@@ -613,7 +533,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 						if (itemsToo && fRevealItems ) // && itemIndex < MAXOBJECTLIST)
 						{
 							// OK, look for corpses...
-							LookForAndMayCommentOnSeeingCorpse( pSoldier, (INT16)marker, ubLevel );
+							LookForAndMayCommentOnSeeingCorpse( pSoldier, marker, ubLevel );
 
 							if (SetItemsVisibilityOn(marker, ubLevel, INVISIBLE, fShowLocators))
 							{
@@ -646,7 +566,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 										{
 											gTacticalStatus.fItemsSeenOnAttack           = TRUE;
 											gTacticalStatus.items_seen_on_attack_soldier = pSoldier;
-											gTacticalStatus.usItemsSeenOnAttackGridNo    = (INT16)marker;
+											gTacticalStatus.usItemsSeenOnAttackGridNo    = marker;
 										}
 										else
 										{
@@ -659,7 +579,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 											{
 												// Turn off item lock for locators...
 												gTacticalStatus.fLockItemLocators = FALSE;
-												SlideToLocation((INT16)marker);
+												SlideToLocation(marker);
 											}
 										}
 										fItemsQuoteSaid = TRUE;
@@ -681,12 +601,12 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 					// CHECK FOR SLANT ROOF!
 					{
 						STRUCTURE* pStructure;
-						pStructure = FindStructure( (INT16)marker, STRUCTURE_SLANTED_ROOF );
+						pStructure = FindStructure( marker, STRUCTURE_SLANTED_ROOF );
 
 						if ( pStructure != NULL )
 						{
 							// ADD TO SLANTED ROOF LIST!
-							AddSlantRoofFOVSlot( (INT16)marker );
+							AddSlantRoofFOVSlot( marker );
 						}
 					}
 
@@ -714,13 +634,13 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 
 						// CHECK FOR ROOMS
 						{
-							if ( InAHiddenRoom( (INT16)marker, &ubRoomNo ) )
+							if ( InAHiddenRoom( marker, &ubRoomNo ) )
 							{
-								RemoveRoomRoof( (INT16)marker, ubRoomNo, pSoldier );
+								RemoveRoomRoof( marker, ubRoomNo, pSoldier );
 								if ( ubRoomNo == ROOM_SURROUNDING_BOXING_RING && gWorldSectorX == BOXING_SECTOR_X && gWorldSectorY == BOXING_SECTOR_Y && gbWorldSectorZ == BOXING_SECTOR_Z )
 								{
 									// reveal boxing ring at same time
-									RemoveRoomRoof( (INT16)marker, BOXING_RING, pSoldier );
+									RemoveRoomRoof( marker, BOXING_RING, pSoldier );
 								}
 							}
 						}
@@ -731,7 +651,7 @@ void RevealRoofsAndItems(SOLDIERTYPE* const pSoldier, const BOOLEAN fShowLocator
 					}
 
 					// Check for blood....
-					UpdateBloodGraphics( (INT16)marker, ubLevel );
+					UpdateBloodGraphics( marker, ubLevel );
 
 					if (Blocking != NOTHING_BLOCKING &&
 						Blocking != BLOCKING_TOPLEFT_DOOR &&
