@@ -1290,7 +1290,7 @@ static void HandleManNoLongerSeen(SOLDIERTYPE* pSoldier, SOLDIERTYPE* pOpponent,
 			// unauthorized!
 			// make guard run to block guard room
 			CancelAIAction(pSoldier);
-			RESETTIMECOUNTER( pSoldier->AICounter, 0 );
+			RESETTIMECOUNTER( pSoldier->AICounter, 0ms );
 			pSoldier->bNextAction = AI_ACTION_RUN;
 			pSoldier->usNextActionData = 13250;
 		}

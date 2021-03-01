@@ -11,46 +11,46 @@
 #include "WorldDef.h"
 
 #include <SDL.h>
+#include <array>
 #include <stdexcept>
 
 
-INT32	giClockTimer = -1;
 INT32	giTimerDiag  =  0;
 
 UINT32 guiBaseJA2Clock = 0;
 
 static BOOLEAN gfPauseClock = FALSE;
 
-const INT32 giTimerIntervals[NUMTIMERS] =
+const std::array<milliseconds, NUMTIMERS> giTimerIntervals
 {
-	5, // Tactical Overhead
-	20, // NEXTSCROLL
-	200, // Start Scroll
-	200, // Animate tiles
-	1000, // FPS Counter
-	80, // PATH FIND COUNTER
-	150, // CURSOR TIMER
-	300, // RIGHT CLICK FOR MENU
-	300, // LEFT
-	300, // MIDDLE
-	200, // TARGET REFINE TIMER
-	150, // CURSOR/AP FLASH
-	20, // PHYSICS UPDATE
-	100, // FADE ENEMYS
-	20, // STRATEGIC OVERHEAD
-	40, // CYCLE TIME RENDER ITEM COLOR
-	500, // NON GUN TARGET REFINE TIMER
-	250, // IMPROVED CURSOR FLASH
-	500, // 2nd CURSOR FLASH
-	400, // RADARMAP BLINK AND OVERHEAD MAP BLINK SHOUDL BE THE SAME
-	10  // Music Overhead
+	5ms, // Tactical Overhead
+	20ms, // NEXTSCROLL
+	200ms, // Start Scroll
+	200ms, // Animate tiles
+	1000ms, // FPS Counter
+	80ms, // PATH FIND COUNTER
+	150ms, // CURSOR TIMER
+	300ms, // RIGHT CLICK FOR MENU
+	300ms, // LEFT
+	300ms, // MIDDLE
+	200ms, // TARGET REFINE TIMER
+	150ms, // CURSOR/AP FLASH
+	20ms, // PHYSICS UPDATE
+	100ms, // FADE ENEMYS
+	20ms, // STRATEGIC OVERHEAD
+	40ms, // CYCLE TIME RENDER ITEM COLOR
+	500ms, // NON GUN TARGET REFINE TIMER
+	250ms, // IMPROVED CURSOR FLASH
+	500ms, // 2nd CURSOR FLASH
+	400ms, // RADARMAP BLINK AND OVERHEAD MAP BLINK SHOUDL BE THE SAME
+	10ms  // Music Overhead
 };
 
 // TIMER COUNTERS
-INT32 giTimerCounters[NUMTIMERS];
+std::array<milliseconds, NUMTIMERS> giTimerCounters;
 
-INT32 giTimerCustomizable       = 0;
-INT32 giTimerTeamTurnUpdate     = 0;
+milliseconds giTimerCustomizable{0ms};
+milliseconds giTimerTeamTurnUpdate{0ms};
 
 CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback = 0;
 
@@ -75,7 +75,7 @@ static UINT32 TimeProc(UINT32 const interval, void*)
 {
 	if (!gfPauseClock)
 	{
-		guiBaseJA2Clock += BASETIMESLICE;
+		guiBaseJA2Clock += BASETIMESLICE.count();
 
 		for (UINT32 i = 0; i != NUMTIMERS; i++)
 		{
@@ -127,17 +127,9 @@ void InitializeJA2Clock(void)
 	SDL_InitSubSystem(SDL_INIT_TIMER);
 
 	// Init timer delays
-	for (INT32 i = 0; i != NUMTIMERS; ++i)
-	{
-		giTimerCounters[i] = giTimerIntervals[i];
-	}
+	giTimerCounters = giTimerIntervals;
 
-	INT32 msPerTimeSlice = gamepolicy(ms_per_time_slice);
-	if (msPerTimeSlice <= 0)
-	{
-		throw std::runtime_error("ms_per_time_slice must be a positive integer");
-	}
-	g_timer = SDL_AddTimer(msPerTimeSlice, TimeProc, 0);
+	g_timer = SDL_AddTimer(BASETIMESLICE.count(), TimeProc, nullptr);
 	if (!g_timer) throw std::runtime_error("Could not create timer callback");
 }
 
@@ -154,7 +146,7 @@ void PauseTime(BOOLEAN const fPaused)
 }
 
 
-void SetCustomizableTimerCallbackAndDelay(INT32 const delay, CUSTOMIZABLE_TIMER_CALLBACK const callback, BOOLEAN const replace)
+void SetCustomizableTimerCallbackAndDelay(milliseconds const delay, CUSTOMIZABLE_TIMER_CALLBACK const callback, BOOLEAN const replace)
 {
 	if (!replace && gpCustomizableTimerCallback)
 	{ // Replace callback but call the current callback first

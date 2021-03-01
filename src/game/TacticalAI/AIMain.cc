@@ -42,7 +42,7 @@
 
 #include <algorithm>
 
-#define AI_DELAY 100
+constexpr milliseconds AI_DELAY = 100ms;
 
 
 //
@@ -1347,11 +1347,10 @@ INT8 ExecuteAction(SOLDIERTYPE *pSoldier)
 			}
 			else
 			{
-				RESETTIMECOUNTER( pSoldier->AICounter, pSoldier->usActionData );
+				RESETTIMECOUNTER( pSoldier->AICounter, milliseconds(pSoldier->usActionData) );
 				if (pSoldier->ubProfile != NO_PROFILE)
 				{
-					SLOGD("%s waiting %d from %d",
-								pSoldier->name.c_str(), pSoldier->AICounter, GetJA2Clock());
+					STLOGD("{} waiting {} from {}",	pSoldier->name.c_str(), pSoldier->AICounter.count(), GetJA2Clock());
 				}
 			}
 			ActionDone( pSoldier );
@@ -2018,7 +2017,7 @@ void SetNewSituation( SOLDIERTYPE * pSoldier )
 			if (!(gTacticalStatus.uiFlags & INCOMBAT))
 			{
 				// reset delay if necessary!
-				RESETTIMECOUNTER( pSoldier->AICounter, Random( 1000 ) );
+				RESETTIMECOUNTER( pSoldier->AICounter, milliseconds(Random( 1000 )) );
 			}
 		}
 	}

@@ -300,7 +300,7 @@ static void PickABoxer()
 			SetSoldierNonNeutral(boxer);
 			RecalculateOppCntsDueToNoLongerNeutral(boxer);
 			CancelAIAction(boxer);
-			RESETTIMECOUNTER(boxer->AICounter, 0);
+			RESETTIMECOUNTER(boxer->AICounter, 0ms);
 			gfBoxerFought[i] = TRUE;
 			// Improve stats based on the # of rests these guys have had
 			boxer->bStrength  = __min(100, boxer->bStrength  + gubBoxersRests * 5);

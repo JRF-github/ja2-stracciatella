@@ -1333,7 +1333,7 @@ void SoldierGetItemFromWorld(SOLDIERTYPE* const s, const INT32 iItemIndex, const
 
 	gpTempSoldier = s;
 	gsTempGridno  = sGridNo;
-	SetCustomizableTimerCallbackAndDelay(1000, CheckForPickedOwnership, TRUE);
+	SetCustomizableTimerCallbackAndDelay(1s, CheckForPickedOwnership, TRUE);
 }
 
 

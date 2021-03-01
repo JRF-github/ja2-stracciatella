@@ -109,7 +109,7 @@ void CallEldinTo( INT16 sGridNo )
 					CancelAIAction(pSoldier);
 					pSoldier->bNextAction = AI_ACTION_GET_CLOSER;
 					pSoldier->usNextActionData = sGridNo;
-					RESETTIMECOUNTER( pSoldier->AICounter, 100 );
+					RESETTIMECOUNTER( pSoldier->AICounter, 100ms );
 				}
 				// otherwise let AI handle this normally
 //				SetNewSituation( pSoldier );

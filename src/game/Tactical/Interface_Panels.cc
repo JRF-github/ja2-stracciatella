@@ -2891,12 +2891,12 @@ void HandlePanelFaceAnimations(SOLDIERTYPE* pSoldier)
 		pSoldier->fClosePanelToDie = TRUE;
 		pSoldier->ubClosePanelFrame = 0;
 		pSoldier->ubDeadPanelFrame = 0;
-		RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160 );
+		RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160ms );
 	}
 
 	if ( pSoldier->fClosePanel )
 	{
-		if ( TIMECOUNTERDONE( pSoldier->PanelAnimateCounter, 160 ) )
+		if ( TIMECOUNTERDONE( pSoldier->PanelAnimateCounter, 160ms ) )
 		{
 			pSoldier->ubClosePanelFrame++;
 
@@ -2918,7 +2918,7 @@ void HandlePanelFaceAnimations(SOLDIERTYPE* pSoldier)
 					}
 				}
 				}
-			RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160 );
+			RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160ms );
 		}
 	}
 
@@ -2973,7 +2973,7 @@ void HandlePanelFaceAnimations(SOLDIERTYPE* pSoldier)
 				HandlePlayerTeamMemberDeathAfterSkullAnimation( pSoldier );
 
 			}
-			RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160 );
+			RESETTIMECOUNTER( pSoldier->PanelAnimateCounter, 160ms );
 		}
 	}
 

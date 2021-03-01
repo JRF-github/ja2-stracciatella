@@ -37,7 +37,7 @@
 #include "NPC.h"
 #include "Logger.h"
 
-#define NEXT_TILE_CHECK_DELAY 700
+constexpr milliseconds NEXT_TILE_CHECK_DELAY = 700ms;
 
 void SetDelayedTileWaiting( SOLDIERTYPE *pSoldier, INT16 sCauseGridNo, INT8 bValue )
 {

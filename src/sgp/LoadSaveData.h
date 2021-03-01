@@ -208,4 +208,9 @@ protected:
 #define EXTR_SOLDIER(S, D) (D) = ID2Soldier((S).read<SoldierID>());
 #define EXTR_VEC3(S, D) EXTR_FLOAT(S, (D).x); EXTR_FLOAT(S, (D).y); EXTR_FLOAT(S, (D).z);
 
+// Inject and extract TIMECOUNTER variables
+// These were previously defined as INT32 but are now 64-bit chrono::milliseconds
+#define EXTR_TC(S, D)	(D) = std::chrono::milliseconds((S).read<INT32>());
+#define INJ_TC(D, S)	(D).write<INT32>(static_cast<INT32>((S).count()));
+
 #endif

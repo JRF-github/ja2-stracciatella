@@ -2,6 +2,11 @@
 #define __TIMER_CONTROL_H
 
 #include "Types.h"
+#include <array>
+#include <chrono>
+
+using std::chrono::milliseconds;
+using namespace std::literals::chrono_literals;
 
 typedef void (*CUSTOMIZABLE_TIMER_CALLBACK) ( void );
 
@@ -33,17 +38,13 @@ enum
 };
 
 // Base resultion of callback timer
-#define BASETIMESLICE 10
+constexpr milliseconds BASETIMESLICE = 10ms;
 
-extern const INT32 giTimerIntervals[NUMTIMERS];
-extern INT32       giTimerCounters[NUMTIMERS];
-
-// GLOBAL SYNC TEMP TIME
-extern INT32 giClockTimer;
+extern std::array<milliseconds, NUMTIMERS> const giTimerIntervals;
+extern std::array<milliseconds, NUMTIMERS> giTimerCounters;
 
 extern INT32 giTimerDiag;
-
-extern INT32 giTimerTeamTurnUpdate;
+extern milliseconds giTimerTeamTurnUpdate;
 
 
 void InitializeJA2Clock(void);
@@ -53,7 +54,7 @@ void ShutdownJA2Clock(void);
 
 void PauseTime( BOOLEAN fPaused );
 
-void SetCustomizableTimerCallbackAndDelay( INT32 iDelay, CUSTOMIZABLE_TIMER_CALLBACK pCallback, BOOLEAN fReplace );
+void SetCustomizableTimerCallbackAndDelay( milliseconds iDelay, CUSTOMIZABLE_TIMER_CALLBACK pCallback, BOOLEAN fReplace );
 void CheckCustomizableTimer( void );
 
 //Don't modify this value
@@ -63,21 +64,21 @@ extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
 // MACROS
 // Check if new counter < 0        | set to 0 |        Decrement
 
-#define UPDATECOUNTER( c )		( ( giTimerCounters[ c ] - BASETIMESLICE ) < 0 ) ?  ( giTimerCounters[ c ] = 0 ) : ( giTimerCounters[ c ] -= BASETIMESLICE )
+#define UPDATECOUNTER( c )		( ( giTimerCounters[ c ] - BASETIMESLICE ) < 0ms ) ?  ( giTimerCounters[ c ] = 0ms ) : ( giTimerCounters[ c ] -= BASETIMESLICE )
 #define RESETCOUNTER( c )		( giTimerCounters[ c ] = giTimerIntervals[ c ] )
-#define COUNTERDONE( c )		( giTimerCounters[ c ] == 0 ) ? TRUE : FALSE
+#define COUNTERDONE( c )		( giTimerCounters[ c ] == 0ms ) ? TRUE : FALSE
 
-#define UPDATETIMECOUNTER( c )		( ( c - BASETIMESLICE ) < 0 ) ?  ( c = 0 ) : ( c -= BASETIMESLICE )
+#define UPDATETIMECOUNTER( c )		( ( c - BASETIMESLICE ) < 0ms ) ?  ( c = 0ms ) : ( c -= BASETIMESLICE )
 #define RESETTIMECOUNTER( c, d )	( c = d )
 
 #ifdef BOUNDS_CHECKER
 	#define TIMECOUNTERDONE(c, d) true
 #else
-	#define TIMECOUNTERDONE(c, d) (c == 0)
+	#define TIMECOUNTERDONE(c, d) (c == 0ms)
 #endif
 
 #define SYNCTIMECOUNTER()		(void)0
-#define ZEROTIMECOUNTER( c )		( c = 0 )
+#define ZEROTIMECOUNTER( c )		( c = 0ms )
 
 // whenever guiBaseJA2Clock changes, we must reset all the timer variables that
 // use it as a reference

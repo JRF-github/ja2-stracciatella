@@ -127,7 +127,7 @@ static INT32   giPauseAllAITimer = 0;
 BOOLEAN gfSurrendered = FALSE;
 
 
-#define NEW_FADE_DELAY			60
+constexpr milliseconds NEW_FADE_DELAY = 60ms;
 
 
 // Soldier List used for all soldier overhead interaction
@@ -771,7 +771,7 @@ void ExecuteOverhead(void)
 						pSoldier->uiStatusFlags &= ~SOLDIER_LOOKFOR_ITEMS;
 					}
 
-					RESETTIMECOUNTER(pSoldier->UpdateCounter, pSoldier->sAniDelay);
+					RESETTIMECOUNTER(pSoldier->UpdateCounter, milliseconds(pSoldier->sAniDelay));
 
 					BOOLEAN fNoAPsForPendingAction = FALSE;
 
@@ -4502,7 +4502,7 @@ BOOLEAN CheckForEndOfBattle( BOOLEAN fAnEnemyRetreated )
 
 		// Play death music
 		SetMusicMode( MUSIC_TACTICAL_DEFEAT );
-		SetCustomizableTimerCallbackAndDelay( 10000, DeathNoMessageTimerCallback, FALSE );
+		SetCustomizableTimerCallbackAndDelay( 10s, DeathNoMessageTimerCallback, FALSE );
 
 		if ( CheckFact( FACT_FIRST_BATTLE_BEING_FOUGHT, 0 ) )
 		{
@@ -4718,7 +4718,7 @@ BOOLEAN CheckForEndOfBattle( BOOLEAN fAnEnemyRetreated )
 			}
 		}
 
-		SetCustomizableTimerCallbackAndDelay(3000, HandleThePlayerBeNotifiedOfSomeoneElseInSector, FALSE);
+		SetCustomizableTimerCallbackAndDelay(3s, HandleThePlayerBeNotifiedOfSomeoneElseInSector, FALSE);
 
 		//Whenever returning TRUE, make sure you clear gfBlitBattleSectorLocator;
 		gfBlitBattleSectorLocator = FALSE;
@@ -5089,11 +5089,11 @@ static BOOLEAN CheckForLosingEndOfBattle(void)
 			if ( fDoCapture )
 			{
 				EndCaptureSequence( );
-				SetCustomizableTimerCallbackAndDelay( 3000, CaptureTimerCallback, FALSE );
+				SetCustomizableTimerCallbackAndDelay( 3s, CaptureTimerCallback, FALSE );
 			}
 			else
 			{
-				SetCustomizableTimerCallbackAndDelay( 10000, DeathTimerCallback, FALSE );
+				SetCustomizableTimerCallbackAndDelay( 10s, DeathTimerCallback, FALSE );
 			}
 
 		}
@@ -6240,7 +6240,7 @@ void HandleThePlayerBeNotifiedOfSomeoneElseInSector(void)
 		AreWeInAUIMenu()
 		)
 	{
-		SetCustomizableTimerCallbackAndDelay(2000, HandleThePlayerBeNotifiedOfSomeoneElseInSector, FALSE);
+		SetCustomizableTimerCallbackAndDelay(2s, HandleThePlayerBeNotifiedOfSomeoneElseInSector, FALSE);
 		return;
 	}
 	

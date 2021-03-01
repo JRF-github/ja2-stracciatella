@@ -2,11 +2,11 @@
 #define JA2TYPES_H
 
 #include "Types.h"
-
+#include <chrono>
 
 typedef INT16 GridNo;
 typedef UINT8 ProfileID;
-typedef INT32 TIMECOUNTER;
+typedef std::chrono::milliseconds TIMECOUNTER;
 
 struct ANIM_PROF;
 struct ANITILE;

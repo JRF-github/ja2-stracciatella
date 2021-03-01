@@ -2691,7 +2691,7 @@ void HandleNPCDoAction( UINT8 ubTargetNPC, UINT16 usActionCode, UINT8 ubQuoteNum
 				// set "don't add to sector" cause he'll only appear after an event...
 				gMercProfiles[ ubTargetNPC ].ubMiscFlags2 |= PROFILE_MISC_FLAG2_DONT_ADD_TO_SECTOR;
 
-				SetCustomizableTimerCallbackAndDelay(params->getAmount(10000), CarmenLeavesSectorCallback, TRUE );
+				SetCustomizableTimerCallbackAndDelay(milliseconds(params->getAmount(10000)), CarmenLeavesSectorCallback, TRUE );
 				break;
 
 			case NPC_ACTION_CARMEN_LEAVES_ON_NEXT_SECTOR_LOAD:

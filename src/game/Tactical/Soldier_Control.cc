@@ -1764,7 +1764,7 @@ void EVENT_InitNewSoldierAnim(SOLDIERTYPE* const pSoldier, UINT16 usNewState, UI
 	SetSoldierAniSpeed( pSoldier );
 
 	// Reset counters
-	RESETTIMECOUNTER( pSoldier->UpdateCounter, pSoldier->sAniDelay );
+	RESETTIMECOUNTER( pSoldier->UpdateCounter, milliseconds(pSoldier->sAniDelay) );
 
 	// Adjust to new animation frame ( the first one )
 	AdjustToNextAnimationFrame( pSoldier );
@@ -4796,7 +4796,7 @@ static void AdjustAniSpeed(SOLDIERTYPE* pSoldier)
 	}
 
 
-	RESETTIMECOUNTER( pSoldier->UpdateCounter, pSoldier->sAniDelay );
+	RESETTIMECOUNTER( pSoldier->UpdateCounter, milliseconds(pSoldier->sAniDelay) );
 }
 
 
@@ -4959,7 +4959,7 @@ void SetSoldierAniSpeed(SOLDIERTYPE* pSoldier)
 			gTacticalStatus.fAutoBandageMode ) && pSoldier->usAnimState != MONSTER_UP )
 		{
 			pSoldier->sAniDelay = 0;
-			RESETTIMECOUNTER( pSoldier->UpdateCounter, pSoldier->sAniDelay );
+			RESETTIMECOUNTER( pSoldier->UpdateCounter, milliseconds(pSoldier->sAniDelay) );
 			return;
 		}
 	}
