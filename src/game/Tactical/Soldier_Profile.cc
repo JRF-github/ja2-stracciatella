@@ -637,9 +637,8 @@ SOLDIERTYPE* ChangeSoldierTeam(SOLDIERTYPE* const old_s, UINT8 const team)
 
 	// Loop through all active merc slots, change any attacker's target if they
 	// were once on this guy.
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE& s = **i;
 		if (s.target == old_s) s.target = new_s;
 	}
 
@@ -914,9 +913,8 @@ BOOLEAN IsProfileAHeadMiner(UINT8 ubProfile)
 
 void UpdateSoldierPointerDataIntoProfile()
 {
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.ubProfile == NO_PROFILE) continue;
 		// If we are above player mercs
 		if (MercProfile(s.ubProfile).isPlayerMerc()) continue;

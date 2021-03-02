@@ -3609,9 +3609,8 @@ void ActivateXRayDevice( SOLDIERTYPE * pSoldier )
 
 	// first, scan through all mercs and turn off xrayed flag for anyone
 	// previously xrayed by this guy
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(tgt)
 	{
-		SOLDIERTYPE* const tgt = *i;
 		if (tgt->ubMiscSoldierFlags &  SOLDIER_MISC_XRAYED &&
 				tgt->xrayed_by          == pSoldier)
 		{
@@ -3620,9 +3619,8 @@ void ActivateXRayDevice( SOLDIERTYPE * pSoldier )
 		}
 	}
 	// now turn on xray for anyone within range
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(tgt)
 	{
-		SOLDIERTYPE* const tgt = *i;
 		if (tgt->bTeam != pSoldier->bTeam &&
 			PythSpacesAway(pSoldier->sGridNo, tgt->sGridNo) < XRAY_RANGE)
 		{
@@ -3642,9 +3640,8 @@ void TurnOffXRayEffects( SOLDIERTYPE * pSoldier )
 
 	// scan through all mercs and turn off xrayed flag for anyone
 	// xrayed by this guy
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(tgt)
 	{
-		SOLDIERTYPE* const tgt = *i;
 		if (tgt->ubMiscSoldierFlags &  SOLDIER_MISC_XRAYED &&
 			tgt->xrayed_by == pSoldier)
 		{

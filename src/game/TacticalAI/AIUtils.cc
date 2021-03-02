@@ -564,9 +564,8 @@ INT16 RandomFriendWithin(SOLDIERTYPE* const s)
 	// go through each soldier, looking for "friends" (soldiers on same side)
 	UINT8 ubFriendCount = 0;
 	const SOLDIERTYPE* friends[MAXMERCS];
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(candidate)
 	{
-		const SOLDIERTYPE* const candidate = *i;
 		if (candidate == s) continue; // skip ourselves
 
 		/* if this man not neutral, but is on my side, OR if he is neutral, but so
@@ -800,10 +799,8 @@ INT16 ClosestReachableDisturbance(SOLDIERTYPE *pSoldier, UINT8 ubUnconsciousOK, 
 
 	// look through this man's personal & public opplists for opponents known
 	INT8 bClosestLevel = 0; // XXX HACK000E
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpp)
 	{
-		const SOLDIERTYPE* const pOpp = *i;
-
 		// if this merc is neutral/on same side, he's not an opponent
 		if ( CONSIDERED_NEUTRAL( pSoldier, pOpp ) || (pSoldier->bSide == pOpp->bSide) )
 		{
@@ -976,10 +973,8 @@ INT16 ClosestKnownOpponent(SOLDIERTYPE *pSoldier, INT16 * psGridNo, INT8 * pbLev
 	pbPublOL = &(gbPublicOpplist[pSoldier->bTeam][0]);
 
 	// look through this man's personal & public opplists for opponents known
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpp)
 	{
-		const SOLDIERTYPE* const pOpp = *i;
-
 		// if this merc is neutral/on same side, he's not an opponent
 		if ( CONSIDERED_NEUTRAL( pSoldier, pOpp ) || (pSoldier->bSide == pOpp->bSide))
 		{
@@ -1062,10 +1057,8 @@ INT16 ClosestSeenOpponent(SOLDIERTYPE *pSoldier, INT16 * psGridNo, INT8 * pbLeve
 	bClosestLevel = -1;
 
 	// look through this man's personal & public opplists for opponents known
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpp)
 	{
-		const SOLDIERTYPE* const pOpp = *i;
-
 		// if this merc is neutral/on same side, he's not an opponent
 		if ( CONSIDERED_NEUTRAL( pSoldier, pOpp ) || (pSoldier->bSide == pOpp->bSide))
 		{
@@ -1412,10 +1405,8 @@ INT16 ClosestReachableFriendInTrouble(SOLDIERTYPE *pSoldier, BOOLEAN * pfClimbin
 	if (IsOnCivTeam(pSoldier)) return sClosestFriend;
 
 	// consider every friend of this soldier (locations assumed to be known)
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pFriend)
 	{
-		SOLDIERTYPE* const pFriend = *i;
-
 		// if this merc is neutral or NOT on the same side, he's not a friend
 		if (pFriend->bNeutral || (pSoldier->bSide != pFriend->bSide))
 		{
@@ -1616,10 +1607,8 @@ INT8 CalcMorale(SOLDIERTYPE *pSoldier)
 	const INT8* pSeenOpp = &gbSeenOpponents[pSoldier->ubID][0];
 
 	// loop through every one of my possible opponents
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		// if this merc is inactive, at base, on assignment, dead, unconscious
 		if (pOpponent->bLife < OKLIFE) continue; // next merc
 
@@ -1668,10 +1657,8 @@ INT8 CalcMorale(SOLDIERTYPE *pSoldier)
 		// THROUGH THEIR PERSONAL OPPLISTS AND CHECK WHICH OF MY FRIENDS KNOW
 		// SOMETHING ABOUT HIM AND WHAT THEIR THREAT VALUE TO HIM IS.
 
-		FOR_EACH_MERC(j)
+		FOR_EACH_MERC(pFriend)
 		{
-			SOLDIERTYPE* const pFriend = *j;
-
 			// if this merc is inactive, at base, on assignment, dead, unconscious
 			if (pFriend->bLife < OKLIFE) continue; // next merc
 

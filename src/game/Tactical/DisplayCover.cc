@@ -273,10 +273,8 @@ static INT8 CalcCoverForGridNoBasedOnTeamKnownEnemies(SOLDIERTYPE const* const p
 	INT32 iTotalCoverPoints = 0;
 	INT8  bNumEnemies       = 0;
 	INT32 iHighestValue     = 0;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		if (pOpponent->bLife < OKLIFE) continue;
 
 		// if this man is neutral / on the same side, he's not an opponent

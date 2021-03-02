@@ -198,9 +198,8 @@ bool BuildAIListForTeam(INT8 const team)
 	// Create a new list
 	UINT8 n      = 0;
 	UINT8 n_done = 0;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE& s = **i;
 		// non-null merc slot ensures active
 		if (s.bTeam != team) continue;
 		if (!SatisfiesAIListConditions(s, &n_done, true)) continue;

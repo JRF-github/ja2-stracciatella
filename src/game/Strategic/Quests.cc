@@ -193,9 +193,8 @@ static INT8 NumWoundedMercsNearby(ProfileID const pid)
 
 	INT8         n      = 0;
 	GridNo const gridno = npc->sGridNo;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.bTeam != OUR_TEAM)                                        continue;
 		if (s.bLife <= 0 || s.bLifeMax <= s.bLife)                         continue;
 		if (s.bAssignment == ASSIGNMENT_HOSPITAL)                          continue;
@@ -213,9 +212,8 @@ static INT8 NumMercsNear(ProfileID const pid, UINT8 const max_dist)
 
 	INT8         n      = 0;
 	GridNo const gridno = npc->sGridNo;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.bTeam != OUR_TEAM)                        continue;
 		if (s.bLife <  OKLIFE)                             continue;
 		if (PythSpacesAway(gridno, s.sGridNo) <= max_dist) continue;
@@ -341,9 +339,8 @@ static INT8 NumMalesPresent(ProfileID const pid)
 
 	INT8         n      = 0;
 	GridNo const gridno = npc->sGridNo;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.bTeam     != OUR_TEAM)            continue;
 		if (s.bLife     <  OKLIFE)                 continue;
 		if (s.ubProfile == NO_PROFILE)             continue;
@@ -361,9 +358,8 @@ static bool FemalePresent(ProfileID const pid)
 	if (!npc) return false;
 
 	GridNo const gridno = npc->sGridNo;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.bTeam     != OUR_TEAM)             continue;
 		if (s.bLife     <  OKLIFE)                  continue;
 		if (s.ubProfile == NO_PROFILE)              continue;
@@ -414,9 +410,8 @@ static BOOLEAN CheckNPCSector(UINT8 ubProfileID, INT16 sSectorX, INT16 sSectorY,
 
 static bool AIMMercWithin(GridNo const gridno, INT16 const distance)
 {
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE const& s = **i;
 		if (s.bTeam               != OUR_TEAM)         continue;
 		if (s.bLife               <  OKLIFE)              continue;
 		if (s.ubWhatKindOfMercAmI != MERC_TYPE__AIM_MERC) continue;

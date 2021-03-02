@@ -1483,9 +1483,8 @@ void LightSetBaseLevel(UINT8 iIntensity)
 	if( !gfEditMode )
 	{
 		// Loop for all good guys in tactical map and add a light if required
-		FOR_EACH_MERC(i)
+		FOR_EACH_MERC(s)
 		{
-			SOLDIERTYPE* const s = *i;
 			if (s->bTeam == OUR_TEAM) ReCreateSoldierLight(s);
 		}
 	}

@@ -124,10 +124,8 @@ void CalcBestShot(SOLDIERTYPE *pSoldier, ATTACKTYPE *pBestShot)
 	//pbPersOL = &(pSoldier->bOppList[0]);
 
 	// determine which attack against which target has the greatest attack value
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		// if this merc is inactive, at base, on assignment, or dead
 		if (!pOpponent->bLife) continue; // next merc
 
@@ -480,10 +478,8 @@ static void CalcBestThrow(SOLDIERTYPE* pSoldier, ATTACKTYPE* pBestThrow)
 	ubDiff = SoldierDifficultyLevel( pSoldier );
 
 	// make a list of tiles one's friends are positioned in
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pFriend)
 	{
-		const SOLDIERTYPE* const pFriend = *i;
-
 		if (pFriend->bLife == 0)
 		{
 			continue;
@@ -503,10 +499,8 @@ static void CalcBestThrow(SOLDIERTYPE* pSoldier, ATTACKTYPE* pBestThrow)
 	}
 
 	// make a list of tiles one's CURRENTLY SEEN opponents are positioned in
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		if (!pOpponent->bLife)
 		{
 			continue;          // next soldier
@@ -1025,10 +1019,8 @@ void CalcBestStab(SOLDIERTYPE *pSoldier, ATTACKTYPE *pBestStab, BOOLEAN fBladeAt
 
 	// determine which attack against which target has the greatest attack value
 
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		// if this merc is inactive, at base, on assignment, or dead
 		if (!pOpponent->bLife) continue; // next merc
 
@@ -1204,10 +1196,8 @@ void CalcTentacleAttack(SOLDIERTYPE *pSoldier, ATTACKTYPE *pBestStab )
 	pSoldier->usAttackingWeapon = pSoldier->inv[HANDPOS].usItem;
 
 	// determine which attack against which target has the greatest attack value
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pOpponent)
 	{
-		SOLDIERTYPE* const pOpponent = *i;
-
 		// if this merc is inactive, at base, on assignment, or dead
 		if (!pOpponent->bLife) continue; // next merc
 
@@ -1319,9 +1309,8 @@ void CalcTentacleAttack(SOLDIERTYPE *pSoldier, ATTACKTYPE *pBestStab )
 static UINT8 NumMercsCloseTo(INT16 sGridNo, UINT8 ubMaxDist)
 {
 	INT8 bNumber = 0;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		const SOLDIERTYPE* const s = *i;
 		if (s->bTeam == OUR_TEAM &&
 			s->bLife >= OKLIFE      &&
 			PythSpacesAway(sGridNo, s->sGridNo) <= ubMaxDist)

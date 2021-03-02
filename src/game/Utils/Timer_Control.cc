@@ -103,9 +103,8 @@ static UINT32 TimeProc(UINT32 const interval, void*)
 		else
 		{
 			// Set update flags for soldiers
-			FOR_EACH_MERC(i)
+			FOR_EACH_MERC(s)
 			{
-				SOLDIERTYPE* const s = *i;
 				UPDATETIMECOUNTER(s->UpdateCounter);
 				UPDATETIMECOUNTER(s->DamageCounter);
 				UPDATETIMECOUNTER(s->BlinkSelCounter);

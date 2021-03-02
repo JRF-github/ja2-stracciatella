@@ -151,9 +151,8 @@ void HandleTacticalEndTurn()
 
 		// We're looping through only mercs in tactical engine, ignoring our mercs
 		// because they were done earlier
-		FOR_EACH_MERC(i)
+		FOR_EACH_MERC_REF(s)
 		{
-			SOLDIERTYPE& s = **i;
 			if (s.bTeam == OUR_TEAM) continue;
 
 			// Handle everything from getting breath back, to bleeding, etc.

@@ -1187,7 +1187,7 @@ void ExecuteOverhead(void)
 				gbNumMercsUntilWaitingOver = 0;
 
 				// Reset all waitng codes
-				FOR_EACH_MERC(i) (*i)->ubWaitActionToDo = 0;
+				FOR_EACH_MERC(i) i->ubWaitActionToDo = 0;
 			}
 
 			if (gbNumMercsUntilWaitingOver == 0)
@@ -4192,9 +4192,8 @@ static bool SoldierHasSeenEnemiesLastFewTurns(SOLDIERTYPE const& s)
 
 static BOOLEAN WeSeeNoOne(void)
 {
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		const SOLDIERTYPE* const s = *i;
 		if (s->bTeam == OUR_TEAM && s->bOppCnt > 0) return FALSE;
 	}
 	return TRUE;
@@ -4203,9 +4202,8 @@ static BOOLEAN WeSeeNoOne(void)
 
 static BOOLEAN NobodyAlerted(void)
 {
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		const SOLDIERTYPE* const s = *i;
 		if (s->bTeam != OUR_TEAM &&
 			!s->bNeutral &&
 			s->bLife >= OKLIFE &&
@@ -4220,9 +4218,8 @@ static BOOLEAN NobodyAlerted(void)
 
 static BOOLEAN WeSawSomeoneThisTurn(void)
 {
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		const SOLDIERTYPE* const s = *i;
 		if (s->bTeam != OUR_TEAM) continue;
 
 		for (UINT32 uiLoop2 = gTacticalStatus.Team[ENEMY_TEAM].bFirstID; uiLoop2 < MAX_NUM_SOLDIERS; ++uiLoop2)
@@ -4301,9 +4298,8 @@ BOOLEAN CheckForEndOfCombatMode( BOOLEAN fIncrementTurnsNotSeen )
 	else
 	{
 		// we have to loop through EVERYONE to see if anyone sees a hostile... if so, stay in turnbased...
-		FOR_EACH_MERC(i)
+		FOR_EACH_MERC_REF(s)
 		{
-			SOLDIERTYPE const& s = **i;
 			if (s.bLife >= OKLIFE &&
 				!s.bNeutral &&
 				SoldierHasSeenEnemiesLastFewTurns(s))
@@ -4856,9 +4852,8 @@ BOOLEAN PlayerTeamFull( )
 UINT8 NumPCsInSector(void)
 {
 	UINT8 ubNumPlayers = 0;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		const SOLDIERTYPE* const s = *i;
 		if (s->bTeam == OUR_TEAM && s->bLife > 0) ++ubNumPlayers;
 	}
 	return ubNumPlayers;
@@ -5199,9 +5194,8 @@ static void HandleSuppressionFire(const SOLDIERTYPE* const targeted_merc, SOLDIE
 	UINT8 ubPointsLost, ubTotalPointsLost, ubNewStance;
 	UINT8 ubLoop2;
 
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pSoldier)
 	{
-		SOLDIERTYPE* const pSoldier = *i;
 		if (IS_MERC_BODY_TYPE(pSoldier) && pSoldier->bLife >= OKLIFE && pSoldier->ubSuppressionPoints > 0)
 		{
 			bTolerance = CalcSuppressionTolerance( pSoldier );

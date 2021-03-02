@@ -151,7 +151,7 @@ UINT8 CountPeopleInBoxingRing( void )
 
 	FOR_EACH_MERC(i)
 	{
-		if (GetRoom((*i)->sGridNo) == BOXING_RING)
+		if (GetRoom(i->sGridNo) == BOXING_RING)
 		{
 			++ubTotalInRing;
 		}
@@ -171,9 +171,8 @@ static void CountPeopleInBoxingRingAndDoActions(void)
 	SOLDIERTYPE *pInRing[2] = { NULL, NULL };
 	SOLDIERTYPE *pNonBoxingPlayer = NULL;
 
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(s)
 	{
-		SOLDIERTYPE* const s = *i;
 		if (GetRoom(s->sGridNo) != BOXING_RING) continue;
 
 		if (ubTotalInRing < 2) pInRing[ubTotalInRing] = s;
@@ -426,5 +425,5 @@ void SetBoxingState( INT8 bNewState )
 
 void ClearAllBoxerFlags(void)
 {
-	FOR_EACH_MERC(i) (*i)->uiStatusFlags &= ~SOLDIER_BOXER;
+	FOR_EACH_MERC(i) i->uiStatusFlags &= ~SOLDIER_BOXER;
 }

@@ -244,10 +244,8 @@ void RenderRadarScreen()
 				Get16BPPColor(FROMRGB(0, 255, 0)), pDestBuf);
 
 			// Re-render radar
-			FOR_EACH_MERC(i)
+			FOR_EACH_MERC(s)
 			{
-				SOLDIERTYPE const* const s = *i;
-
 				// Don't place guys in radar until visible!
 				if (s->bVisible == -1 &&
 						!(gTacticalStatus.uiFlags & SHOW_ALL_MERCS) &&

@@ -143,10 +143,8 @@ SOLDIERTYPE* FindSoldier(GridNo const gridno, UINT32 flags)
 
 	INT16        heighest_merc_screen_y = -32000;
 	SOLDIERTYPE* best_merc              = 0;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC_REF(s)
 	{
-		SOLDIERTYPE& s = **i;
-
 		if (s.uiStatusFlags & SOLDIER_DEAD) continue;
 		if (s.bVisible == -1 && !(gTacticalStatus.uiFlags & SHOW_ALL_MERCS)) continue;
 

@@ -146,10 +146,8 @@ INT16 MostImportantNoiseHeard( SOLDIERTYPE *pSoldier, INT32 *piRetValue, BOOLEAN
 	pbPublOL = gbPublicOpplist[pSoldier->bTeam];
 
 	// look through this man's personal & public opplists for opponents heard
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pTemp)
 	{
-		const SOLDIERTYPE* const pTemp = *i;
-
 		// if this merc is inactive, at base, on assignment, or dead
 		if (!pTemp->bLife) continue; // next merc
 
@@ -315,10 +313,8 @@ INT16 WhatIKnowThatPublicDont(SOLDIERTYPE *pSoldier, UINT8 ubInSightOnly)
 	pbPersOL = &(pSoldier->bOppList[0]);
 	pbPublOL = &(gbPublicOpplist[pSoldier->bTeam][0]);
 
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pTemp)
 	{
-		const SOLDIERTYPE* const pTemp = *i;
-
 		// if this merc is neutral/on same side, he's not an opponent
 		if ( CONSIDERED_NEUTRAL( pSoldier, pTemp ) || (pSoldier->bSide == pTemp->bSide))
 		{

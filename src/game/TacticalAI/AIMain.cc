@@ -1956,10 +1956,8 @@ static void ManChecksOnFriends(SOLDIERTYPE* pSoldier)
 	// THIS ROUTINE SHOULD ONLY BE CALLED FOR SOLDIERS ON STATUS GREEN or YELLOW
 
 	// go through each soldier, looking for "friends" (soldiers on same side)
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pFriend)
 	{
-		const SOLDIERTYPE* const pFriend = *i;
-
 		// if this man is neutral / NOT on my side, he's not my friend
 		if (pFriend->bNeutral || (pSoldier->bSide != pFriend->bSide))
 			continue;  // next merc

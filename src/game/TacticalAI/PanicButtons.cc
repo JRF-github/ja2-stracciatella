@@ -50,10 +50,8 @@ void MakeClosestEnemyChosenOne()
 
 	// consider every enemy, looking for the closest capable, unbusy one
 	SOLDIERTYPE* closest_enemy = NULL;
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pSoldier)
 	{
-		SOLDIERTYPE* const pSoldier = *i;
-
 		// if this merc is unconscious, or dead
 		if (pSoldier->bLife < OKLIFE)
 		{

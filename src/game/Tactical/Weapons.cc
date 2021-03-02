@@ -3882,9 +3882,8 @@ void DishoutQueenSwipeDamage( SOLDIERTYPE *pQueenSoldier )
 	INT32 iHitBy;
 
 	// Loop through all mercs and make go
-	FOR_EACH_MERC(i)
+	FOR_EACH_MERC(pSoldier)
 	{
-		SOLDIERTYPE* const pSoldier = *i;
 		if (pSoldier == pQueenSoldier) continue;
 
 		// ATE: Ok, lets check for some basic things here!
