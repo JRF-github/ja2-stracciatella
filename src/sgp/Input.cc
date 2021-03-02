@@ -21,11 +21,11 @@ static SGPRect gCursorClipRect;
 
 // These data structure are used to track the mouse while polling
 
-static UINT32 guiSingleClickTimer;
+static time_point guiSingleClickTimer;
 
-static UINT32 guiLeftButtonRepeatTimer;
-static UINT32 guiRightButtonRepeatTimer;
-static UINT32 guiMiddleButtonRepeatTimer;
+static time_point guiLeftButtonRepeatTimer;
+static time_point guiRightButtonRepeatTimer;
+static time_point guiMiddleButtonRepeatTimer;
 
 BOOLEAN gfLeftButtonState;  // TRUE = Pressed, FALSE = Not Pressed
 BOOLEAN gfRightButtonState; // TRUE = Pressed, FALSE = Not Pressed
@@ -146,7 +146,7 @@ void MouseButtonDown(const SDL_MouseButtonEvent* BtnEv)
 			g_down_right = key_state[SDL_SCANCODE_LGUI] || key_state[SDL_SCANCODE_RGUI];
 			if (g_down_right) goto right_button;
 #endif
-			guiLeftButtonRepeatTimer = GetClock() + BUTTON_REPEAT_TIMEOUT;
+			guiLeftButtonRepeatTimer = Now() + BUTTON_REPEAT_TIMEOUT;
 			gfLeftButtonState = TRUE;
 			QueueMouseEvent(LEFT_BUTTON_DOWN);
 			break;
@@ -156,13 +156,13 @@ void MouseButtonDown(const SDL_MouseButtonEvent* BtnEv)
 #if defined(WITH_MAEMO) || defined(__APPLE__)
 right_button:
 #endif
-			guiRightButtonRepeatTimer = GetClock() + BUTTON_REPEAT_TIMEOUT;
+			guiRightButtonRepeatTimer = Now() + BUTTON_REPEAT_TIMEOUT;
 			gfRightButtonState = TRUE;
 			QueueMouseEvent(RIGHT_BUTTON_DOWN);
 			break;
 
 		case SDL_BUTTON_MIDDLE:
-			guiMiddleButtonRepeatTimer = GetClock() + BUTTON_REPEAT_TIMEOUT;
+			guiMiddleButtonRepeatTimer = Now() + BUTTON_REPEAT_TIMEOUT;
 			gfMiddleButtonState = TRUE;
 			QueueMouseEvent(MIDDLE_BUTTON_DOWN);
 			break;
@@ -180,10 +180,10 @@ void MouseButtonUp(const SDL_MouseButtonEvent* BtnEv)
 #if defined(WITH_MAEMO) || defined(__APPLE__)
 			if (g_down_right) goto right_button;
 #endif
-			guiLeftButtonRepeatTimer = 0;
+			guiLeftButtonRepeatTimer = time_point::min();
 			gfLeftButtonState = FALSE;
 			QueueMouseEvent(LEFT_BUTTON_UP);
-			UINT32 uiTimer = GetClock();
+			time_point const uiTimer = Now();
 			if (uiTimer - guiSingleClickTimer < DBL_CLK_TIME)
 			{
 				QueueMouseEvent(LEFT_BUTTON_DBL_CLK);
@@ -199,13 +199,13 @@ void MouseButtonUp(const SDL_MouseButtonEvent* BtnEv)
 #if defined WITH_MAEMO || defined(__APPLE__)
 right_button:
 #endif
-			guiRightButtonRepeatTimer = 0;
+			guiRightButtonRepeatTimer = time_point::min();
 			gfRightButtonState = FALSE;
 			QueueMouseEvent(RIGHT_BUTTON_UP);
 			break;
 
 		case SDL_BUTTON_MIDDLE:
-			guiMiddleButtonRepeatTimer = 0;
+			guiMiddleButtonRepeatTimer = time_point::min();
 			gfMiddleButtonState = FALSE;
 			QueueMouseEvent(MIDDLE_BUTTON_UP);
 			break;
@@ -489,12 +489,12 @@ void DequeueAllKeyBoardEvents(void)
 
 static void HandleSingleClicksAndButtonRepeats(void)
 {
-	UINT32 uiTimer = GetClock();
+	time_point uiTimer = Now();
 
 	// Is there a LEFT mouse button repeat
 	if (gfLeftButtonState)
 	{
-		if ((guiLeftButtonRepeatTimer > 0)&&(guiLeftButtonRepeatTimer <= uiTimer))
+		if ((guiLeftButtonRepeatTimer > time_point::min()) && (guiLeftButtonRepeatTimer <= uiTimer))
 		{
 			QueueMouseEvent(LEFT_BUTTON_REPEAT);
 			guiLeftButtonRepeatTimer = uiTimer + BUTTON_REPEAT_TIME;
@@ -502,14 +502,14 @@ static void HandleSingleClicksAndButtonRepeats(void)
 	}
 	else
 	{
-		guiLeftButtonRepeatTimer = 0;
+		guiLeftButtonRepeatTimer = time_point::min();
 	}
 
 
 	// Is there a RIGHT mouse button repeat
 	if (gfRightButtonState)
 	{
-		if ((guiRightButtonRepeatTimer > 0)&&(guiRightButtonRepeatTimer <= uiTimer))
+		if ((guiRightButtonRepeatTimer > time_point::min()) && (guiRightButtonRepeatTimer <= uiTimer))
 		{
 			QueueMouseEvent(RIGHT_BUTTON_REPEAT);
 			guiRightButtonRepeatTimer = uiTimer + BUTTON_REPEAT_TIME;
@@ -517,13 +517,13 @@ static void HandleSingleClicksAndButtonRepeats(void)
 	}
 	else
 	{
-		guiRightButtonRepeatTimer = 0;
+		guiRightButtonRepeatTimer = time_point::min();
 	}
 
 	// Is there a MIDDLE mouse button repeat
 	if (gfMiddleButtonState)
 	{
-		if ((guiMiddleButtonRepeatTimer > 0)&&(guiMiddleButtonRepeatTimer <= uiTimer))
+		if ((guiMiddleButtonRepeatTimer > time_point::min()) && (guiMiddleButtonRepeatTimer <= uiTimer))
 		{
 			QueueMouseEvent(MIDDLE_BUTTON_REPEAT);
 			guiMiddleButtonRepeatTimer = uiTimer + BUTTON_REPEAT_TIME;
@@ -531,6 +531,6 @@ static void HandleSingleClicksAndButtonRepeats(void)
 	}
 	else
 	{
-		guiMiddleButtonRepeatTimer = 0;
+		guiMiddleButtonRepeatTimer = time_point::min();;
 	}
 }

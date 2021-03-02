@@ -117,7 +117,7 @@ struct SAMPLETAG
 	UINT32  uiCacheHits;
 
 	// Random sound data
-	UINT32  uiTimeNext;
+	time_point tpTimeNext;
 	UINT32  uiTimeMin;
 	UINT32  uiTimeMax;
 	UINT32  uiVolMin;
@@ -137,7 +137,7 @@ struct SOUNDTAG
 	UINT32        uiSoundID;
 	void          (*EOSCallback)(void*);
 	void*         pCallbackData;
-	UINT32        uiTimeStamp;
+	time_point    tpTimeStamp;
 	HWFILE        hFile;
 	UINT32        uiFadeVolume;
 	UINT32        uiFadeRate;
@@ -295,11 +295,7 @@ UINT32 SoundPlayRandom(const char* pFilename, UINT32 time_min, UINT32 time_max, 
 	s->uiPanMin        = pan_min;
 	s->uiPanMax        = pan_max;
 	s->uiMaxInstances  = max_instances;
-
-	s->uiTimeNext =
-		GetClock() +
-		s->uiTimeMin +
-		Random(s->uiTimeMax - s->uiTimeMin);
+	s->tpTimeNext      = Now() + milliseconds(s->uiTimeMin + Random(s->uiTimeMax - s->uiTimeMin));
 
 	return (UINT32)(s - pSampleList);
 }
@@ -408,7 +404,7 @@ static BOOLEAN SoundRandomShouldPlay(const SAMPLETAG* s)
 {
 	return
 		s->uiFlags & SAMPLE_RANDOM &&
-		s->uiTimeNext <= GetClock() &&
+		s->tpTimeNext <= Now() &&
 		s->uiInstances < s->uiMaxInstances;
 }
 
@@ -427,10 +423,7 @@ static UINT32 SoundStartRandom(SAMPLETAG* s)
 	const UINT32 uiSoundID = SoundStartSample(s, channel, volume, pan, 1, NULL, NULL);
 	if (uiSoundID == SOUND_ERROR) return NO_SAMPLE;
 
-	s->uiTimeNext =
-		GetClock() +
-		s->uiTimeMin +
-		Random(s->uiTimeMax - s->uiTimeMin);
+	s->tpTimeNext = Now() + milliseconds(s->uiTimeMin + Random(s->uiTimeMax - s->uiTimeMin));
 	return uiSoundID;
 }
 
@@ -590,8 +583,7 @@ UINT32 SoundGetPosition(UINT32 uiSoundID)
 	const SOUNDTAG* const channel = SoundGetChannelByID(uiSoundID);
 	if (channel == NULL) return 0;
 
-	const UINT32 now = GetClock();
-	return now - channel->uiTimeStamp;
+	return CastDuration(Now() - channel->tpTimeStamp);
 }
 
 
@@ -1105,7 +1097,7 @@ static UINT32 SoundStartSample(SAMPLETAG* sample, SOUNDTAG* channel, UINT32 volu
 	UINT32 uiSoundID = SoundGetUniqueID();
 	channel->uiSoundID    = uiSoundID;
 	channel->pSample      = sample;
-	channel->uiTimeStamp  = GetClock();
+	channel->tpTimeStamp  = Now();
 	channel->Pos          = 0;
 	channel->DoneServicing = FALSE;
 

@@ -217,24 +217,21 @@ static UINT32 UndergroundTacticalTraversalTime(INT8 const exit_direction)
 
 void BeginLoadScreen( )
 {
-	UINT32 uiStartTime, uiCurrTime;
 	INT32 iPercentage, iFactor;
-	UINT32 uiTimeRange;
+	constexpr milliseconds DURATION = 2s;
 
 	SetCurrentCursorFromDatabase( VIDEO_NO_CURSOR );
 
 	if( guiCurrentScreen == MAP_SCREEN && !(gTacticalStatus.uiFlags & LOADING_SAVED_GAME) && !AreInMeanwhile() )
 	{
 		SGPBox const DstRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-		uiTimeRange = 2000;
 		iPercentage = 0;
-		uiStartTime = GetClock();
+		time_point const tpStartTime = Now();
 		BltVideoSurface(guiSAVEBUFFER, FRAME_BUFFER, 0, 0, NULL);
 		PlayJA2SampleFromFile(SOUNDSDIR "/final psionic blast 01 (16-44).wav", HIGHVOLUME, 1, MIDDLEPAN);
 		while( iPercentage < 100  )
 		{
-			uiCurrTime = GetClock();
-			iPercentage = (uiCurrTime-uiStartTime) * 100 / uiTimeRange;
+			iPercentage = (Now() - tpStartTime) * 100 / DURATION;
 			iPercentage = MIN( iPercentage, 100 );
 
 			//Factor the percentage so that it is modified by a gravity falling acceleration effect.

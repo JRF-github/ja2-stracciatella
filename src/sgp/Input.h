@@ -32,9 +32,9 @@
 #define CTRL_DOWN									0x02
 #define ALT_DOWN									0x04
 
-#define DBL_CLK_TIME							300     // Increased by Alex, Jun-10-97, 200 felt too short
-#define BUTTON_REPEAT_TIMEOUT			250
-#define BUTTON_REPEAT_TIME				50
+#define DBL_CLK_TIME					300ms     // Increased by Alex, Jun-10-97, 200 felt too short
+#define BUTTON_REPEAT_TIMEOUT			250ms
+#define BUTTON_REPEAT_TIME				50ms
 
 struct InputAtom
 {

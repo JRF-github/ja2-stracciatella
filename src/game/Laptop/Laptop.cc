@@ -1024,17 +1024,16 @@ ScreenID LaptopScreenHandle()
 		//Step 2:  The mapscreen image is in the EXTRABUFFER, and laptop is in the SAVEBUFFER
 		//         Start transitioning the screen.
 		SGPBox const DstRect = { STD_SCREEN_X, STD_SCREEN_Y, MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT };
-		const UINT32 uiTimeRange = 1000;
+		constexpr milliseconds DURATION = 1s;
 		INT32 iPercentage     = 0;
 		INT32 iRealPercentage = 0;
-		const UINT32 uiStartTime = GetClock();
+		time_point const tpStartTime = Now();
 		BltVideoSurface(guiSAVEBUFFER, FRAME_BUFFER,   0, 0, NULL);
 		BltVideoSurface(FRAME_BUFFER,  guiEXTRABUFFER, 0, 0, NULL);
 		PlayJA2SampleFromFile(SOUNDSDIR "/laptop power up (8-11).wav", HIGHVOLUME, 1, MIDDLEPAN);
 		while (iRealPercentage < 100)
 		{
-			const UINT32 uiCurrTime = GetClock();
-			iPercentage = (uiCurrTime-uiStartTime) * 100 / uiTimeRange;
+			iPercentage = (Now() - tpStartTime) * 100 / DURATION;
 			iPercentage = MIN(iPercentage, 100);
 
 			iRealPercentage = iPercentage;
@@ -1408,18 +1407,17 @@ static void LeaveLapTopScreen(void)
 			//Step 2:  The mapscreen image is in the EXTRABUFFER, and laptop is in the SAVEBUFFER
 			//         Start transitioning the screen.
 			SGPBox const SrcRect = { STD_SCREEN_X, STD_SCREEN_Y, MAP_SCREEN_WIDTH, MAP_SCREEN_HEIGHT };
-			const UINT32 uiTimeRange = 1000;
+			constexpr milliseconds DURATION = 1s;
 			INT32 iPercentage     = 100;
 			INT32 iRealPercentage = 100;
-			const UINT32 uiStartTime = GetClock();
+			time_point const tpStartTime = Now();
 			BltVideoSurface(guiSAVEBUFFER, FRAME_BUFFER, 0, 0, NULL);
 			PlayJA2SampleFromFile(SOUNDSDIR "/laptop power down (8-11).wav", HIGHVOLUME, 1, MIDDLEPAN);
 			while (iRealPercentage > 0)
 			{
 				BltVideoSurface(FRAME_BUFFER, guiEXTRABUFFER, 0, 0, NULL);
 
-				const UINT32 uiCurrTime = GetClock();
-				iPercentage = (uiCurrTime-uiStartTime) * 100 / uiTimeRange;
+				iPercentage = (Now() - tpStartTime) * 100 / DURATION;
 				iPercentage = MIN(iPercentage, 100);
 				iPercentage = 100 - iPercentage;
 

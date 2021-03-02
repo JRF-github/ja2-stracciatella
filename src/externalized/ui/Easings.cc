@@ -1,12 +1,12 @@
-#include <stdint.h>
-
 #include "sgp/Debug.h"
+#include "sgp/Timer.h"
 
-float EaseInCubic(uint32_t uiStartTime, uint32_t uiEndTime, uint32_t uiCurrentTime) {
-	Assert(uiEndTime >= uiStartTime);
-	Assert(uiCurrentTime <= uiEndTime);
+float EaseInCubic(time_point const tpStartTime, time_point const tpEndTime, time_point const tpCurrentTime)
+{
+	Assert(tpEndTime >= tpStartTime);
+	Assert(tpCurrentTime <= tpEndTime);
 
-	float fProgress = (float)(uiCurrentTime - uiStartTime) / (float)(uiEndTime - uiStartTime);
+	float fProgress = (float)(double(CastDuration(tpCurrentTime - tpStartTime)) / double(CastDuration(tpEndTime - tpStartTime)));
 
 	if (fProgress < 0.5) {
 		return 4.0f * fProgress * fProgress * fProgress;

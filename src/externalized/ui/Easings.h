@@ -1,5 +1,5 @@
 #pragma once
 
-#include <stdint.h>
+#include "sgp/Timer.h"
 
-float EaseInCubic(uint32_t uiStartTime, uint32_t uiEndTime, uint32_t uiCurrentTime);
+float EaseInCubic(time_point tpStartTime, time_point tpEndTime, time_point tpCurrentTime);

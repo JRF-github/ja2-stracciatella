@@ -364,8 +364,8 @@ static void RenderAutoResolve(void);
 
 static void DoTransitionFromPreBattleInterfaceToAutoResolve(void)
 {
-	UINT32 uiStartTime = GetClock();
-	UINT32 uiEndTime = uiStartTime + 1000;
+	time_point const uiStartTime = Now();
+	time_point const uiEndTime = uiStartTime + 1s;
 
 	PauseTime( FALSE );
 
@@ -390,9 +390,9 @@ static void DoTransitionFromPreBattleInterfaceToAutoResolve(void)
 	BlitBufferToBuffer(guiEXTRABUFFER, FRAME_BUFFER, x, y, w, h);
 
 	PlayJA2SampleFromFile(SOUNDSDIR "/laptop power up (8-11).wav", HIGHVOLUME, 1, MIDDLEPAN);
-	while( GetClock() <= uiEndTime )
+	while( Now() < uiEndTime )
 	{
-		FLOAT fEasingProgress = EaseInCubic(uiStartTime, uiEndTime, GetClock());
+		FLOAT fEasingProgress = EaseInCubic(uiStartTime, uiEndTime, Now());
 
 		SGPBox const DstRect =
 		{

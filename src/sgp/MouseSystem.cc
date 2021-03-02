@@ -38,13 +38,13 @@
 //Kris:	Nov 31, 1999 -- Added support for double clicking
 //
 //Max double click delay (in milliseconds) to be considered a double click
-#define MSYS_DOUBLECLICK_DELAY		400
+constexpr milliseconds MSYS_DOUBLECLICK_DELAY = 400ms;
 //
 //Records and stores the last place the user clicked.  These values are compared to the current
 //click to determine if a double click event has been detected.
 static MOUSE_REGION* gpRegionLastLButtonDown      = NULL;
 static MOUSE_REGION* gpRegionLastLButtonUp        = NULL;
-static UINT32        guiRegionLastLButtonDownTime = 0;
+static time_point    guiRegionLastLButtonDownTime{};
 
 
 INT16 MSYS_CurrentMX=0;
@@ -462,10 +462,9 @@ static void MSYS_UpdateMouseRegion(void)
 						//This is where double clicks are checked and passed down.
 						if (ButtonReason == MSYS_CALLBACK_REASON_LBUTTON_DWN)
 						{
-							UINT32 uiCurrTime = GetClock();
 							if (gpRegionLastLButtonDown == cur &&
 									gpRegionLastLButtonUp   == cur &&
-									uiCurrTime <= guiRegionLastLButtonDownTime + MSYS_DOUBLECLICK_DELAY)
+									Now() <= guiRegionLastLButtonDownTime + MSYS_DOUBLECLICK_DELAY)
 							{
 								/* Sequential left click on same button within the maximum time
 								 * allowed for a double click.  Double click check succeeded,
@@ -473,21 +472,20 @@ static void MSYS_UpdateMouseRegion(void)
 								ButtonReason |= MSYS_CALLBACK_REASON_LBUTTON_DOUBLECLICK;
 								gpRegionLastLButtonDown = NULL;
 								gpRegionLastLButtonUp   = NULL;
-								guiRegionLastLButtonDownTime = 0;
+								guiRegionLastLButtonDownTime = time_point::min();
 							}
 							else
 							{
 								/* First click, record time and region pointer (to check if 2nd
 								 * click detected later) */
 								gpRegionLastLButtonDown = cur;
-								guiRegionLastLButtonDownTime = GetClock();
+								guiRegionLastLButtonDownTime = Now();
 							}
 						}
 						else if (ButtonReason == MSYS_CALLBACK_REASON_LBUTTON_UP)
 						{
-							UINT32 uiCurrTime = GetClock();
 							if (gpRegionLastLButtonDown == cur &&
-									uiCurrTime <= guiRegionLastLButtonDownTime + MSYS_DOUBLECLICK_DELAY)
+								Now() <= guiRegionLastLButtonDownTime + MSYS_DOUBLECLICK_DELAY)
 							{
 								/* Double click is Left down, then left up, then left down.  We
 								 * have just detected the left up here (step 2). */
@@ -499,7 +497,7 @@ static void MSYS_UpdateMouseRegion(void)
 								 * chance of a double click happening. */
 								gpRegionLastLButtonDown = NULL;
 								gpRegionLastLButtonUp   = NULL;
-								guiRegionLastLButtonDownTime = 0;
+								guiRegionLastLButtonDownTime = time_point::min();
 							}
 						}
 
@@ -799,12 +797,12 @@ static void DisplayHelpTokenizedString(const ST::utf32_buffer& codepoints, INT16
 
 void RenderFastHelp()
 {
-	static UINT32 last_clock;
+	static time_point last_clock;
 
 	if (!gfRenderHilights) return;
 
-	UINT32 const current_clock = GetClock();
-	UINT32 const time_delta    = current_clock - last_clock;
+	time_point const current_clock = Now();
+	UINT32 const time_delta = CastDuration(current_clock - last_clock);
 	last_clock = current_clock;
 
 	MOUSE_REGION* const r = MSYS_CurrRegion;

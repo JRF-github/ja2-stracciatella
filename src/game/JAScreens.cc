@@ -143,7 +143,7 @@ ScreenID ErrorScreenHandle(void)
 
 ScreenID InitScreenHandle(void)
 {
-	static UINT32 splashDisplayedMoment = 0;
+	static time_point splashDisplayedMoment{};
 	static UINT8					ubCurrentScreen = 255;
 
 	if ( ubCurrentScreen == 255 )
@@ -175,7 +175,7 @@ ScreenID InitScreenHandle(void)
 		//ATE: Set to true to reset before going into main screen!
 
 		SetCurrentCursorFromDatabase( VIDEO_NO_CURSOR );
-		splashDisplayedMoment = GetClock();
+		splashDisplayedMoment = Now();
 		return( INIT_SCREEN );
 	}
 
@@ -189,7 +189,7 @@ ScreenID InitScreenHandle(void)
 	{
 		// wait 3 seconds since the splash displayed and then switch
 		// to the main menu
-		if((GetClock() - splashDisplayedMoment) >= 3000)
+		if((Now() - splashDisplayedMoment) >= 3s)
 		{
 			InitMainMenu( );
 			ubCurrentScreen = 3;

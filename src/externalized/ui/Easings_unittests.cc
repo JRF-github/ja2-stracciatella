@@ -4,9 +4,12 @@
 
 TEST(EasingsTest, easeInCubic)
 {
-	ASSERT_EQ(EaseInCubic(100, 101, 100), 0.0);
-	ASSERT_EQ(EaseInCubic(1000, 1100, 1100), 1.0);
+	constexpr time_point start = time_point(15h) + 18min + 56s + 111ms + 23us + 7ns;
+	constexpr time_point end   = start + 100ms;
 
-	ASSERT_EQ(EaseInCubic(1000, 1100, 1025), 0.0625);
-	ASSERT_EQ(EaseInCubic(1000, 1100, 1075), 0.9375);
+	EXPECT_EQ(EaseInCubic(time_point(100ms), time_point(101ms), time_point(100ms)), 0.0);
+	EXPECT_EQ(EaseInCubic(start, end, end), 1.0);
+
+	EXPECT_EQ(EaseInCubic(start, end, start + 25ms), 0.0625);
+	EXPECT_EQ(EaseInCubic(start, end, start + 75ms), 0.9375);
 }

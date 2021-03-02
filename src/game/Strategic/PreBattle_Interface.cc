@@ -558,9 +558,7 @@ set_help:
 
 static void DoTransitionFromMapscreenToPreBattleInterface(void)
 {
-	UINT32 uiStartTime, uiCurrTime;
 	INT32 iPercentage, iFactor;
-	UINT32 uiTimeRange;
 	INT16 sStartLeft, sEndLeft, sStartTop, sEndTop;
 	INT32 iLeft, iTop, iWidth, iHeight;
 	BOOLEAN fEnterAutoResolveMode = FALSE;
@@ -570,9 +568,9 @@ static void DoTransitionFromMapscreenToPreBattleInterface(void)
 	iWidth = 261;
 	iHeight = 359;
 
-	uiTimeRange = 1000;
+	constexpr milliseconds DURATION = 1s;
 	iPercentage = 0;
-	uiStartTime = GetClock();
+	time_point const tpStartTime = Now();
 
 	GetScreenXYFromMapXY( gubPBSectorX, gubPBSectorY, &sStartLeft, &sStartTop );
 	sStartLeft += MAP_GRID_X / 2;
@@ -614,8 +612,7 @@ static void DoTransitionFromMapscreenToPreBattleInterface(void)
 	SGPBox const PBIRect = { STD_SCREEN_X, STD_SCREEN_Y, 261, 359 };
 	while( iPercentage < 100  )
 	{
-		uiCurrTime = GetClock();
-		iPercentage = (uiCurrTime-uiStartTime) * 100 / uiTimeRange;
+		iPercentage = (Now() - tpStartTime) * 100 / DURATION;
 		iPercentage = MIN( iPercentage, 100 );
 
 		//Factor the percentage so that it is modified by a gravity falling acceleration effect.

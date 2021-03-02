@@ -189,7 +189,7 @@ void requestGameExit()
 	SDL_PushEvent(&event);
 }
 
-static void MainLoop(int msPerGameCycle)
+static void MainLoop(milliseconds const msPerGameCycle)
 {
 	BOOLEAN s_doGameCycles = TRUE;
 
@@ -230,21 +230,19 @@ static void MainLoop(int msPerGameCycle)
 		{
 			if (s_doGameCycles)
 			{
-				UINT32 gameCycleMS = GetClock();
-#if DEBUG_PRINT_GAME_CYCLE_TIME
-				UINT32 totalGameCycleMS = gameCycleMS;
-#endif
+				time_point const beforeGameLoop = Now();
 				GameLoop();
-				gameCycleMS = GetClock() - gameCycleMS;
+				time_point const afterGameLoop = Now();
 
-				if(static_cast<int>(gameCycleMS) < msPerGameCycle)
+				if (afterGameLoop - beforeGameLoop < msPerGameCycle)
 				{
-					SDL_Delay(msPerGameCycle - gameCycleMS);
+					SDL_Delay(CastDuration(msPerGameCycle - (afterGameLoop - beforeGameLoop)));
 				}
 
 #if DEBUG_PRINT_GAME_CYCLE_TIME
-				totalGameCycleMS = GetClock() - totalGameCycleMS;
-				printf("game cycle: %4d %4d\n", gameCycleMS, totalGameCycleMS);
+				printf("game cycle: GameLoop() at tick %4d executed in %4d us.\n",
+					   int(std::chrono::duration_cast<milliseconds>(beforeGameLoop.time_since_epoch()).count()),
+					   int((afterGameLoop - beforeGameLoop).count() / 1000));
 #endif
 			}
 			else
@@ -561,7 +559,7 @@ int main(int argc, char* argv[])
 			/* At this point the SGP is set up, which means all I/O, Memory, tools, etc.
 			* are available. All we need to do is attend to the gaming mechanics
 			* themselves */
-			MainLoop(gamepolicy(ms_per_game_cycle));
+			MainLoop(milliseconds(gamepolicy(ms_per_game_cycle)));
 		}
 
 		delete cm;

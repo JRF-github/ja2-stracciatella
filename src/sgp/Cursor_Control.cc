@@ -24,7 +24,7 @@ static UINT16 gusNumDataFiles = 0;
 static SGPVObject const* guiExternVo;
 static UINT16            gusExternVoSubIndex;
 static UINT32 guiOldSetCursor = 0;
-static UINT32 guiDelayTimer = 0;
+static time_point guiDelayTimer{};
 
 static MOUSEBLT_HOOK gMouseBltOverride = NULL;
 
@@ -222,7 +222,7 @@ BOOLEAN SetCurrentCursorFromDatabase(UINT32 uiCursorIndex)
 				// OK, check if we are a delay cursor...
 				if (pCurData->bFlags & DELAY_START_CURSOR)
 				{
-					guiDelayTimer = GetClock();
+					guiDelayTimer = Now();
 				}
 			}
 
@@ -231,7 +231,7 @@ BOOLEAN SetCurrentCursorFromDatabase(UINT32 uiCursorIndex)
 			// Olny update if delay timer has elapsed...
 			if (pCurData->bFlags & DELAY_START_CURSOR)
 			{
-				if (GetClock() - guiDelayTimer < 1000)
+				if (Now() - guiDelayTimer < 1s)
 				{
 					SetMouseCursorProperties(0, 0, 0, 0);
 					return TRUE;
