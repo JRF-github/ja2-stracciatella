@@ -160,6 +160,9 @@ struct AUTORESOLVE_STRUCT
 	BOOLEAN fCaptureNotPermittedDueToEPCs;
 
 	MOUSE_REGION AutoResolveRegion;
+	SOLDIERCELL mercs[20];
+	SOLDIERCELL civs[MAX_ALLOWABLE_MILITIA_PER_SECTOR];
+	SOLDIERCELL enemies[32];
 };
 
 //Classifies the type of soldier the soldier cell is
@@ -421,11 +424,11 @@ void EnterAutoResolveMode( UINT8 ubSectorX, UINT8 ubSectorY )
 	//Allocate memory for all the globals while we are in this mode.
 	gpAR = new AUTORESOLVE_STRUCT{};
 	//Mercs -- 20 max
-	gpMercs = new SOLDIERCELL[20]{};
+	gpMercs = gpAR->mercs;
 	//Militia -- MAX_ALLOWABLE_MILITIA_PER_SECTOR max
-	gpCivs = new SOLDIERCELL[MAX_ALLOWABLE_MILITIA_PER_SECTOR]{};
+	gpCivs = gpAR->civs;
 	//Enemies -- 32 max
-	gpEnemies = new SOLDIERCELL[32]{};
+	gpEnemies = gpAR->enemies;
 
 	//Set up autoresolve
 	gpAR->fEnteringAutoResolve = TRUE;
@@ -1831,9 +1834,8 @@ static void RemoveAutoResolveInterface(bool const delete_for_good)
 	}
 
 	// Physically delete the soldiers now.
-	for (INT32 i = 0; i != 32; ++i)
+	for (SOLDIERCELL& slot : gpAR->enemies)
 	{
-		SOLDIERCELL& slot = gpEnemies[i];
 		if (!slot.pSoldier) continue;
 		TacticalRemoveSoldier(*slot.pSoldier);
 		slot = SOLDIERCELL{};
@@ -1853,16 +1855,7 @@ static void RemoveAutoResolveInterface(bool const delete_for_good)
 		// Deallocate all of the global memory.
 		// Everything internal to them, should have already been deleted.
 		delete gpAR;
-		gpAR = 0;
-
-		delete[] gpMercs;
-		gpMercs = 0;
-
-		delete[] gpCivs;
-		gpCivs = 0;
-
-		delete[] gpEnemies;
-		gpEnemies = 0;
+		gpAR = nullptr;
 	}
 
 	//KM : Aug 09, 1999 Patch fix -- Would break future dialog while time compressing
