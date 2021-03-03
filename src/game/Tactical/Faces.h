@@ -3,6 +3,8 @@
 
 #include "JA2Types.h"
 #include "Types.h"
+#include <utility>
+#include <vector>
 #include <string_theory/string>
 
 class SGPVObject;
@@ -41,20 +43,7 @@ struct VIDEO_OVERLAY;
 #define FACE_NO_TEXT_OVER			0
 
 
-struct AUDIO_GAP
-{
-	UINT32 start;
-	UINT32 end;
-};
-
-// This is a structure that will contain data about the gaps in a particular
-// wave file
-struct AudioGapList
-{
-	AUDIO_GAP*       gaps; // Pointer to gap array
-	const AUDIO_GAP* end;  // Pointer one past the end of the gap array
-};
-
+using AUDIO_GAP = std::pair<UINT32, UINT32>;
 
 struct FACETYPE
 {
@@ -134,7 +123,7 @@ struct FACETYPE
 	BOOLEAN bOldStealthMode;
 	INT8    bOldOppCnt;
 
-	AudioGapList GapList;
+	std::vector<AUDIO_GAP> GapList;
 
 	union // XXX TODO001E ugly
 	{

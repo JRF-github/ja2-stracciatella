@@ -558,7 +558,7 @@ static void MouthAutoFace(FACETYPE& f)
 	if (f.fTalking && !f.fInvalidAnim && f.fAnimatingTalking)
 	{
 		// Check if we have an audio gap
-		if (PollAudioGap(f.uiSoundID, &f.GapList))
+		if (PollAudioGap(f.uiSoundID, f.GapList))
 		{
 			f.sMouthFrame = 0;
 
@@ -639,7 +639,7 @@ static void HandleTalkingAutoFace(FACETYPE& f)
 			// end of talking
 			f.fTalking          = FALSE;
 			f.fAnimatingTalking = FALSE;
-			AudioGapListDone(&f.GapList); // Remove gap info
+			f.GapList.clear(); // Remove gap info
 			HandleDialogueEnd(f);          // Call dialogue handler function
 		}
 	}
@@ -1266,7 +1266,7 @@ void InternalShutupaYoFace(FACETYPE* const pFace, const BOOLEAN fForce)
 		}
 
 		// Remove gap info
-		AudioGapListDone( &(pFace->GapList) );
+		pFace->GapList.clear();
 
 		// Shutup mouth!
 		pFace->sMouthFrame = 0;
