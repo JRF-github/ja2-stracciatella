@@ -1753,9 +1753,8 @@ void InitItemDescriptionBox(SOLDIERTYPE* pSoldier, UINT8 ubPosition, INT16 sX, I
 
 void InitKeyItemDescriptionBox(SOLDIERTYPE* const pSoldier, const UINT8 ubPosition, const INT16 sX, const INT16 sY)
 {
-	OBJECTTYPE *pObject;
+	OBJECTTYPE *pObject = new OBJECTTYPE{};
 
-	AllocateObject( &pObject );
 	CreateKeyObject( pObject, pSoldier->pKeyRing[ ubPosition ].ubNumber ,pSoldier->pKeyRing[ ubPosition ].ubKeyID );
 
 	InternalInitItemDescriptionBox(pObject, sX, sY, 0, pSoldier);
@@ -2776,7 +2775,7 @@ void DeleteItemDescriptionBox( )
 
 	if (InKeyRingPopup())
 	{
-		DeleteKeyObject(gpItemDescObject);
+		delete gpItemDescObject;
 		gpItemDescObject = NULL;
 		fShowDescriptionFlag = FALSE;
 		fInterfacePanelDirty = DIRTYLEVEL2;

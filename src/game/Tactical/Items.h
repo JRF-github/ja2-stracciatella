@@ -85,8 +85,6 @@ void SwapKeysToSlot(SOLDIERTYPE&, INT8 key_ring_pos, OBJECTTYPE&);
 
 // create a keyobject
 void CreateKeyObject(OBJECTTYPE*, UINT8 ubNumberOfKeys, UINT8 ubKeyIdValue);
-BOOLEAN DeleteKeyObject( OBJECTTYPE * pObj );
-void    AllocateObject(OBJECTTYPE** pObj);
 
 // removes a key from a *KEYRING* slot
 BOOLEAN RemoveKeyFromSlot( SOLDIERTYPE * pSoldier, INT8 bKeyRingPosition, OBJECTTYPE * pObj );

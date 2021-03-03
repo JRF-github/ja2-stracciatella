@@ -2449,24 +2449,6 @@ void CreateKeyObject(OBJECTTYPE* const pObj, UINT8 const ubNumberOfKeys, UINT8 c
 }
 
 
-void AllocateObject(OBJECTTYPE** const pObj)
-{
-	// create a key object
-	*pObj = new OBJECTTYPE{};
-}
-
-
-BOOLEAN DeleteKeyObject( OBJECTTYPE * pObj )
-{
-	if (pObj == NULL) return FALSE;
-
-	// free up space
-	delete pObj;
-
-	return( TRUE );
-}
-
-
 UINT16 TotalPoints(const OBJECTTYPE* const pObj)
 {
 	UINT16 usPoints = 0;
