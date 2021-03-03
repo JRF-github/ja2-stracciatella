@@ -30,6 +30,7 @@ void SetDebugRenderHook( RENDER_HOOK pDebugRenderOverride, INT8 ubPage );
 
 void ToggleFPSOverlay(void);
 
+extern INT32   giTimerDiag;
 extern BOOLEAN gfExitDebugScreen;
 extern INT8    gCurDebugPage;
 

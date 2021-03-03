@@ -63,6 +63,7 @@ static VIDEO_OVERLAY* g_fps_overlay            = nullptr;
 static VIDEO_OVERLAY* g_counter_period_overlay = nullptr;
 
 INT8 gCurDebugPage = 0;
+INT32 giTimerDiag;
 
 
 static void DefaultDebugPage1(void);

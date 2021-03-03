@@ -1917,8 +1917,9 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 	pContractReHireSoldier = contract_rehire_soldier != -1 ? &GetMan(contract_rehire_soldier) : 0;
 	ExtractGameOptions(d, gGameOptions);
 	EXTR_SKIP( d, 4)
-	EXTR_U32(  d, guiBaseJA2Clock)
-	ResetJA2ClockGlobalTimers();
+	UINT32 baseClock;
+	EXTR_U32(  d, baseClock)
+	ResetJA2ClockGlobalTimers(baseClock);
 	INT16 cur_interface_panel;
 	EXTR_I16(  d, cur_interface_panel)
 	UINT8 sm_current_merc;

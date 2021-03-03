@@ -33,6 +33,7 @@ enum class TIMERNAMES
 	INVALID_AP_HOLD,		// TIME TO HOLD INVALID AP
 	RADAR_MAP_BLINK,		// BLINK DELAY FOR RADAR MAP
 	MUSICOVERHEAD,			// MUSIC TIMER
+	TEAMTURNUPDATE,			// Team turn timer used by Interface.cc
 	NUMTIMERS
 };
 using TIMERS = std::array<milliseconds, static_cast<int>(TIMERNAMES::NUMTIMERS)>;
@@ -43,15 +44,11 @@ constexpr milliseconds BASETIMESLICE = 5ms;
 extern TIMERS const giTimerIntervals;
 extern TIMERS giTimerCounters;
 
-extern INT32 giTimerDiag;
-extern milliseconds giTimerTeamTurnUpdate;
-
 
 void InitializeJA2Clock(void);
 void ShutdownJA2Clock(void);
 
 // This value must only be modified by the Timer_Control code
-// (LoadSavedGame is the only acceptable exception from this rule).
 extern UINT32 guiBaseJA2Clock;
 static inline UINT32 GetJA2Clock() { return guiBaseJA2Clock; }
 
@@ -77,6 +74,6 @@ extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
 #define SYNCTIMECOUNTER()		(void)0
 #define ZEROTIMECOUNTER( c )		( c = 0ms )
 
-// whenever guiBaseJA2Clock changes, we must reset all the timer variables that
-// use it as a reference
-void ResetJA2ClockGlobalTimers(void);
+// Exclusive for LoadSavedGame: reset the JA2 base clock and
+// all timers that use it as a reference.
+void ResetJA2ClockGlobalTimers(UINT32 uiJA2BaseClock);

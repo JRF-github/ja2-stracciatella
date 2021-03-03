@@ -15,10 +15,7 @@
 #include <stdexcept>
 
 
-INT32	giTimerDiag  =  0;
-
 UINT32 guiBaseJA2Clock = 0;
-
 static BOOLEAN gfPauseClock = FALSE;
 
 const TIMERS giTimerIntervals
@@ -43,7 +40,8 @@ const TIMERS giTimerIntervals
 	250ms, // IMPROVED CURSOR FLASH
 	500ms, // 2nd CURSOR FLASH
 	400ms, // RADARMAP BLINK AND OVERHEAD MAP BLINK SHOUDL BE THE SAME
-	10ms  // Music Overhead
+	10ms,  // Music Overhead
+	100ms  // definition of PLAYER_TEAM_TIMER_SEC_PER_TICKS in Interface.cc, keep in sync
 };
 
 // TIMER COUNTERS
@@ -86,8 +84,6 @@ static UINT32 TimeProc(UINT32 const interval, void*)
 		for (milliseconds & counter : giTimerCounters) UpdateTimer(counter);
 
 		// Update some specialized countdown timers...
-		UpdateTimer(giTimerTeamTurnUpdate);
-
 		if (gpCustomizableTimerCallback)
 		{
 			UpdateTimer(giTimerCustomizable);
@@ -163,8 +159,8 @@ void SetCustomizableTimerCallbackAndDelay(milliseconds const delay, CUSTOMIZABLE
 
 void CheckCustomizableTimer(void)
 {
-	if (!gpCustomizableTimerCallback)             return;
-	if (!TIMECOUNTERDONE(giTimerCustomizable, 0)) return;
+	if (!gpCustomizableTimerCallback) return;
+	if (giTimerCustomizable != 0ms) return;
 
 	/* Set the callback to a temp variable so we can reset the global variable
 	 * before calling the callback, so that if the callback sets up another
@@ -175,9 +171,9 @@ void CheckCustomizableTimer(void)
 }
 
 
-void ResetJA2ClockGlobalTimers(void)
+void ResetJA2ClockGlobalTimers(UINT32 const now)
 {
-	UINT32 const now = GetJA2Clock();
+	guiBaseJA2Clock = now;
 
 	guiCompressionStringBaseTime   = now;
 	giFlashHighlightedItemBaseTime = now;
@@ -192,3 +188,44 @@ void ResetJA2ClockGlobalTimers(void)
 	guiFlashCursorBaseTime         = now;
 	giPotCharPathBaseTime          = now;
 }
+
+#ifdef WITH_UNITTESTS
+#include "gtest/gtest.h"
+#include "Timer.h"
+
+static time_point callbackCalled;
+static void TimerTestCallback(void)
+{
+	callbackCalled = Now();
+}
+
+TEST(TimerControl, BasicTimerFunctionality)
+{
+	if (!g_timer) InitializeJA2Clock();
+
+	{
+		time_point const before = Now();
+		callbackCalled = time_point::min();
+		milliseconds const expectedDuration = 30ms;
+
+		SetCustomizableTimerCallbackAndDelay(expectedDuration, TimerTestCallback, true);
+		do {
+			SDL_Delay(1);
+			CheckCustomizableTimer();
+		} while (callbackCalled == time_point::min());
+
+		milliseconds const actualDuration = std::chrono::duration_cast<milliseconds>(callbackCalled - before);
+		EXPECT_TRUE(std::chrono::abs(actualDuration - expectedDuration) <= (BASETIMESLICE + 2ms));
+	}
+	{
+		#define USETIMER NEXTSCROLL
+		milliseconds const expectedDuration = giTimerIntervals[static_cast<int>(TIMERNAMES::USETIMER)];
+
+		RESETCOUNTER(USETIMER);
+		EXPECT_FALSE(COUNTERDONE(USETIMER));
+		SDL_Delay(expectedDuration.count() + 1);
+		EXPECT_TRUE(COUNTERDONE(USETIMER));
+	}
+}
+
+#endif

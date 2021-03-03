@@ -1710,9 +1710,10 @@ void EndUIMessage( )
 	}
 }
 
+// Keep the next value in sync with the one in Timer_Control.cc
+constexpr milliseconds PLAYER_TEAM_TIMER_SEC_PER_TICKS = 100ms;
 #define PLAYER_TEAM_TIMER_INTTERUPT_GRACE			(15000ms / PLAYER_TEAM_TIMER_SEC_PER_TICKS)
 #define PLAYER_TEAM_TIMER_GRACE_PERIOD				1000
-#define PLAYER_TEAM_TIMER_SEC_PER_TICKS			100ms
 #define PLAYER_TEAM_TIMER_TICKS_PER_OK_MERC			(15000ms / PLAYER_TEAM_TIMER_SEC_PER_TICKS)
 #define PLAYER_TEAM_TIMER_TICKS_PER_NOTOK_MERC			(5000ms / PLAYER_TEAM_TIMER_SEC_PER_TICKS)
 #define PLAYER_TEAM_TIMER_TICKS_FROM_END_TO_START_BEEP		(5000ms / PLAYER_TEAM_TIMER_SEC_PER_TICKS)
@@ -1878,9 +1879,9 @@ void HandleTopMessages(void)
 		case MILITIA_INTERRUPT_MESSAGE:
 		case AIR_RAID_TURN_MESSAGE:
 			// OK, update timer.....
-			if (TIMECOUNTERDONE(giTimerTeamTurnUpdate, PLAYER_TEAM_TIMER_SEC_PER_TICKS))
+			if (COUNTERDONE(TEAMTURNUPDATE))
 			{
-				RESETTIMECOUNTER(giTimerTeamTurnUpdate, PLAYER_TEAM_TIMER_SEC_PER_TICKS);
+				RESETCOUNTER(TEAMTURNUPDATE);
 
 				// Update counter....
 				if (ts->usTactialTurnLimitCounter < ts->usTactialTurnLimitMax)
@@ -1907,9 +1908,9 @@ void HandleTopMessages(void)
 			{
 				ts->uiTactialTurnLimitClock = 0;
 
-				if (TIMECOUNTERDONE(giTimerTeamTurnUpdate, PLAYER_TEAM_TIMER_SEC_PER_TICKS))
+				if (COUNTERDONE(TEAMTURNUPDATE))
 				{
-					RESETTIMECOUNTER(giTimerTeamTurnUpdate, PLAYER_TEAM_TIMER_SEC_PER_TICKS);
+					TIMECOUNTER(TEAMTURNERUPDATE);
 
 					if (ts->fTactialTurnLimitStartedBeep)
 					{
@@ -2056,9 +2057,8 @@ void InitPlayerUIBar( BOOLEAN fInterrupt )
 	gTacticalStatus.uiTactialTurnLimitClock = 0;
 	gTacticalStatus.fTactialTurnLimitStartedBeep = FALSE;
 
-	// RESET COIUNTER...
-	RESETTIMECOUNTER( giTimerTeamTurnUpdate, PLAYER_TEAM_TIMER_SEC_PER_TICKS );
-
+	// RESET COUNTER...
+	RESETCOUNTER( TEAMTURNUPDATE );
 
 	// OK, set value
 	AddTopMessage(fInterrupt != TRUE ? PLAYER_TURN_MESSAGE : PLAYER_INTERRUPT_MESSAGE);
