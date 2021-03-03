@@ -384,10 +384,9 @@ void TextInput(const SDL_TextInputEvent* TextEv) {
 }
 
 
-void GetMousePos(SGPPoint* Point)
+SGPPoint GetMousePos(void)
 {
-	Point->iX = gusMouseXPos;
-	Point->iY = gusMouseYPos;
+	return { gusMouseXPos, gusMouseYPos};
 }
 
 

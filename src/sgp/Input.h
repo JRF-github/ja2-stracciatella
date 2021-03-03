@@ -55,7 +55,7 @@ void KeyDown(const SDL_Keysym*);
 void KeyUp(  const SDL_Keysym*);
 void TextInput(  const SDL_TextInputEvent*);
 
-extern void					GetMousePos(SGPPoint *Point);
+SGPPoint GetMousePos(void);
 
 extern BOOLEAN DequeueSpecificEvent(InputAtom *Event, UINT32 uiMaskFlags );
 

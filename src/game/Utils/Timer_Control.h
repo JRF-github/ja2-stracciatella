@@ -1,5 +1,4 @@
-#ifndef __TIMER_CONTROL_H
-#define __TIMER_CONTROL_H
+#pragma once
 
 #include "Types.h"
 #include <array>
@@ -11,7 +10,7 @@ using namespace std::literals::chrono_literals;
 typedef void (*CUSTOMIZABLE_TIMER_CALLBACK) ( void );
 
 // TIMER DEFINES
-enum
+enum class TIMERNAMES
 {
 	TOVERHEAD = 0,			// Overhead time slice
 	NEXTSCROLL,			// Scroll Speed timer
@@ -36,12 +35,13 @@ enum
 	MUSICOVERHEAD,			// MUSIC TIMER
 	NUMTIMERS
 };
+using TIMERS = std::array<milliseconds, static_cast<int>(TIMERNAMES::NUMTIMERS)>;
 
 // Base resultion of callback timer
-constexpr milliseconds BASETIMESLICE = 10ms;
+constexpr milliseconds BASETIMESLICE = 5ms;
 
-extern std::array<milliseconds, NUMTIMERS> const giTimerIntervals;
-extern std::array<milliseconds, NUMTIMERS> giTimerCounters;
+extern TIMERS const giTimerIntervals;
+extern TIMERS giTimerCounters;
 
 extern INT32 giTimerDiag;
 extern milliseconds giTimerTeamTurnUpdate;
@@ -50,25 +50,22 @@ extern milliseconds giTimerTeamTurnUpdate;
 void InitializeJA2Clock(void);
 void ShutdownJA2Clock(void);
 
-#define GetJA2Clock() guiBaseJA2Clock
+// This value must only be modified by the Timer_Control code
+// (LoadSavedGame is the only acceptable exception from this rule).
+extern UINT32 guiBaseJA2Clock;
+static inline UINT32 GetJA2Clock() { return guiBaseJA2Clock; }
 
 void PauseTime( BOOLEAN fPaused );
 
 void SetCustomizableTimerCallbackAndDelay( milliseconds iDelay, CUSTOMIZABLE_TIMER_CALLBACK pCallback, BOOLEAN fReplace );
 void CheckCustomizableTimer( void );
 
-//Don't modify this value
-extern UINT32	guiBaseJA2Clock;
 extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
 
-// MACROS
-// Check if new counter < 0        | set to 0 |        Decrement
 
-#define UPDATECOUNTER( c )		( ( giTimerCounters[ c ] - BASETIMESLICE ) < 0ms ) ?  ( giTimerCounters[ c ] = 0ms ) : ( giTimerCounters[ c ] -= BASETIMESLICE )
-#define RESETCOUNTER( c )		( giTimerCounters[ c ] = giTimerIntervals[ c ] )
-#define COUNTERDONE( c )		( giTimerCounters[ c ] == 0ms ) ? TRUE : FALSE
+#define RESETCOUNTER( c ) ( giTimerCounters[ static_cast<int>(TIMERNAMES::c) ] = giTimerIntervals[ static_cast<int>(TIMERNAMES::c) ] )
+#define COUNTERDONE( c )  ( giTimerCounters[ static_cast<int>(TIMERNAMES::c) ] == 0ms )
 
-#define UPDATETIMECOUNTER( c )		( ( c - BASETIMESLICE ) < 0ms ) ?  ( c = 0ms ) : ( c -= BASETIMESLICE )
 #define RESETTIMECOUNTER( c, d )	( c = d )
 
 #ifdef BOUNDS_CHECKER
@@ -83,5 +80,3 @@ extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
 // whenever guiBaseJA2Clock changes, we must reset all the timer variables that
 // use it as a reference
 void ResetJA2ClockGlobalTimers(void);
-
-#endif

@@ -556,7 +556,7 @@ static void HandleCreatureTenseQuote(void);
 void ExecuteOverhead(void)
 {
 	// Diagnostic Stuff
-	static INT32 iTimerTest = 0;
+	static UINT32 iTimerTest = 0;
 
 	BOOLEAN fKeepMoving;
 
@@ -565,7 +565,7 @@ void ExecuteOverhead(void)
 		RESETCOUNTER(TOVERHEAD);
 
 		// Diagnostic Stuff
-		INT32 iTimerVal = GetJA2Clock();
+		UINT32 iTimerVal = GetJA2Clock();
 		giTimerDiag = iTimerVal - iTimerTest;
 		iTimerTest  = iTimerVal;
 

@@ -21,7 +21,7 @@ UINT32 guiBaseJA2Clock = 0;
 
 static BOOLEAN gfPauseClock = FALSE;
 
-const std::array<milliseconds, NUMTIMERS> giTimerIntervals
+const TIMERS giTimerIntervals
 {
 	5ms, // Tactical Overhead
 	20ms, // NEXTSCROLL
@@ -47,7 +47,7 @@ const std::array<milliseconds, NUMTIMERS> giTimerIntervals
 };
 
 // TIMER COUNTERS
-std::array<milliseconds, NUMTIMERS> giTimerCounters;
+TIMERS giTimerCounters;
 
 milliseconds giTimerCustomizable{0ms};
 milliseconds giTimerTeamTurnUpdate{0ms};
@@ -71,23 +71,26 @@ extern UINT32 guiFlashCursorBaseTime;
 extern INT32  giPotCharPathBaseTime;
 
 
+static void UpdateTimer(milliseconds & counter)
+{
+	counter = std::max<milliseconds>(0ms, counter - BASETIMESLICE);
+}
+
+
 static UINT32 TimeProc(UINT32 const interval, void*)
 {
 	if (!gfPauseClock)
 	{
 		guiBaseJA2Clock += BASETIMESLICE.count();
 
-		for (UINT32 i = 0; i != NUMTIMERS; i++)
-		{
-			UPDATECOUNTER(i);
-		}
+		for (milliseconds & counter : giTimerCounters) UpdateTimer(counter);
 
 		// Update some specialized countdown timers...
-		UPDATETIMECOUNTER(giTimerTeamTurnUpdate);
+		UpdateTimer(giTimerTeamTurnUpdate);
 
 		if (gpCustomizableTimerCallback)
 		{
-			UPDATETIMECOUNTER(giTimerCustomizable);
+			UpdateTimer(giTimerCustomizable);
 		}
 
 #ifndef BOUNDS_CHECKER
@@ -96,8 +99,8 @@ static UINT32 TimeProc(UINT32 const interval, void*)
 			// IN Mapscreen, loop through player's team
 			FOR_EACH_IN_TEAM(s, OUR_TEAM)
 			{
-				UPDATETIMECOUNTER(s->PortraitFlashCounter);
-				UPDATETIMECOUNTER(s->PanelAnimateCounter);
+				UpdateTimer(s->PortraitFlashCounter);
+				UpdateTimer(s->PanelAnimateCounter);
 			}
 		}
 		else
@@ -105,14 +108,14 @@ static UINT32 TimeProc(UINT32 const interval, void*)
 			// Set update flags for soldiers
 			FOR_EACH_MERC(s)
 			{
-				UPDATETIMECOUNTER(s->UpdateCounter);
-				UPDATETIMECOUNTER(s->DamageCounter);
-				UPDATETIMECOUNTER(s->BlinkSelCounter);
-				UPDATETIMECOUNTER(s->PortraitFlashCounter);
-				UPDATETIMECOUNTER(s->AICounter);
-				UPDATETIMECOUNTER(s->FadeCounter);
-				UPDATETIMECOUNTER(s->NextTileCounter);
-				UPDATETIMECOUNTER(s->PanelAnimateCounter);
+				UpdateTimer(s->UpdateCounter);
+				UpdateTimer(s->DamageCounter);
+				UpdateTimer(s->BlinkSelCounter);
+				UpdateTimer(s->PortraitFlashCounter);
+				UpdateTimer(s->AICounter);
+				UpdateTimer(s->FadeCounter);
+				UpdateTimer(s->NextTileCounter);
+				UpdateTimer(s->PanelAnimateCounter);
 			}
 		}
 #endif

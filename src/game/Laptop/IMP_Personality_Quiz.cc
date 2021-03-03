@@ -774,8 +774,7 @@ static void HandleIMPQuizKeyBoard(void)
 	InputAtom InputEvent;
 	BOOLEAN fSkipFrame = FALSE;
 
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	SGPPoint const MousePos = GetMousePos();
 
 	while (DequeueEvent(&InputEvent))
 	{

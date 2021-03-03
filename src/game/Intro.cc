@@ -202,8 +202,7 @@ static void HandleIntroScreen(void)
 
 static void GetIntroScreenUserInput(void)
 {
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	SGPPoint const MousePos = GetMousePos();
 
 	InputAtom Event;
 	while( DequeueEvent( &Event ) )

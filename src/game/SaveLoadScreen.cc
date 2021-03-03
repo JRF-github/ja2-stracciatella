@@ -720,8 +720,7 @@ static void GetSaveLoadScreenUserInput(void)
 	}
 	fWasCtrlHeldDownLastFrame = _KeyDown(CTRL);
 
-	SGPPoint mouse_pos;
-	GetMousePos(&mouse_pos);
+	SGPPoint const mouse_pos = GetMousePos();
 
 	InputAtom e;
 	while (DequeueEvent(&e))

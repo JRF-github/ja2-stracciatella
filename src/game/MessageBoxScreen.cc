@@ -109,7 +109,7 @@ static MessageBoxStyle const g_msg_box_style_default = { BASIC_MERC_POPUP_BACKGR
 
 void DoMessageBox(MessageBoxStyleID ubStyle, const ST::string str, ScreenID uiExitScreen, MessageBoxFlags usFlags, MSGBOX_CALLBACK ReturnCallback, const SGPBox* centering_rect)
 {
-	GetMousePos(&pOldMousePosition);
+	pOldMousePosition = GetMousePos();
 
 	//this variable can be unset if ur in a non gamescreen and DONT want the msg box to use the save buffer
 	gfDontOverRideSaveBuffer = TRUE;
@@ -406,8 +406,7 @@ static ScreenID ExitMsgBox(MessageBoxReturnValue const ubExitCode)
 
 	if (fCursorLockedToArea)
 	{
-		SGPPoint pPosition;
-		GetMousePos(&pPosition);
+		SGPPoint const pPosition = GetMousePos();
 
 		if (pPosition.iX > MessageBoxRestrictedCursorRegion.iRight ||
 				(pPosition.iX > MessageBoxRestrictedCursorRegion.iLeft && pPosition.iY < MessageBoxRestrictedCursorRegion.iTop && pPosition.iY > MessageBoxRestrictedCursorRegion.iBottom))

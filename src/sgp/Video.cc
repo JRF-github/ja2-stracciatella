@@ -1,7 +1,5 @@
-#include "ContentManager.h"
 #include "Debug.h"
 #include "Fade_Screen.h"
-#include "FileMan.h"
 #include "GameInstance.h"
 #include "HImage.h"
 #include "Input.h"
@@ -32,7 +30,6 @@
 
 #define VIDEO_OFF         0x00
 #define VIDEO_ON          0x01
-#define VIDEO_SUSPENDED   0x04
 
 #define RED_MASK 0xF800
 #define GREEN_MASK 0x07E0
@@ -142,29 +139,20 @@ void InitializeVideoManager(const VideoScaleQuality quality)
 	GameRenderer = SDL_CreateRenderer(g_game_window, -1, 0);
 	SDL_RenderSetLogicalSize(GameRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	SDL_Surface* windowIcon = SDL_CreateRGBSurfaceFrom(
+	SDL_Surface* const windowIcon = SDL_CreateRGBSurfaceWithFormatFrom(
 			(void*)gWindowIconData.pixel_data,
 			gWindowIconData.width,
 			gWindowIconData.height,
-			gWindowIconData.bytes_per_pixel*8,
+			0,
 			gWindowIconData.bytes_per_pixel*gWindowIconData.width,
-			0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+			SDL_PIXELFORMAT_ARGB8888);
 	SDL_SetWindowIcon(g_game_window, windowIcon);
 	SDL_FreeSurface(windowIcon);
 
 
 	ClippingRect.set(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	ScreenBuffer = SDL_CreateRGBSurface(
-					0,
-					SCREEN_WIDTH,
-					SCREEN_HEIGHT,
-					PIXEL_DEPTH,
-					RED_MASK,
-					GREEN_MASK,
-					BLUE_MASK,
-					ALPHA_MASK
-	);
+	ScreenBuffer = SDL_CreateRGBSurfaceWithFormat(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, SDL_PIXELFORMAT_RGB565);
 
 	if (ScreenBuffer == NULL) {
 		SLOGE("SDL_CreateRGBSurface for ScreenBuffer failed: %s\n", SDL_GetError());
@@ -219,9 +207,8 @@ void InitializeVideoManager(const VideoScaleQuality quality)
 		SLOGE("SDL_CreateTexture for ScreenTexture failed: %s\n", SDL_GetError());
 	}
 
-	FrameBuffer = SDL_CreateRGBSurface(
-		SDL_SWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, PIXEL_DEPTH,
-		RED_MASK, GREEN_MASK, BLUE_MASK, ALPHA_MASK
+	FrameBuffer = SDL_CreateRGBSurfaceWithFormat(
+		0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, SDL_PIXELFORMAT_RGB565
 	);
 
 	if (FrameBuffer == NULL)
@@ -229,9 +216,8 @@ void InitializeVideoManager(const VideoScaleQuality quality)
 		SLOGE("SDL_CreateRGBSurface for FrameBuffer failed: %s\n", SDL_GetError());
 	}
 
-	MouseCursor = SDL_CreateRGBSurface(
-		0, MAX_CURSOR_WIDTH, MAX_CURSOR_HEIGHT, PIXEL_DEPTH,
-		RED_MASK, GREEN_MASK, BLUE_MASK, ALPHA_MASK
+	MouseCursor = SDL_CreateRGBSurfaceWithFormat(
+		0, MAX_CURSOR_WIDTH, MAX_CURSOR_HEIGHT, 0, SDL_PIXELFORMAT_RGB565
 	);
 	SDL_SetColorKey(MouseCursor, SDL_TRUE, 0);
 
@@ -292,11 +278,6 @@ void ShutdownVideoManager(void)
 	FreeMouseCursor();
 }
 
-
-void SuspendVideoManager(void)
-{
-	guiVideoManagerState = VIDEO_SUSPENDED;
-}
 
 void InvalidateRegion(INT32 iLeft, INT32 iTop, INT32 iRight, INT32 iBottom)
 {
@@ -592,16 +573,10 @@ void RefreshScreen(void)
 		guiFrameBufferState = BUFFER_READY;
 	}
 
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
-	SDL_Rect src;
-	src.x = 0;
-	src.y = 0;
-	src.w = gusMouseCursorWidth;
-	src.h = gusMouseCursorHeight;
-	SDL_Rect dst;
-	dst.x = MousePos.iX - gsMouseCursorXOffset;
-	dst.y = MousePos.iY - gsMouseCursorYOffset;
+	// Render the mouse cursor
+	SGPPoint const MousePos = GetMousePos();
+	SDL_Rect const src { 0, 0, gusMouseCursorWidth, gusMouseCursorHeight };
+	SDL_Rect dst { MousePos.iX - gsMouseCursorXOffset, MousePos.iY - gsMouseCursorYOffset, 0, 0 };
 	SDL_BlitSurface(MouseCursor, &src, ScreenBuffer, &dst);
 	MouseBackground = dst;
 
@@ -646,14 +621,6 @@ static void GetRGBDistribution()
 	gusRedShift   = f.Rshift - f.Rloss;
 	gusGreenShift = f.Gshift - f.Gloss;
 	gusBlueShift  = f.Bshift - f.Bloss;
-}
-
-
-void GetPrimaryRGBDistributionMasks(UINT32* const  RedBitMask, UINT32* const GreenBitMask, UINT32* const BlueBitMask)
-{
-	*RedBitMask   = gusRedMask;
-	*GreenBitMask = gusGreenMask;
-	*BlueBitMask  = gusBlueMask;
 }
 
 

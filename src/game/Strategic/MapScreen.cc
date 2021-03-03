@@ -3079,8 +3079,7 @@ static void GetMapKeyboardInput(MapEvent& new_event)
 	InputAtom InputEvent;
 	while (DequeueEvent(&InputEvent))
 	{
-		SGPPoint MousePos;
-		GetMousePos(&MousePos);
+		SGPPoint const MousePos = GetMousePos();
 		MouseSystemHook(InputEvent.usEvent, MousePos.iX, MousePos.iY);
 
 		if (InputEvent.usEvent == KEY_DOWN)
@@ -3323,9 +3322,7 @@ static BOOLEAN GetMapXY(INT16 sX, INT16 sY, INT16* psMapWorldX, INT16* psMapWorl
 
 BOOLEAN GetMouseMapXY(INT16* psMapWorldX, INT16* psMapWorldY)
 {
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
-
+	SGPPoint const MousePos = GetMousePos();
 	return GetMapXY(MousePos.iX, MousePos.iY, psMapWorldX, psMapWorldY);
 }
 

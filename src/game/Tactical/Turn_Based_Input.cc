@@ -1997,8 +1997,7 @@ void GetKeyboardInput(UIEventKind* const puiNewEvent)
 	InputAtom InputEvent;
 	BOOLEAN fKeyTaken = FALSE;
 
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	SGPPoint const MousePos = GetMousePos();
 
 	while (DequeueEvent(&InputEvent))
 	{

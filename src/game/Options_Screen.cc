@@ -513,8 +513,7 @@ static void SetOptionsExitScreen(ScreenID);
 
 static void GetOptionsScreenUserInput(void)
 {
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	SGPPoint const MousePos = GetMousePos();
 
 	InputAtom Event;
 	while( DequeueEvent( &Event ) )

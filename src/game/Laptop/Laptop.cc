@@ -338,8 +338,7 @@ void SetLaptopNewGameFlag(void)
 
 static void GetLaptopKeyboardInput(void)
 {
-	SGPPoint MousePos;
-	GetMousePos(&MousePos);
+	SGPPoint const MousePos = GetMousePos();
 
 	fTabHandled = FALSE;
 

@@ -1778,7 +1778,7 @@ static void SaveGeneralInfo(HWFILE const f)
 	INJ_I16(  d, pContractReHireSoldier ? pContractReHireSoldier->ubID : -1)
 	InjectGameOptions(d, gGameOptions);
 	INJ_SKIP( d, 4)
-	INJ_U32(  d, guiBaseJA2Clock)
+	INJ_U32(  d, GetJA2Clock())
 	INJ_I16(  d, gsCurInterfacePanel)
 	INJ_U8(   d, gpSMCurrentMerc ? gpSMCurrentMerc->ubID : 255)
 	INJ_SKIP( d, 1)
