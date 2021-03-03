@@ -60,7 +60,6 @@ struct REAL_OBJECT
 	BOOLEAN      fEndedWithCollisionPositionSet;
 	vector_3     EndedWithCollisionPosition;
 	BOOLEAN      fHaveHitGround;
-	BOOLEAN      fPotentialForDebug;
 	INT16        sLevelNodeGridNo;
 	UINT32       uiSoundID;
 	UINT8        ubLastTargetTakenDamage;

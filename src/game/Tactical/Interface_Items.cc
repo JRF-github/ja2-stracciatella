@@ -3423,8 +3423,7 @@ BOOLEAN HandleItemPointerClick( UINT16 usMapPos )
 					if ( sActionGridNo != -1 && gbItemPointerSrcSlot != NO_SLOT )
 					{
 							// Make a temp object for ammo...
-							gpItemPointerSoldier->pTempObject  = new OBJECTTYPE{};
-							*gpItemPointerSoldier->pTempObject = TempObject;
+							gpItemPointerSoldier->pTempObject  = new OBJECTTYPE{ TempObject };
 
 							// Remove from soldier's inv...
 							RemoveObjs( &( gpItemPointerSoldier->inv[ gbItemPointerSrcSlot ] ), 1 );
@@ -3519,8 +3518,7 @@ BOOLEAN HandleItemPointerClick( UINT16 usMapPos )
 				switch ( gAnimControl[ gpItemPointerSoldier->usAnimState ].ubHeight )
 				{
 					case ANIM_STAND:
-						gpItemPointerSoldier->pTempObject = new OBJECTTYPE{};
-						*gpItemPointerSoldier->pTempObject = *gpItemPointer;
+						gpItemPointerSoldier->pTempObject = new OBJECTTYPE{ *gpItemPointer };
 						gpItemPointerSoldier->sPendingActionData2 = usMapPos;
 
 						// Turn towards.....gridno

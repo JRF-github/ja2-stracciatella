@@ -1095,10 +1095,7 @@ void SoldierGiveItem( SOLDIERTYPE *pSoldier, SOLDIERTYPE *pTargetSoldier, OBJECT
 
 		pSoldier->bPendingActionData5 = bInvPos;
 		// Copy temp object
-		pSoldier->pTempObject	= new OBJECTTYPE{};
-		*pSoldier->pTempObject = *pObject;
-
-
+		pSoldier->pTempObject = new OBJECTTYPE{ *pObject };
 		pSoldier->sPendingActionData2  = pTargetSoldier->sGridNo;
 		pSoldier->bPendingActionData3  = ubDirection;
 		pSoldier->uiPendingActionData4 = pTargetSoldier->ubID;
@@ -1127,8 +1124,7 @@ void SoldierGiveItem( SOLDIERTYPE *pSoldier, SOLDIERTYPE *pTargetSoldier, OBJECT
 
 void SoldierDropItem(SOLDIERTYPE* const pSoldier, OBJECTTYPE* const pObj)
 {
-	pSoldier->pTempObject = new OBJECTTYPE{};
-	*pSoldier->pTempObject = *pObj;
+	pSoldier->pTempObject = new OBJECTTYPE{ *pObj };
 	PickDropItemAnimation( pSoldier );
 }
 

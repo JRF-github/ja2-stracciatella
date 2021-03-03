@@ -1910,7 +1910,7 @@ void HandleTopMessages(void)
 
 				if (COUNTERDONE(TEAMTURNUPDATE))
 				{
-					TIMECOUNTER(TEAMTURNERUPDATE);
+					RESETCOUNTER(TEAMTURNUPDATE);
 
 					if (ts->fTactialTurnLimitStartedBeep)
 					{
