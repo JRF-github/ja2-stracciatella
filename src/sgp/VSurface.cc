@@ -300,21 +300,10 @@ void BltVideoSurface(SGPVSurface* const dst, SGPVSurface* const src, INT32 const
 	const UINT8 dst_bpp = dst->BPP();
 	if (src_bpp == dst_bpp)
 	{
-		SDL_Rect* src_rect = 0;
-		SDL_Rect  r;
-		if (src_box)
-		{
-			r.x = src_box->x;
-			r.y = src_box->y;
-			r.w = src_box->w;
-			r.h = src_box->h;
-			src_rect = &r;
-		}
-
 		SDL_Rect dstrect;
 		dstrect.x = iDestX;
 		dstrect.y = iDestY;
-		SDL_BlitSurface(src->surface_, src_rect, dst->surface_, &dstrect);
+		SDL_BlitSurface(src->surface_, src_box, dst->surface_, &dstrect);
 	}
 	else if (src_bpp < dst_bpp)
 	{
@@ -429,10 +418,8 @@ void BltVideoSurfaceOnceWithStretch(SGPVSurface* const dst, const char* const fi
 /** Fill video surface with another one with stretch. */
 void FillVideoSurfaceWithStretch(SGPVSurface* const dst, SGPVSurface* const src)
 {
-	SGPBox srcRec;
-	SGPBox dstRec;
-	srcRec.set(0, 0, src->Width(), src->Height());
-	dstRec.set(0, 0, dst->Width(), dst->Height());
+	SGPBox srcRec{0, 0, src->Width(), src->Height()};
+	SGPBox dstRec{0, 0, dst->Width(), dst->Height()};
 	BltStretchVideoSurface(dst, src, &srcRec, &dstRec);
 }
 

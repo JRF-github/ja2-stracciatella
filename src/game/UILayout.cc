@@ -105,7 +105,7 @@ void UILayout::recalculatePositions()
 
 	m_invCamoRegion.set(SM_BODYINV_X, SM_BODYINV_Y);
 
-	m_progress_bar_box.set(STD_SCREEN_X + 5, 2, MIN_INTERFACE_WIDTH - 10, 12);
+	m_progress_bar_box = { STD_SCREEN_X + 5, 2, MIN_INTERFACE_WIDTH - 10, 12 };
 	m_moneyButtonLoc.set(343, startInvY + 11);
 	m_MoneyButtonLocMap.set(m_stdScreenOffsetX + 174, m_stdScreenOffsetY + 115);
 

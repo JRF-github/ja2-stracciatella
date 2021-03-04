@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <SDL_rect.h>
 #include <SDL_video.h>
 
 #include "Platform.h"
@@ -30,13 +31,6 @@
 
 #define FOR_EACHX(type, iter, array, x) for (type* iter = (array); iter != endof((array)); (x), ++iter)
 #define FOR_EACH(type, iter, array)     FOR_EACHX(type, iter, (array), (void)0)
-
-template<typename T> static inline void Swap(T& a, T& b)
-{
-	T t(a);
-	a = b;
-	b = t;
-}
 
 
 typedef int32_t     INT;
@@ -73,29 +67,15 @@ typedef CHAR8 SGPFILENAME[SGPFILENAME_LEN];
 #define FALSE 0
 #endif
 
-#define BAD_INDEX -1
-
 #define PI 3.1415926
 
 #ifndef NULL
 #define NULL 0
 #endif
 
-struct SGPBox
-{
-	UINT16 x;
-	UINT16 y;
-	UINT16 w;
-	UINT16 h;
-
-	void set(UINT16 _x, UINT16 _y, UINT16 _w, UINT16 _h)
-	{
-		x = _x;
-		y = _y;
-		w = _w;
-		h = _h;
-	}
-};
+// Unlike SGPRect this data structure uses 32-bit signed integers
+// and width and height instead of right and bottom.
+using SGPBox = SDL_Rect;
 
 struct SGPRect
 {
