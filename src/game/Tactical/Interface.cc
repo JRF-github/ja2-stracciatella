@@ -1763,21 +1763,12 @@ static void CreateTopMessage(void)
 			bar_file   = INTERFACEDIR "/timebaryellow.sti";
 			foreground = FONT_MCOLOR_BLACK;
 			shadow     = NO_SHADOW;
-			if (gGameOptions.fTurnTimeLimit) fDoLimitBar = TRUE;
 			break;
 
 		case PLAYER_TURN_MESSAGE:
 			bar_file   = INTERFACEDIR "/timebargreen.sti";
 			foreground = FONT_MCOLOR_BLACK;
 			shadow     = NO_SHADOW;
-			if (gGameOptions.fTurnTimeLimit)
-			{
-				fDoLimitBar = TRUE;
-			}
-			else
-			{
-				//bar_gfx     = 13;
-			}
 			break;
 
 		default:
@@ -1898,56 +1889,6 @@ void HandleTopMessages(void)
 				CreateTopMessage();
 			}
 			break;
-
-		case PLAYER_TURN_MESSAGE:
-		case PLAYER_INTERRUPT_MESSAGE:
-			if (gGameOptions.fTurnTimeLimit &&
-				!gfUserTurnRegionActive &&
-				!AreWeInAUIMenu() &&
-				GetJA2Clock() - ts->uiTactialTurnLimitClock > PLAYER_TEAM_TIMER_GRACE_PERIOD) // Check Grace period...
-			{
-				ts->uiTactialTurnLimitClock = 0;
-
-				if (COUNTERDONE(TEAMTURNUPDATE))
-				{
-					RESETCOUNTER(TEAMTURNUPDATE);
-
-					if (ts->fTactialTurnLimitStartedBeep)
-					{
-						if (GetJA2Clock() - gTopMessage.uiTimeSinceLastBeep > PLAYER_TEAM_TIMER_TIME_BETWEEN_BEEPS)
-						{
-							gTopMessage.uiTimeSinceLastBeep = GetJA2Clock();
-							PlayJA2SampleFromFile(SOUNDSDIR "/turn_near_end.wav", HIGHVOLUME, 1, MIDDLEPAN);
-						}
-					}
-					else
-					{
-						// OK, have we gone past the time to
-						if (ts->usTactialTurnLimitMax - ts->usTactialTurnLimitCounter < PLAYER_TEAM_TIMER_TICKS_FROM_END_TO_START_BEEP)
-						{
-							ts->fTactialTurnLimitStartedBeep = TRUE;
-							gTopMessage.uiTimeSinceLastBeep = GetJA2Clock();
-						}
-					}
-
-					// Update counter....
-					if (ts->usTactialTurnLimitCounter < ts->usTactialTurnLimitMax)
-					{
-						++ts->usTactialTurnLimitCounter;
-					}
-
-					CreateTopMessage();
-
-					// Have we reached max?
-					if (ts->usTactialTurnLimitCounter == ts->usTactialTurnLimitMax - 1)
-					{
-						// ATE: increase this so that we don't go into here again...
-						++ts->usTactialTurnLimitCounter;
-						UIHandleEndTurn(NULL);
-					}
-				}
-			}
-			break;
 	}
 
 	gsVIEWPORT_WINDOW_START_Y = 20;
@@ -2015,53 +1956,7 @@ void UpdateEnemyUIBar( )
 
 void InitPlayerUIBar( BOOLEAN fInterrupt )
 {
-	INT8 bNumOK = 0, bNumNotOK = 0;
-
-	if ( !gGameOptions.fTurnTimeLimit )
-	{
-		AddTopMessage(fInterrupt == TRUE ? PLAYER_INTERRUPT_MESSAGE : PLAYER_TURN_MESSAGE);
-		return;
-	}
-
-	// OK, calculate time....
-	if ( !fInterrupt || gTacticalStatus.usTactialTurnLimitMax == 0 )
-	{
-		gTacticalStatus.usTactialTurnLimitCounter = 0;
-
-		CFOR_EACH_IN_TEAM(s, OUR_TEAM)
-		{
-			if (s->bInSector)
-			{
-				if (s->bLife < OKLIFE)
-				{
-					bNumNotOK++;
-				}
-				else
-				{
-					bNumOK++;
-				}
-			}
-		}
-
-		gTacticalStatus.usTactialTurnLimitMax = (bNumOK * PLAYER_TEAM_TIMER_TICKS_PER_OK_MERC) +
-							(bNumNotOK * PLAYER_TEAM_TIMER_TICKS_PER_NOTOK_MERC);
-	}
-	else
-	{
-		if ( gTacticalStatus.usTactialTurnLimitCounter > PLAYER_TEAM_TIMER_INTTERUPT_GRACE )
-		{
-			gTacticalStatus.usTactialTurnLimitCounter -= PLAYER_TEAM_TIMER_INTTERUPT_GRACE;
-		}
-	}
-
-	gTacticalStatus.uiTactialTurnLimitClock = 0;
-	gTacticalStatus.fTactialTurnLimitStartedBeep = FALSE;
-
-	// RESET COUNTER...
-	RESETCOUNTER( TEAMTURNUPDATE );
-
-	// OK, set value
-	AddTopMessage(fInterrupt != TRUE ? PLAYER_TURN_MESSAGE : PLAYER_INTERRUPT_MESSAGE);
+	AddTopMessage(fInterrupt == TRUE ? PLAYER_INTERRUPT_MESSAGE : PLAYER_TURN_MESSAGE);
 }
 
 

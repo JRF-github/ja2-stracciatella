@@ -159,7 +159,7 @@ static void ExtractGameOptions(DataReader& d, GAME_OPTIONS& g)
 	EXTR_BOOL( d, g.fGunNut)
 	EXTR_BOOL( d, g.fSciFi)
 	EXTR_U8(   d, g.ubDifficultyLevel)
-	EXTR_BOOL( d, g.fTurnTimeLimit)
+	EXTR_SKIP( d, 1) // was g.fTurnTimeLimit
 	EXTR_U8(   d, g.ubGameSaveMode)
 	EXTR_SKIP( d, 7)
 	Assert(d.getConsumed() == start + 12);
@@ -172,7 +172,8 @@ static void InjectGameOptions(DataWriter& d, GAME_OPTIONS const& g)
 	INJ_BOOL( d, g.fGunNut)
 	INJ_BOOL( d, g.fSciFi)
 	INJ_U8(   d, g.ubDifficultyLevel)
-	INJ_BOOL( d, g.fTurnTimeLimit)
+	BOOLEAN fTurnTimeLimit{FALSE};
+	INJ_BOOL( d, fTurnTimeLimit)
 	INJ_U8(   d, g.ubGameSaveMode)
 	INJ_SKIP( d, 7)
 	Assert(d.getConsumed() == start + 12);

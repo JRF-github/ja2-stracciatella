@@ -159,7 +159,6 @@ static void RegisterUserTypes()
 		"fGunNut", &GAME_OPTIONS::fGunNut,
 		"fSciFi", &GAME_OPTIONS::fSciFi,
 		"ubDifficultyLevel", &GAME_OPTIONS::ubDifficultyLevel,
-		"fTurnTimeLimit", &GAME_OPTIONS::fTurnTimeLimit,
 		"ubGameSaveMode", &GAME_OPTIONS::ubGameSaveMode
 		);
 	

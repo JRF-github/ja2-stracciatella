@@ -219,8 +219,6 @@ void InitMainMenu(void)
 	SetPendingNewScreen(MAINMENU_SCREEN);
 	guiMainMenuExitScreen = MAINMENU_SCREEN;
 
-	InitGameOptions();
-
 	DequeueAllKeyBoardEvents();
 }
 

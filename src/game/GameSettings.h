@@ -94,11 +94,10 @@ enum
 
 struct GAME_OPTIONS
 {
-	BOOLEAN fGunNut;
-	BOOLEAN	fSciFi;
-	UINT8		ubDifficultyLevel;
-	BOOLEAN	fTurnTimeLimit;
-	UINT8		ubGameSaveMode;
+	BOOLEAN fGunNut{FALSE};
+	BOOLEAN	fSciFi{TRUE};
+	UINT8   ubDifficultyLevel{DIF_LEVEL_EASY};
+	UINT8   ubGameSaveMode{DIF_CAN_SAVE};
 };
 
 //This structure will contain general Ja2 settings  NOT individual game settings.
@@ -112,8 +111,6 @@ extern GAME_OPTIONS gGameOptions;
 void SaveGameSettings(void);
 void LoadGameSettings(void);
 
-void InitGameOptions(void);
-
 void DisplayGameSettings(void);
 
 bool MeanwhileSceneSeen(UINT8 meanwhile_id);
@@ -122,7 +119,5 @@ void SetMeanwhileSceneSeen(UINT8 meanwhile_id);
 BOOLEAN CanGameBeSaved(void);
 
 void DoDeadIsDeadSaveIfNecessary(void);
-
-void CDromEjectionErrorMessageBoxCallBack(MessageBoxReturnValue);
 
 #endif

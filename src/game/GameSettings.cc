@@ -181,38 +181,6 @@ static void InitGameSettings(void)
 }
 
 
-void InitGameOptions()
-{
-	gGameOptions = GAME_OPTIONS{};
-
-	//Init the game options
-	gGameOptions.fGunNut           = FALSE;
-	gGameOptions.fSciFi            = TRUE;
-	gGameOptions.ubDifficultyLevel = DIF_LEVEL_EASY;
-	//gGameOptions.fTurnTimeLimit  = FALSE;
-	gGameOptions.ubGameSaveMode    = DIF_CAN_SAVE;
-
-}
-
-
-void CDromEjectionErrorMessageBoxCallBack(MessageBoxReturnValue const bExitValue)
-{
-	if( bExitValue == MSG_BOX_RETURN_OK )
-	{
-		guiPreviousOptionScreen = GAME_SCREEN;
-
-		//if we are in a game, save the game
-		if( gTacticalStatus.fHasAGameBeenStarted )
-		{
-			SaveGame( SAVE__ERROR_NUM, pMessageStrings[ MSG_CDROM_SAVE ] );
-		}
-
- 		//quit the game
-		requestGameExit();
-	}
-}
-
-
 void DisplayGameSettings( )
 {
 	//Display the version number
@@ -229,10 +197,6 @@ void DisplayGameSettings( )
 
 	//Sci fi option
 	ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, ST::format("{}: {}", gzGIOScreenText[GIO_GAME_STYLE_TEXT], gzGIOScreenText[GIO_REALISTIC_TEXT + gGameOptions.fSciFi]));
-
-	//Timed Turns option
-	// JA2Gold: no timed turns
-	//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, ST::format("{}: {}", gzGIOScreenText[GIO_TIMED_TURN_TITLE_TEXT], gzGIOScreenText[GIO_NO_TIMED_TURNS_TEXT + gGameOptions.fTurnTimeLimit]));
 
 	if (CHEATER_CHEAT_LEVEL())
 	{

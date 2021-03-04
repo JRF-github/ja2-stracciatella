@@ -76,9 +76,6 @@ void InitializeGame(void)
 	//Loads the saved (if any) general JA2 game settings
 	LoadGameSettings();
 
-	//Initialize the Game options ( Gun nut, scifi and dif. levels
-	InitGameOptions();
-
 	// preload mapscreen graphics
 	HandlePreloadOfMapGraphics( );
 
