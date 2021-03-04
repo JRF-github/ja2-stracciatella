@@ -294,18 +294,6 @@ void Blt8BPPDataTo16BPPBufferTransZNBTranslucent(UINT16* const buf, UINT32 const
 }
 
 
-UINT16* InitZBuffer(const UINT32 width, const UINT32 height)
-{
-	return new UINT16[width * height]{};
-}
-
-
-void ShutdownZBuffer(UINT16* const pBuffer)
-{
-	delete[] pBuffer;
-}
-
-
 /**********************************************************************************************
 Blt8BPPDataTo16BPPBufferMonoShadowClip
 

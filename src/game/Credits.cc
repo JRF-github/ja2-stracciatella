@@ -7,7 +7,6 @@
 #include "Font_Control.h"
 #include "Input.h"
 #include "Local.h"
-#include "MemMan.h"
 #include "MouseSystem.h"
 #include "Random.h"
 #include "Render_Dirty.h"
@@ -23,7 +22,7 @@
 
 #include "ContentManager.h"
 #include "GameInstance.h"
-
+#include <memory>
 #include <string_theory/string>
 
 
@@ -31,7 +30,7 @@ struct CRDT_NODE
 {
 	INT16        sPosY;
 	INT16        sHeightOfString;     // The height of the displayed string
-	SGPVSurface* uiVideoSurfaceImage;
+	std::unique_ptr<SGPVSurface> pVideoSurfaceImage;
 	CRDT_NODE*   next;
 };
 
@@ -329,7 +328,6 @@ static void DeleteFirstNode(void)
 
 	if (g_credits_tail == del) g_credits_tail = NULL;
 
-	DeleteVideoSurface(del->uiVideoSurfaceImage);
 	delete del;
 }
 
@@ -359,7 +357,7 @@ static void AddCreditNode(UINT32 uiFlags, const ST::string& pString)
 	pNodeToAdd->sPosY = CRDT_START_POS_Y;
 
 	SGPVSurface* const vs = AddVideoSurface(CRDT_WIDTH_OF_TEXT_AREA, pNodeToAdd->sHeightOfString, PIXEL_DEPTH);
-	pNodeToAdd->uiVideoSurfaceImage = vs;
+	pNodeToAdd->pVideoSurfaceImage.reset(vs);
 
 	vs->SetTransparency(0);
 	vs->Fill(0);
@@ -432,7 +430,7 @@ static void DisplayCreditNode(const CRDT_NODE* const pCurrent)
 	}
 	RestoreExternBackgroundRect(CRDT_TEXT_START_LOC, y, CRDT_WIDTH_OF_TEXT_AREA, h);
 
-	BltVideoSurface(FRAME_BUFFER, pCurrent->uiVideoSurfaceImage, CRDT_TEXT_START_LOC, pCurrent->sPosY, NULL);
+	BltVideoSurface(FRAME_BUFFER, pCurrent->pVideoSurfaceImage.get(), CRDT_TEXT_START_LOC, pCurrent->sPosY, NULL);
 }
 
 
@@ -543,9 +541,9 @@ static void SelectCreditFaceMovementRegionCallBack(MOUSE_REGION* pRegion, INT32 
 static void InitCreditEyeBlinking(void)
 {
 	const UINT32 now = GetJA2Clock();
-	FOR_EACH(CreditFace, f, gCreditFaces)
+	for (auto f : gCreditFaces)
 	{
-		f->uiLastBlinkTime = now + Random(f->sBlinkFreq * 2);
+		f.uiLastBlinkTime = now + Random(f.sBlinkFreq * 2);
 	}
 }
 
@@ -553,9 +551,8 @@ static void InitCreditEyeBlinking(void)
 static void HandleCreditEyeBlinking()
 {
 	UINT16 gfx = 0;
-	FOR_EACHX(CreditFace, i, gCreditFaces, gfx += 3)
+	for (auto f : gCreditFaces)
 	{
-		CreditFace&  f   = *i;
 		UINT32 const now = GetJA2Clock();
 		if (now - f.uiLastBlinkTime > f.sBlinkFreq)
 		{
@@ -573,6 +570,7 @@ static void HandleCreditEyeBlinking()
 
 			f.uiEyesClosedTime = 0;
 		}
+		gfx += 3;
 	}
 }
 

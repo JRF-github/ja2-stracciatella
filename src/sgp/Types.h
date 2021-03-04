@@ -79,10 +79,10 @@ using SGPBox = SDL_Rect;
 
 struct SGPRect
 {
-	UINT16 iLeft;
-	UINT16 iTop;
-	UINT16 iRight;
-	UINT16 iBottom;
+	int iLeft;
+	int iTop;
+	int iRight;
+	int iBottom;
 
 	void set(UINT16 left, UINT16 top, UINT16 right, UINT16 bottom)
 	{
@@ -95,9 +95,10 @@ struct SGPRect
 
 struct SGPPoint
 {
-	UINT16 iX;
-	UINT16 iY;
+	int iX;
+	int iY;
 
+	operator SDL_Point() { return *reinterpret_cast<SDL_Point *>(this); }
 	void set(UINT16 x, UINT16 y)
 	{
 		iX = x;

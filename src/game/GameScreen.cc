@@ -61,6 +61,7 @@
 #include "GameState.h"
 #include "EditScreen.h"
 #include "Logger.h"
+#include <type_traits>
 
 #define ARE_IN_FADE_IN( )		( gfFadeIn || gfFadeInitialized )
 
@@ -92,9 +93,8 @@ static BOOLEAN  guiTacticalLeaveScreen   = FALSE;
 void MainGameScreenInit(void)
 {
 	// all blit functions expect z-buffer pitch to match framebuffer pitch
-	gZBufferPitch = FRAME_BUFFER->surface_->pitch / FRAME_BUFFER->surface_->format->BytesPerPixel;
-	gpZBuffer = InitZBuffer(gZBufferPitch, SCREEN_HEIGHT);
-	gZBufferPitch *= sizeof(*gpZBuffer);
+	gZBufferPitch = FRAME_BUFFER->Width() * FRAME_BUFFER->BPP();
+	gpZBuffer = new std::remove_pointer<decltype(gpZBuffer)>::type[FRAME_BUFFER->Width() * FRAME_BUFFER->Height()]{};
 	InitializeBackgroundRects();
 
 	SetRenderFlags(RENDER_FLAG_FULL);
@@ -105,7 +105,7 @@ void MainGameScreenInit(void)
 // It will also be responsible to making sure that all Gaming Engine tasks exit properly
 void MainGameScreenShutdown(void)
 {
-	ShutdownZBuffer(gpZBuffer);
+	delete[] gpZBuffer;
 	ShutdownBackgroundRects();
 }
 

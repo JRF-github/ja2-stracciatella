@@ -1,6 +1,5 @@
 #include "Debug.h"
 #include "HImage.h"
-#include "MemMan.h"
 #include "Shading.h"
 #include "VObject_Blitters.h"
 #include "VSurface.h"
@@ -10,40 +9,31 @@
 
 #include <string_theory/format>
 #include <string_theory/string>
-
+#include <algorithm>
 #include <stdexcept>
 
-extern SGPVSurface* gpVSurfaceHead;
 
-
-SGPVSurface::SGPVSurface(UINT16 const w, UINT16 const h, UINT8 const bpp) :
-	p16BPPPalette(),
-#ifdef SGP_VIDEO_DEBUGGING
-	name_(),
-	code_(),
-#endif
-	next_(gpVSurfaceHead)
+SGPVSurface::SGPVSurface(UINT16 const w, UINT16 const h, UINT8 const bpp)
 {
-	Assert(w > 0);
-	Assert(h > 0);
+	Assert(w > 0 && h > 0);
 
-	SDL_Surface* s;
+	Uint32 pixelFormat;
 	switch (bpp)
 	{
 		case 8:
-			s = SDL_CreateRGBSurface(0, w, h, bpp, 0, 0, 0, 0);
+			pixelFormat = SDL_PIXELFORMAT_INDEX8;
 			break;
 
 		case 16:
 		{
-			SDL_PixelFormat const* f = SDL_AllocFormat(SDL_PIXELFORMAT_RGB565);
-			s = SDL_CreateRGBSurface(0, w, h, bpp, f->Rmask, f->Gmask, f->Bmask, f->Amask);
+			pixelFormat = SDL_PIXELFORMAT_RGB565;
 			break;
 		}
 
 		default:
 			throw std::logic_error("Tried to create video surface with invalid bpp, must be 8 or 16.");
 	}
+	SDL_Surface * const s = SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, pixelFormat);
 	if (!s) throw std::runtime_error("Failed to create SDL surface");
 	surface_ = s;
 	gpVSurfaceHead = this;
@@ -54,13 +44,7 @@ SGPVSurface::SGPVSurface(UINT16 const w, UINT16 const h, UINT8 const bpp) :
 
 
 SGPVSurface::SGPVSurface(SDL_Surface* const s) :
-	surface_(s),
-	p16BPPPalette(),
-#ifdef SGP_VIDEO_DEBUGGING
-	name_(),
-	code_(),
-#endif
-	next_(gpVSurfaceHead)
+	surface_(s)
 {
 	gpVSurfaceHead = this;
 #ifdef SGP_VIDEO_DEBUGGING
@@ -95,10 +79,7 @@ void SGPVSurface::SetPalette(const SGPPaletteEntry* const src_pal)
 	// Create palette object if not already done so
 	if (!palette_) palette_.Allocate(256);
 	SGPPaletteEntry* const p = palette_;
-	for (UINT32 i = 0; i < 256; i++)
-	{
-		p[i] = src_pal[i];
-	}
+	std::copy_n(src_pal, 256, p);
 
 	if (p16BPPPalette != NULL) delete[] p16BPPPalette;
 	p16BPPPalette = Create16BPPPalette(src_pal);
@@ -121,7 +102,7 @@ void SGPVSurface::SetTransparency(const COLORVAL colour)
 
 void SGPVSurface::Fill(const UINT16 colour)
 {
-	SDL_FillRect(surface_, NULL, colour);
+	SDL_FillRect(surface_, nullptr, colour);
 }
 
 SGPVSurfaceAuto::SGPVSurfaceAuto(UINT16 w, UINT16 h, UINT8 bpp)
@@ -160,12 +141,7 @@ static void InternalShadowVideoSurfaceRect(SGPVSurface* const dst, INT32 X1, INT
 	if (X2 - X1 <= 0) return;
 	if (Y2 - Y1 <= 0) return;
 
-	SGPRect area;
-	area.iTop    = Y1;
-	area.iBottom = Y2;
-	area.iLeft   = X1;
-	area.iRight  = X2;
-
+	SGPRect area { X1, Y1, X2, Y2 };
 	SGPVSurface::Lock ldst(dst);
 	Blt16BPPBufferFilterRect(ldst.Buffer<UINT16>(), ldst.Pitch(), filter_table, &area);
 }

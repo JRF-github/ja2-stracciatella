@@ -18,6 +18,8 @@ class SGPVSurface;
 extern SGPVSurface* g_back_buffer;
 extern SGPVSurfaceAuto* g_frame_buffer;
 extern SGPVSurfaceAuto* g_mouse_buffer;
+extern SGPVSurface* gpVSurfaceHead;
+
 
 /** Utility wrapper around SDL_Surface. */
 class SGPVSurface
@@ -59,19 +61,16 @@ class SGPVSurface
 		 * If the 2 images are not 16 Bpp, it returns false. */
 		friend void BltStretchVideoSurface(SGPVSurface* dst, SGPVSurface const* src, SGPBox const* src_rect, SGPBox const* dst_rect);
 
-		// needs read access to *surface_ to initalize z-buffer properly
-		friend void MainGameScreenInit(void);
-
 	protected:
 		SDL_Surface*                               surface_;
 		SGP::Buffer<SGPPaletteEntry>               palette_;
 	public:
-		UINT16*                                    p16BPPPalette; // A 16BPP palette used for 8->16 blits
+		UINT16*                                    p16BPPPalette{nullptr}; // A 16BPP palette used for 8->16 blits
 #ifdef SGP_VIDEO_DEBUGGING
-		char*                        name_;
-		char*                        code_;
+		char*                        name_{nullptr};
+		char*                        code_{nullptr};
 #endif
-		SGPVSurface*                 next_;
+		SGPVSurface*                 next_{gpVSurfaceHead};
 
 	private:
 		class LockBase
@@ -84,7 +83,7 @@ class SGPVSurface
 					return static_cast<T*>(surface_->pixels);
 				}
 
-				UINT32 Pitch()
+				auto Pitch() const
 				{
 					return surface_->pitch;
 				}

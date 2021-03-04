@@ -1768,12 +1768,7 @@ void RenderWorld(void)
 	{
 		// COPY Z BUFFER TO FRAME BUFFER
 		SGPVSurface::Lock l(FRAME_BUFFER);
-		UINT16* const pDestBuf = l.Buffer<UINT16>();
-
-		for (UINT32 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
-		{
-			pDestBuf[i] = gpZBuffer[i];
-		}
+		std::copy_n(gpZBuffer, SCREEN_WIDTH * SCREEN_HEIGHT, l.Buffer<UINT16>());
 	}
 }
 
