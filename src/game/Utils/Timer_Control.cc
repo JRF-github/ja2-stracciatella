@@ -128,7 +128,12 @@ void InitializeJA2Clock(void)
 	// Init timer delays
 	giTimerCounters = giTimerIntervals;
 
-	g_timer = SDL_AddTimer(BASETIMESLICE.count(), TimeProc, nullptr);
+	INT32 msPerTimeSlice = gamepolicy(ms_per_time_slice);
+	if (msPerTimeSlice <= 0)
+	{
+		throw std::runtime_error("ms_per_time_slice must be a positive integer");
+	}
+	g_timer = SDL_AddTimer(msPerTimeSlice, TimeProc, 0);
 	if (!g_timer) throw std::runtime_error("Could not create timer callback");
 }
 
