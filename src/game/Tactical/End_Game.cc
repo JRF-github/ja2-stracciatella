@@ -40,11 +40,7 @@
 #include "ScreenIDs.h"
 
 
-INT16 sStatueGridNos[] = { 13829, 13830, 13669, 13670 };
-
-SOLDIERTYPE *gpKillerSoldier = NULL;
-INT16 gsGridNo;
-INT8 gbLevel;
+static GridNo const sStatueGridNos[] = { 13829, 13830, 13669, 13670 };
 
 
 // This function checks if our statue exists in the current sector at given gridno
@@ -137,18 +133,8 @@ void HandleStatueDamaged(INT16 sectorX, INT16 sectorY, INT8 sectorZ, INT16 sGrid
 static void HandleDeidrannaDeath(SOLDIERTYPE* pKillerSoldier, INT16 sGridNo, INT8 bLevel);
 
 
-static void DeidrannaTimerCallback(void)
-{
-	HandleDeidrannaDeath( gpKillerSoldier, gsGridNo, gbLevel );
-}
-
-
 void BeginHandleDeidrannaDeath( SOLDIERTYPE *pKillerSoldier, INT16 sGridNo, INT8 bLevel )
 {
-	gpKillerSoldier = pKillerSoldier;
-	gsGridNo = sGridNo;
-	gbLevel  = bLevel;
-
 	// Lock the UI.....
 	gTacticalStatus.uiFlags |= ENGAGED_IN_CONV;
 	// Increment refrence count...
@@ -156,7 +142,8 @@ void BeginHandleDeidrannaDeath( SOLDIERTYPE *pKillerSoldier, INT16 sGridNo, INT8
 
 	gTacticalStatus.uiFlags |= IN_DEIDRANNA_ENDGAME;
 
-	SetCustomizableTimerCallbackAndDelay( 2s, DeidrannaTimerCallback, FALSE );
+	SetCustomizableTimerCallbackAndDelay( 2s,
+		[=](void) { HandleDeidrannaDeath( pKillerSoldier, sGridNo, bLevel ); }, FALSE );
 
 }
 
@@ -376,19 +363,8 @@ static void DoneFadeOutEndCinematic(void)
 
 static void HandleQueenBitchDeath(SOLDIERTYPE* pKillerSoldier, INT16 sGridNo, INT8 bLevel);
 
-
-static void QueenBitchTimerCallback(void)
-{
-	HandleQueenBitchDeath( gpKillerSoldier, gsGridNo, gbLevel );
-}
-
-
 void BeginHandleQueenBitchDeath( SOLDIERTYPE *pKillerSoldier, INT16 sGridNo, INT8 bLevel )
 {
-	gpKillerSoldier = pKillerSoldier;
-	gsGridNo = sGridNo;
-	gbLevel  = bLevel;
-
 	// Lock the UI.....
 	gTacticalStatus.uiFlags |= ENGAGED_IN_CONV;
 	// Increment refrence count...
@@ -396,8 +372,8 @@ void BeginHandleQueenBitchDeath( SOLDIERTYPE *pKillerSoldier, INT16 sGridNo, INT
 
 	// gTacticalStatus.uiFlags |= IN_DEIDRANNA_ENDGAME;
 
-	SetCustomizableTimerCallbackAndDelay( 3s, QueenBitchTimerCallback, FALSE );
-
+	SetCustomizableTimerCallbackAndDelay( 3s,
+		[=](void) { HandleQueenBitchDeath( pKillerSoldier, sGridNo, bLevel ); }, FALSE );
 
 	// Kill all enemies in creature team.....
 	FOR_EACH_IN_TEAM(s, CREATURE_TEAM)

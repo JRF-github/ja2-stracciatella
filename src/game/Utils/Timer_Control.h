@@ -3,11 +3,12 @@
 #include "Types.h"
 #include <array>
 #include <chrono>
+#include <functional>
 
 using std::chrono::milliseconds;
 using namespace std::literals::chrono_literals;
+using CUSTOMIZABLE_TIMER_CALLBACK = std::function<void (void)>;
 
-typedef void (*CUSTOMIZABLE_TIMER_CALLBACK) ( void );
 
 // TIMER DEFINES
 enum class TIMERNAMES
@@ -52,9 +53,9 @@ void ShutdownJA2Clock(void);
 extern UINT32 guiBaseJA2Clock;
 static inline UINT32 GetJA2Clock() { return guiBaseJA2Clock; }
 
-void PauseTime( BOOLEAN fPaused );
+void PauseTime( bool fPaused );
 
-void SetCustomizableTimerCallbackAndDelay( milliseconds iDelay, CUSTOMIZABLE_TIMER_CALLBACK pCallback, BOOLEAN fReplace );
+void SetCustomizableTimerCallbackAndDelay( milliseconds iDelay, CUSTOMIZABLE_TIMER_CALLBACK pCallback, bool fReplace );
 void CheckCustomizableTimer( void );
 
 extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
@@ -76,4 +77,4 @@ extern CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback;
 
 // Exclusive for LoadSavedGame: reset the JA2 base clock and
 // all timers that use it as a reference.
-void ResetJA2ClockGlobalTimers(UINT32 uiJA2BaseClock);
+void ResetJA2ClockGlobalTimers(decltype(GetJA2Clock()) uiJA2BaseClock);

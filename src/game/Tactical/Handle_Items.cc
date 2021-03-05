@@ -1193,7 +1193,7 @@ static void HandleAutoPlaceFail(SOLDIERTYPE* const pSoldier, OBJECTTYPE* const o
 }
 
 
-static void CheckForPickedOwnership(void);
+static void CheckForPickedOwnership(GridNo sGridNo, INT8 bLevel);
 static BOOLEAN ContinuePastBoobyTrap(SOLDIERTYPE* pSoldier, INT16 sGridNo, INT32 iItemIndex, BOOLEAN* pfSaidQuote);
 static BOOLEAN ItemExistsAtLocation(INT16 sGridNo, INT32 iItemIndex, UINT8 ubLevel);
 static BOOLEAN ItemPoolOKForPickup(SOLDIERTYPE* pSoldier, const ITEM_POOL* pItemPool, INT8 bZLevel);
@@ -1327,9 +1327,8 @@ void SoldierGetItemFromWorld(SOLDIERTYPE* const s, const INT32 iItemIndex, const
 		DeductPoints(s, AP_PICKUP_ITEM, 0);
 	}
 
-	gpTempSoldier = s;
-	gsTempGridno  = sGridNo;
-	SetCustomizableTimerCallbackAndDelay(1s, CheckForPickedOwnership, TRUE);
+	SetCustomizableTimerCallbackAndDelay(1s,
+		[=](void){ CheckForPickedOwnership(sGridNo, s->bLevel); }, TRUE);
 }
 
 
@@ -3303,9 +3302,9 @@ static void TestPotentialOwner(SOLDIERTYPE* const s)
 }
 
 
-static void CheckForPickedOwnership(void)
+static void CheckForPickedOwnership(GridNo const sGridNo, INT8 const bLevel)
 {
-	for (ITEM_POOL const* i = GetItemPool(gsTempGridno, gpTempSoldier->bLevel); i; i = i->pNext)
+	for (ITEM_POOL const* i = GetItemPool(sGridNo, bLevel); i; i = i->pNext)
 	{
 		OBJECTTYPE const& o = GetWorldItem(i->iItemIndex).o;
 		if (o.usItem != OWNERSHIP) continue;

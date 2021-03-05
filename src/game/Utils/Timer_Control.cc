@@ -11,12 +11,11 @@
 #include "WorldDef.h"
 
 #include <SDL.h>
-#include <array>
 #include <stdexcept>
 
 
 UINT32 guiBaseJA2Clock = 0;
-static BOOLEAN gfPauseClock = FALSE;
+static bool gfPauseClock = FALSE;
 
 const TIMERS giTimerIntervals
 {
@@ -75,7 +74,7 @@ static void UpdateTimer(milliseconds & counter)
 }
 
 
-static UINT32 TimeProc(UINT32 const interval, void*)
+static Uint32 TimeProc(Uint32 const interval, void*)
 {
 	if (!gfPauseClock)
 	{
@@ -128,12 +127,12 @@ void InitializeJA2Clock(void)
 	// Init timer delays
 	giTimerCounters = giTimerIntervals;
 
-	INT32 msPerTimeSlice = gamepolicy(ms_per_time_slice);
+	int32_t msPerTimeSlice = gamepolicy(ms_per_time_slice);
 	if (msPerTimeSlice <= 0)
 	{
 		throw std::runtime_error("ms_per_time_slice must be a positive integer");
 	}
-	g_timer = SDL_AddTimer(msPerTimeSlice, TimeProc, 0);
+	g_timer = SDL_AddTimer(msPerTimeSlice, TimeProc, nullptr);
 	if (!g_timer) throw std::runtime_error("Could not create timer callback");
 }
 
@@ -144,13 +143,13 @@ void ShutdownJA2Clock(void)
 }
 
 
-void PauseTime(BOOLEAN const fPaused)
+void PauseTime(bool const fPaused)
 {
 	gfPauseClock = fPaused;
 }
 
 
-void SetCustomizableTimerCallbackAndDelay(milliseconds const delay, CUSTOMIZABLE_TIMER_CALLBACK const callback, BOOLEAN const replace)
+void SetCustomizableTimerCallbackAndDelay(milliseconds const delay, CUSTOMIZABLE_TIMER_CALLBACK const callback, bool const replace)
 {
 	if (!replace && gpCustomizableTimerCallback)
 	{ // Replace callback but call the current callback first
@@ -171,12 +170,12 @@ void CheckCustomizableTimer(void)
 	 * before calling the callback, so that if the callback sets up another
 	 * instance of the timer, we don't reset it afterwards. */
 	CUSTOMIZABLE_TIMER_CALLBACK const callback = gpCustomizableTimerCallback;
-	gpCustomizableTimerCallback = 0;
+	gpCustomizableTimerCallback = nullptr;
 	callback();
 }
 
 
-void ResetJA2ClockGlobalTimers(UINT32 const now)
+void ResetJA2ClockGlobalTimers(decltype(GetJA2Clock()) const now)
 {
 	guiBaseJA2Clock = now;
 
