@@ -67,6 +67,7 @@
 #include "SysUtil.h"
 #include "Tactical_Save.h"
 #include "Text.h"
+#include "Timer.h"
 #include "Timer_Control.h"
 #include "Town_Militia.h"
 #include "Video.h"
@@ -100,9 +101,9 @@ struct PopUpBox;
 #define MAP_TIME_UNDER_THIS_DISPLAY_AS_HOURS ( 3 * 24 * 60 )
 
 
-#define DELAY_PER_FLASH_FOR_DEPARTING_PERSONNEL 500
-#define GLOW_DELAY 70
-#define ASSIGNMENT_DONE_FLASH_TIME 500
+constexpr milliseconds DELAY_PER_FLASH_FOR_DEPARTING_PERSONNEL = 500ms;
+constexpr milliseconds GLOW_DELAY = 70ms;
+constexpr milliseconds ASSIGNMENT_DONE_FLASH_TIME = 500ms;
 
 #define MINS_TO_FLASH_CONTRACT_TIME (4 * 60)
 
@@ -332,10 +333,6 @@ GUIButtonRef giMapContractButton;
 
 INT32 giSortStateForMapScreenList = 0;
 
-INT32 giCommonGlowBaseTime = 0;
-INT32 giFlashAssignBaseTime = 0;
-INT32 giFlashContractBaseTime = 0;
-UINT32 guiFlashCursorBaseTime = 0;
 INT32 giPotCharPathBaseTime = 0;
 
 static SGPVObject* guiCHARLIST;
@@ -2129,7 +2126,6 @@ static void RenderMapCursorsIndexesAnims(void)
 	BOOLEAN fSelectedSectorHighlighted = FALSE;
 	BOOLEAN fSelectedCursorIsYellow = TRUE;
 	UINT16 usCursorColor;
-	UINT32 uiDeltaTime;
 	static INT16 sPrevHighlightedMapX = -1, sPrevHighlightedMapY = -1;
 	static INT16 sPrevSelectedMapX = -1, sPrevSelectedMapY = -1;
 	static BOOLEAN fFlashCursorIsYellow = FALSE;
@@ -2193,12 +2189,10 @@ static void RenderMapCursorsIndexesAnims(void)
 		{
 			fSelectedSectorHighlighted = TRUE;
 
+			static RepeatTimer flashCursorBaseTime;
 			// do we need to flash the cursor?  get the delta in time
-			uiDeltaTime = GetJA2Clock( ) - guiFlashCursorBaseTime;
-
-			if ( uiDeltaTime > 300 )
+			if ( flashCursorBaseTime(300ms) )
 			{
-				guiFlashCursorBaseTime = GetJA2Clock();
 				fFlashCursorIsYellow = !fFlashCursorIsYellow;
 
 				fHighlightChanged = TRUE;
@@ -6257,16 +6251,11 @@ static bool AnyMercsLeavingRealSoon();
 
 static void HandleContractTimeFlashForMercThatIsAboutLeave(void)
 {
-	INT32 iCurrentTime;
-
-	// grab the current time
-	iCurrentTime = GetJA2Clock();
+	static RepeatTimer flashContractBaseTime;
 
 	// only bother checking once flash interval has elapsed
-	if( ( iCurrentTime - giFlashContractBaseTime ) >= DELAY_PER_FLASH_FOR_DEPARTING_PERSONNEL )
+	if( flashContractBaseTime(DELAY_PER_FLASH_FOR_DEPARTING_PERSONNEL) )
 	{
-		// update timer so that we only run check so often
-		giFlashContractBaseTime = iCurrentTime;
 		fFlashContractFlag = !fFlashContractFlag;
 
 		// don't redraw unless we have to!
@@ -6758,24 +6747,11 @@ static void RemoveTeamPanelSortButtonsForMapScreen()
 
 static void HandleCommonGlowTimer(void)
 {
-	INT32 iCurrentTime = 0;
-
-	// grab the current time
-	iCurrentTime = GetJA2Clock();
+	static RepeatTimer commonGlowBaseTime;
 
 	// only bother checking once flash interval has elapsed
-	if( ( iCurrentTime - giCommonGlowBaseTime ) >= GLOW_DELAY )
-	{
-		// update timer so that we only run check so often
-		giCommonGlowBaseTime = iCurrentTime;
-
-		// set flag to trigger glow higlight updates
-		gfGlowTimerExpired = TRUE;
-	}
-	else
-	{
-		gfGlowTimerExpired = FALSE;
-	}
+	// set flag to trigger glow higlight updates if so
+	gfGlowTimerExpired = commonGlowBaseTime(GLOW_DELAY);
 }
 
 
@@ -6788,15 +6764,11 @@ static void HandleAssignmentsDoneAndAwaitingFurtherOrders(void)
 		ReEvaluateEveryonesNothingToDo();
 	}
 
-	// grab the current time
-	const INT32 iCurrentTime = GetJA2Clock();
+	static RepeatTimer flashAssignBaseTime;
 
 	// only bother checking once flash interval has elapsed
-	if( ( iCurrentTime - giFlashAssignBaseTime ) >= ASSIGNMENT_DONE_FLASH_TIME )
+	if( flashAssignBaseTime(ASSIGNMENT_DONE_FLASH_TIME) )
 	{
-		// update timer so that we only run check so often
-		giFlashAssignBaseTime = iCurrentTime;
-
 		CFOR_EACH_IN_CHAR_LIST(c)
 		{
 			// toggle and redraw if flash was left ON even though the flag is OFF

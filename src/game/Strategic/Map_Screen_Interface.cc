@@ -48,6 +48,7 @@
 #include "Tactical_Placement_GUI.h"
 #include "Tactical_Save.h"
 #include "Text.h"
+#include "Timer.h"
 #include "Timer_Control.h"
 #include "Video.h"
 #include "VObject.h"
@@ -137,7 +138,7 @@ INT16 gsSectorLocatorY;
 UINT8 gubBlitSectorLocatorCode; //color
 static SGPVObject* guiSectorLocatorGraphicID;
 // the animate time per frame in milliseconds
-#define ANIMATED_BATTLEICON_FRAME_TIME 80
+constexpr milliseconds ANIMATED_BATTLEICON_FRAME_TIME = 80ms;
 #define MAX_FRAME_COUNT_FOR_ANIMATED_BATTLE_ICON 12
 
 
@@ -233,9 +234,6 @@ static UINT32 guiLeaveListOwnerProfileId[NUM_LEAVE_LIST_SLOTS];
 
 // timers for double click
 static INT32 giDblClickTimersForMoveBoxMouseRegions[MAX_POPUP_BOX_STRING_COUNT];
-
-UINT32 guiSectorLocatorBaseTime = 0;
-
 
 // which menus are we showing
 BOOLEAN fShowAssignmentMenu = FALSE;
@@ -4228,7 +4226,6 @@ void HandleBlitOfSectorLocatorIcon( INT16 sSectorX, INT16 sSectorY, INT16 sSecto
 {
 	static UINT8  ubFrame = 0;
 	UINT8 ubBaseFrame = 0;
-	UINT32 uiTimer = 0;
 	INT16 sScreenX, sScreenY;
 
 
@@ -4278,18 +4275,11 @@ void HandleBlitOfSectorLocatorIcon( INT16 sSectorX, INT16 sSectorY, INT16 sSecto
 		sScreenY = MAP_GRID_Y;
 	}
 
-	uiTimer = GetJA2Clock();
-
-	// if first time in, reset value
-	if( guiSectorLocatorBaseTime == 0 )
-	{
-		guiSectorLocatorBaseTime = GetJA2Clock( );
-	}
+	static RepeatTimer sectorLocatorBaseTime;
 
 	// check if enough time has passed to update the frame counter
-	if( ANIMATED_BATTLEICON_FRAME_TIME < ( uiTimer - guiSectorLocatorBaseTime ) )
+	if( sectorLocatorBaseTime(ANIMATED_BATTLEICON_FRAME_TIME) )
 	{
-		guiSectorLocatorBaseTime = uiTimer;
 		ubFrame++;
 
 		if( ubFrame > ubBaseFrame + MAX_FRAME_COUNT_FOR_ANIMATED_BATTLE_ICON )

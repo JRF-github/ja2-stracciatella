@@ -38,7 +38,7 @@
 #include "Debug.h"
 #include "ScreenIDs.h"
 #include "VSurface.h"
-#include "MemMan.h"
+#include "Timer.h"
 #include "ShopKeeper_Interface.h"
 #include "ArmsDealerInvInit.h"
 
@@ -57,7 +57,7 @@
 #define DESC_STATUS_BAR_SHADOW FROMRGB( 140, 136,  119 )
 
 // delay for flash of item
-#define DELAY_FOR_HIGHLIGHT_ITEM_FLASH 200
+constexpr milliseconds DELAY_FOR_HIGHLIGHT_ITEM_FLASH = 200ms;
 
 // inventory slot font
 #define MAP_IVEN_FONT						SMALLCOMPFONT
@@ -106,7 +106,6 @@ static BOOLEAN      fChangedInventorySlots = FALSE;
 // the unseen items list...have to save this
 static std::vector<WORLDITEM> pUnSeenItems;
 
-INT32 giFlashHighlightedItemBaseTime = 0;
 INT32 giCompatibleItemBaseTime = 0;
 
 static GUIButtonRef guiMapInvenButton[3];
@@ -1171,40 +1170,32 @@ static void DrawTextOnSectorInventory(void)
 
 void HandleFlashForHighLightedItem( void )
 {
-	INT32 iCurrentTime = 0;
-	INT32 iDifference = 0;
-
+	static time_point flashHighlightedTime{time_point::min()};
+	time_point currentTime{Now()};
 
 	// if there is an invalid item, reset
 	if( iCurrentlyHighLightedItem == -1 )
 	{
 		fFlashHighLightInventoryItemOnradarMap = FALSE;
-		giFlashHighlightedItemBaseTime = 0;
+		flashHighlightedTime = time_point::min();
 	}
-
-	// get the current time
-	iCurrentTime = GetJA2Clock();
 
 	// if there basetime is uninit
-	if( giFlashHighlightedItemBaseTime == 0 )
+	if( flashHighlightedTime == time_point::min() )
 	{
-		giFlashHighlightedItemBaseTime = iCurrentTime;
+		flashHighlightedTime = currentTime;
 	}
 
-
-	iDifference = iCurrentTime - giFlashHighlightedItemBaseTime;
-
-	if( iDifference > DELAY_FOR_HIGHLIGHT_ITEM_FLASH )
+	if( currentTime - flashHighlightedTime > DELAY_FOR_HIGHLIGHT_ITEM_FLASH )
 	{
 		// reset timer
-		giFlashHighlightedItemBaseTime = iCurrentTime;
+		flashHighlightedTime = currentTime;
 
 		// flip flag
 		fFlashHighLightInventoryItemOnradarMap = !fFlashHighLightInventoryItemOnradarMap;
 
 		// re render radar map
 		RenderRadarScreen( );
-
 	}
 }
 

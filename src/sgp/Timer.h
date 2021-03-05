@@ -19,3 +19,20 @@ constexpr UINT32 CastDuration(std::chrono::nanoseconds const duration)
 {
 	return static_cast<UINT32>(std::chrono::duration_cast<milliseconds>(duration).count());
 }
+
+class RepeatTimer
+{
+	time_point startTime_{Now()};
+
+public:
+	bool operator() (milliseconds const interval)
+	{
+		time_point const now{Now()};
+		if (now - startTime_ >= interval)
+		{
+			startTime_ = now;
+			return true;
+		}
+		return false;
+	}
+};

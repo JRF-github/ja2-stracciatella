@@ -5,6 +5,7 @@
 #include "Map_Screen_Interface_Bottom.h"
 #include "Map_Screen_Interface_Border.h"
 #include "MessageBoxScreen.h"
+#include "Timer.h"
 #include "Timer_Control.h"
 #include "Types.h"
 #include "VObject.h"
@@ -77,7 +78,7 @@
 #define MESSAGE_BTN_SCROLL_TIME 100
 
 // delay for paused flash
-#define PAUSE_GAME_TIMER 500
+constexpr milliseconds PAUSE_GAME_TIMER = 500ms;
 
 #define MAP_BOTTOM_FONT_COLOR ( 32 * 4 - 9 )
 
@@ -115,8 +116,6 @@ static BOOLEAN gfOneFramePauseOnExit = FALSE;
 static ExitToWhere gbExitingMapScreenToWhere = MAP_EXIT_TO_INVALID;
 
 static UINT8 gubFirstMapscreenMessageIndex = 0;
-
-UINT32 guiCompressionStringBaseTime = 0;
 
 // graphics
 static SGPVObject* guiMAPBOTTOMPANEL;
@@ -563,6 +562,7 @@ static void EnableDisableMessageScrollButtonsAndRegions(void)
 
 static void DisplayCompressMode(void)
 {
+
 	INT16 sX, sY;
 	static UINT8 usColor = FONT_LTGREEN;
 
@@ -576,7 +576,8 @@ static void DisplayCompressMode(void)
 	RestoreExternBackgroundRect( STD_SCREEN_X + 489, STD_SCREEN_Y + 457, 522 - 489, 467 - 454 );
 	SetFontDestBuffer(FRAME_BUFFER);
 
-	if( GetJA2Clock() - guiCompressionStringBaseTime >= PAUSE_GAME_TIMER )
+	static RepeatTimer compressionBaseTime;
+	if( compressionBaseTime(PAUSE_GAME_TIMER) )
 	{
 		if( usColor == FONT_LTGREEN )
 		{
@@ -586,8 +587,6 @@ static void DisplayCompressMode(void)
 		{
 			usColor = FONT_LTGREEN;
 		}
-
-		guiCompressionStringBaseTime = GetJA2Clock();
 	}
 
 	if (giTimeCompressMode != 0 && !GamePaused())

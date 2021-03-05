@@ -55,16 +55,9 @@ CUSTOMIZABLE_TIMER_CALLBACK gpCustomizableTimerCallback = 0;
 static SDL_TimerID g_timer;
 
 
-extern UINT32 guiCompressionStringBaseTime;
-extern INT32  giFlashHighlightedItemBaseTime;
 extern INT32  giCompatibleItemBaseTime;
 extern INT32  giAnimateRouteBaseTime;
 extern INT32  giPotHeliPathBaseTime;
-extern UINT32 guiSectorLocatorBaseTime;
-extern INT32  giCommonGlowBaseTime;
-extern INT32  giFlashAssignBaseTime;
-extern INT32  giFlashContractBaseTime;
-extern UINT32 guiFlashCursorBaseTime;
 extern INT32  giPotCharPathBaseTime;
 
 
@@ -179,17 +172,9 @@ void ResetJA2ClockGlobalTimers(decltype(GetJA2Clock()) const now)
 {
 	guiBaseJA2Clock = now;
 
-	guiCompressionStringBaseTime   = now;
-	giFlashHighlightedItemBaseTime = now;
 	giCompatibleItemBaseTime       = now;
 	giAnimateRouteBaseTime         = now;
 	giPotHeliPathBaseTime          = now;
-	guiSectorLocatorBaseTime       = now;
-
-	giCommonGlowBaseTime           = now;
-	giFlashAssignBaseTime          = now;
-	giFlashContractBaseTime        = now;
-	guiFlashCursorBaseTime         = now;
 	giPotCharPathBaseTime          = now;
 }
 
