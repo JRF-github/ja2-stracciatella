@@ -11,6 +11,8 @@ struct STORE_INVENTORY
 	UINT8   ubQtyOnOrder; //The number of items on order
 	UINT8   ubItemQuality; // the % damaged listed from 0 to 100
 	BOOLEAN fPreviouslyEligible; // whether or not dealer has been eligible to sell this item in days prior to today
+
+	bool operator<(STORE_INVENTORY const& other) const;
 };
 
 

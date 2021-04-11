@@ -32,6 +32,8 @@ struct WORLDITEM
 	//Because this value is zero in the saved maps, we can't change it to 100, hence the reversal method.
 	//This check is only performed the first time a map is loaded.  Later, it is entirely skipped.
 	UINT8      ubNonExistChance;
+
+	bool operator<(WORLDITEM const& other) const;
 };
 
 

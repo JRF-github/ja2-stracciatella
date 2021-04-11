@@ -2142,11 +2142,8 @@ static UINT32 DisplayInvSlot(UINT8 const slot_num, UINT16 const item_idx, UINT16
 }
 
 
-static int RepairmanItemQsortCompare(void const* pArg1, void const* pArg2)
+static bool RepairItemComparisonFn(INVENTORY_IN_SLOT const& inv_slot1, INVENTORY_IN_SLOT const& inv_slot2)
 {
-	INVENTORY_IN_SLOT const& inv_slot1 = *static_cast<INVENTORY_IN_SLOT const*>(pArg1);
-	INVENTORY_IN_SLOT const& inv_slot2 = *static_cast<INVENTORY_IN_SLOT const*>(pArg2);
-
 	Assert(inv_slot1.sSpecialItemElement != -1);
 	Assert(inv_slot2.sSpecialItemElement != -1);
 
@@ -2154,10 +2151,8 @@ static int RepairmanItemQsortCompare(void const* pArg1, void const* pArg2)
 	UINT32             const repair_time1      = dih[inv_slot1.sItemIndex].SpecialItem[inv_slot1.sSpecialItemElement].uiRepairDoneTime;
 	UINT32             const repair_time2      = dih[inv_slot2.sItemIndex].SpecialItem[inv_slot2.sSpecialItemElement].uiRepairDoneTime;
 
-	// lower reapir time first
-	return repair_time1 < repair_time2 ? -1 :
-		repair_time1 > repair_time2 ?  1 :
-		0;
+	// lower repair time first
+	return repair_time1 < repair_time2;
 }
 
 
@@ -2258,16 +2253,9 @@ static void DetermineArmsDealersSellingInventory(void)
 	if ( guiNextFreeInvSlot > 1 )
 	{
 		// repairmen sort differently from merchants
-		if (DoesDealerDoRepairs(gbSelectedArmsDealerID))
-		{
-			// sort this list by object category, and by ascending price within each category
-			qsort( gpTempDealersInventory, guiNextFreeInvSlot, sizeof( INVENTORY_IN_SLOT ), RepairmanItemQsortCompare );
-		}
-		else
-		{
-			// sort this list by object category, and by ascending price within each category
-			qsort( gpTempDealersInventory, guiNextFreeInvSlot, sizeof( INVENTORY_IN_SLOT ), ArmsDealerItemQsortCompare );
-		}
+		// sort this list by object category, and by ascending price within each category
+		std::sort(gpTempDealersInventory, gpTempDealersInventory + guiNextFreeInvSlot,
+			DoesDealerDoRepairs(gbSelectedArmsDealerID) ? RepairItemComparisonFn : ArmsDealerComparisonFn);
 	}
 }
 

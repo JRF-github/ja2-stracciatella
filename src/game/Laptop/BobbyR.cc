@@ -463,7 +463,7 @@ static void InitBobbyRayNewInventory(void)
 	if ( usBobbyrIndex > 1 )
 	{
 		// sort this list by object category, and by ascending price within each category
-		qsort( LaptopSaveInfo.BobbyRayInventory, usBobbyrIndex, sizeof( STORE_INVENTORY ), BobbyRayItemQsortCompare );
+		std::sort(std::begin(LaptopSaveInfo.BobbyRayInventory), std::begin(LaptopSaveInfo.BobbyRayInventory) + usBobbyrIndex);
 	}
 
 
@@ -502,7 +502,7 @@ static void InitBobbyRayUsedInventory(void)
 	if ( usBobbyrIndex > 1 )
 	{
 		// sort this list by object category, and by ascending price within each category
-		qsort( LaptopSaveInfo.BobbyRayUsedInventory, usBobbyrIndex, sizeof( STORE_INVENTORY ), BobbyRayItemQsortCompare );
+		std::sort(std::begin(LaptopSaveInfo.BobbyRayUsedInventory), std::begin(LaptopSaveInfo.BobbyRayUsedInventory) + usBobbyrIndex);
 	}
 
 	// remember how many entries in the list are valid

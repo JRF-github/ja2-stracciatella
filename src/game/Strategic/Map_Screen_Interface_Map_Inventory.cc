@@ -657,7 +657,6 @@ static void DestroyMapInventoryButtons(void)
 
 
 static void CheckGridNoOfItemsInMapScreenMapInventory(void);
-static void SortSectorInventory(WORLDITEM* pInventory, size_t sizeOfArray);
 
 
 static void BuildStashForSelectedSector(const INT16 sMapX, const INT16 sMapY, const INT16 sMapZ)
@@ -698,7 +697,7 @@ static void BuildStashForSelectedSector(const INT16 sMapX, const INT16 sMapY, co
 	iLastInventoryPoolPage  = static_cast<INT32>((pInventoryPoolList.size() - 1) / MAP_INVENTORY_POOL_SLOT_COUNT);
 
 	CheckGridNoOfItemsInMapScreenMapInventory();
-	SortSectorInventory(pInventoryPoolList.data(), visible_slots);
+	std::sort(std::begin(pInventoryPoolList), std::begin(pInventoryPoolList) + visible_slots);
 }
 
 
@@ -1372,32 +1371,9 @@ static void CheckGridNoOfItemsInMapScreenMapInventory(void)
 	}
 }
 
-
-static INT32 MapScreenSectorInventoryCompare(const void* pNum1, const void* pNum2);
-
-
-static void SortSectorInventory(WORLDITEM* pInventory, size_t sizeOfArray)
+bool WORLDITEM::operator<(WORLDITEM const& other) const
 {
-	qsort(pInventory, sizeOfArray, sizeof(WORLDITEM), MapScreenSectorInventoryCompare);
-}
-
-
-static INT32 MapScreenSectorInventoryCompare(const void* pNum1, const void* pNum2)
-{
-	WORLDITEM *pFirst = (WORLDITEM *)pNum1;
-	WORLDITEM *pSecond = (WORLDITEM *)pNum2;
-	UINT16	usItem1Index;
-	UINT16	usItem2Index;
-	UINT8		ubItem1Quality;
-	UINT8		ubItem2Quality;
-
-	usItem1Index = pFirst->o.usItem;
-	usItem2Index = pSecond->o.usItem;
-
-	ubItem1Quality = pFirst->o.bStatus[ 0 ];
-	ubItem2Quality = pSecond->o.bStatus[ 0 ];
-
-	return( CompareItemsForSorting( usItem1Index, usItem2Index, ubItem1Quality, ubItem2Quality ) );
+	return CompareItemsForSorting(o.usItem, other.o.usItem, o.bStatus[0], other.o.bStatus[0]) < 0;
 }
 
 

@@ -1979,7 +1979,6 @@ void FatigueCharacter(SOLDIERTYPE& s)
 }
 
 
-static int TownTrainerQsortCompare(const void* pArg1, const void* pArg2);
 static void TrainSoldierWithPts(SOLDIERTYPE* pSoldier, INT16 sTrainPts);
 static BOOLEAN TrainTownInSector(SOLDIERTYPE* pTrainer, INT16 sMapX, INT16 sMapY, INT16 sTrainingPts);
 
@@ -1993,8 +1992,6 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 	INT16 sTrainingPtsDueToInstructor = 0;
 	INT16 sBestTrainingPts;
 	INT16 sTownTrainingPts;
-	TOWN_TRAINER_TYPE TownTrainer[ MAX_CHARACTER_COUNT ];
-	UINT8 ubTownTrainers;
 	UINT16 usMaxPts;
 	BOOLEAN fTrainingCompleted = FALSE;
 
@@ -2109,9 +2106,21 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 	// check if we're doing a sector where militia can be trained
 	if (CanSectorContainMilita(sMapX, sMapY, bZ))
 	{
+		struct TOWN_TRAINER_TYPE
+		{
+			SOLDIERTYPE *pSoldier;
+			INT16	sTrainingPts;
+
+			bool operator<(TOWN_TRAINER_TYPE const& other)
+			{
+				// other on the LHS because we want to sort in descending order
+				return other.sTrainingPts < sTrainingPts;
+			}
+		};
+
 		// init town trainer list
-		std::fill(std::begin(TownTrainer), std::end(TownTrainer), TOWN_TRAINER_TYPE{});
-		ubTownTrainers = 0;
+		TOWN_TRAINER_TYPE TownTrainer[ MAX_CHARACTER_COUNT ]{};
+		UINT8 ubTownTrainers{0};
 
 		// build list of all the town trainers in this sector and their training pts
 		FOR_EACH_IN_TEAM(pTrainer, OUR_TEAM)
@@ -2141,7 +2150,7 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 		if (ubTownTrainers > 1)
 		{
 			// sort the town trainer list from best trainer to worst
-			qsort( TownTrainer, ubTownTrainers, sizeof(TOWN_TRAINER_TYPE), TownTrainerQsortCompare);
+			std::sort(TownTrainer, TownTrainer + ubTownTrainers);
 		}
 
 		// for each trainer, in sorted order from the best to the worst
@@ -2164,14 +2173,6 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 			}
 		}
 	}
-}
-
-
-static int TownTrainerQsortCompare(const void* pArg1, const void* pArg2)
-{
-	const TOWN_TRAINER_TYPE* const t1 = (const TOWN_TRAINER_TYPE*)pArg1;
-	const TOWN_TRAINER_TYPE* const t2 = (const TOWN_TRAINER_TYPE*)pArg2;
-	return (t1->sTrainingPts < t2->sTrainingPts) - (t1->sTrainingPts > t2->sTrainingPts);
 }
 
 

@@ -15,6 +15,7 @@
 #include "VSurface.h"
 #include "Debug.h"
 #include "Font_Control.h"
+#include <algorithm>
 
 
 //#define
@@ -198,13 +199,13 @@ void EnterAimSort()
 }
 
 
-static void SortMercArray(void);
+static bool AimArrayComparisonFn(uint8_t m1, uint8_t m2);
 
 
 void ExitAimSort()
 {
 	// Sort the merc array
-	SortMercArray();
+	std::sort(std::begin(AimMercArray), std::end(AimMercArray), AimArrayComparisonFn);
 	RemoveAimDefaults();
 
 	DeleteVideoObject(guiSortByBox);
@@ -375,19 +376,10 @@ static void DrawSelectLight(const UINT8 ubMode, const UINT8 ubImage)
 }
 
 
-static INT32 QsortCompare(const void* pNum1, const void* pNum2);
-
-
-static void SortMercArray(void)
+static bool AimArrayComparisonFn(uint8_t const m1, uint8_t const m2)
 {
-	qsort(AimMercArray, MAX_NUMBER_MERCS, sizeof(UINT8), QsortCompare);
-}
-
-
-static INT32 QsortCompare(const void* pNum1, const void* pNum2)
-{
-	MERCPROFILESTRUCT const& p1 = GetProfile(*(UINT8*)pNum1);
-	MERCPROFILESTRUCT const& p2 = GetProfile(*(UINT8*)pNum2);
+	MERCPROFILESTRUCT const& p1 = GetProfile(m1);
+	MERCPROFILESTRUCT const& p2 = GetProfile(m2);
 
 	INT32 v1;
 	INT32 v2;
@@ -400,8 +392,7 @@ static INT32 QsortCompare(const void* pNum1, const void* pNum2)
 		/* Explosives   */ case 4: v1 = p1.bExplosive;     v2 = p2.bExplosive;     break;
 		/* Mechanical   */ case 5: v1 = p1.bMechanical;    v2 = p2.bMechanical;    break;
 
-		default: SLOGA("QsortCompare: invalid sort mode"); return 0;
+		default: SLOGA("invalid sort mode"); return 0;
 	}
-	const INT32 ret = (v1 > v2) - (v1 < v2);
-	return gubCurrentListMode == AIM_ASCEND ? ret : -ret;
+	return gubCurrentListMode == AIM_ASCEND ? v1 < v2 : v1 > v2;
 }

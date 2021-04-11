@@ -84,13 +84,6 @@ enum{
 };
 
 
-struct TOWN_TRAINER_TYPE
-{
-	SOLDIERTYPE *pSoldier;
-	INT16	sTrainingPts;
-};
-
-
 // can character train militia?
 BOOLEAN CanCharacterTrainMilitia(const SOLDIERTYPE* s);
 
