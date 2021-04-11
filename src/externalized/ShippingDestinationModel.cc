@@ -4,19 +4,19 @@ ShippingDestinationModel::ShippingDestinationModel(uint8_t locationId_,
 	uint16_t chargeRateOverNight_, uint16_t chargeRate2Days_, uint16_t chargeRateStandard_,
 	uint8_t flowersNextDayDeliveryCost_, uint8_t flowersWhenItGetsThereCost_,
 	bool canDeliver_, bool isPrimary_,
-	uint8_t deliverySectorId_, uint8_t deliverySectorZ_, int16_t deliverySectorGridNo_,
+	uint8_t deliverySectorId_, int8_t deliverySectorZ_, int16_t deliverySectorGridNo_,
 	int16_t emailOffset_, int16_t emailLength_):
 		locationId(locationId_), 
 		chargeRateOverNight(chargeRateOverNight_), chargeRate2Days(chargeRate2Days_), chargeRateStandard(chargeRateStandard_),
 		flowersNextDayDeliveryCost(flowersNextDayDeliveryCost_), flowersWhenItGetsThereCost(flowersWhenItGetsThereCost_),
 		canDeliver(canDeliver_), isPrimary(isPrimary_),
-		deliverySectorX(SECTORX(deliverySectorId_)), deliverySectorY(SECTORY(deliverySectorId_)),
-		deliverySectorZ(deliverySectorZ_), deliverySectorGridNo(deliverySectorGridNo_),
+		deliverySector{SECTORX(deliverySectorId_), SECTORY(deliverySectorId_), deliverySectorZ_},
+		deliverySectorGridNo(deliverySectorGridNo_),
 		emailOffset(emailOffset_), emailLength(emailLength_) {}
 
 uint8_t ShippingDestinationModel::getDeliverySector() const
 {
-	return SECTOR(deliverySectorX, deliverySectorY);
+	return deliverySector;
 }
 
 ShippingDestinationModel* ShippingDestinationModel::deserialize(JsonObjectReader& obj)

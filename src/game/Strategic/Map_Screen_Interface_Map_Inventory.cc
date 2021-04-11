@@ -267,8 +267,7 @@ static void UpdateHelpTextForInvnentoryStashSlots(void)
 	}
 }
 
-
-static void BuildStashForSelectedSector(INT16 sMapX, INT16 sMapY, INT16 sMapZ);
+static void BuildStashForSelectedSector(sector_coords const& coords);
 static void CreateMapInventoryButtons(void);
 static void CreateMapInventoryPoolDoneButton(void);
 static void CreateMapInventoryPoolSlots(void);
@@ -312,7 +311,7 @@ void CreateDestroyMapInventoryPoolButtons( BOOLEAN fExitFromMapScreen )
 		CreateMapInventoryButtons( );
 
 		// build stash
-		BuildStashForSelectedSector( sSelMapX, sSelMapY, ( INT16 )( iCurrentMapSectorZ ) );
+		BuildStashForSelectedSector({sSelMapX, sSelMapY, iCurrentMapSectorZ});
 
 		CreateMapInventoryPoolDoneButton( );
 
@@ -414,7 +413,7 @@ static void SaveSeenAndUnseenItems(void)
 	else
 	{
 		// now copy over unseen and seen
-		SaveWorldItemsToTempItemFile( sSelMapX, sSelMapY, iCurrentMapSectorZ, pUnSeenItems);
+		SaveWorldItemsToTempItemFile({sSelMapX, sSelMapY, iCurrentMapSectorZ}, pUnSeenItems);
 		AddWorldItemsToUnLoadedSector(sSelMapX, sSelMapY, iCurrentMapSectorZ, pSeenItemsList);
 	}
 }
@@ -660,19 +659,17 @@ static void CheckGridNoOfItemsInMapScreenMapInventory(void);
 static void SortSectorInventory(WORLDITEM* pInventory, size_t sizeOfArray);
 
 
-static void BuildStashForSelectedSector(const INT16 sMapX, const INT16 sMapY, const INT16 sMapZ)
+static void BuildStashForSelectedSector(sector_coords const& coords)
 {
 	std::vector<WORLDITEM> temp;
 	std::vector<WORLDITEM>* items = nullptr;
-	if (sMapX == gWorldSectorX &&
-			sMapY == gWorldSectorY &&
-			sMapZ == gbWorldSectorZ)
+	if (coords.equals_world_coords())
 	{
 		items = &gWorldItems;
 	}
 	else
 	{
-		temp = LoadWorldItemsFromTempItemFile(sMapX, sMapY, sMapZ);
+		temp = LoadWorldItemsFromTempItemFile(coords);
 		items = &temp;
 	}
 
@@ -726,7 +723,7 @@ static void ReBuildWorldItemStashForLoadedSector(const std::vector<WORLDITEM>& p
 	}
 
 	//reset the visible item count in the sector info struct
-	SetNumberOfVisibleWorldItemsInSectorStructureForSector(gWorldSectorX, gWorldSectorY, gbWorldSectorZ, uiTotalNumberOfVisibleItems);
+	SetNumberOfVisibleWorldItemsInSectorStructureForSector(sector_coords::from_world_coords(), uiTotalNumberOfVisibleItems);
 }
 
 

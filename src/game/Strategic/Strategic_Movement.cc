@@ -1328,7 +1328,7 @@ void GroupArrivedAtSector(GROUP& g, BOOLEAN const check_for_battle, BOOLEAN cons
 			}
 			else
 			{
-				if (HandleHeliEnteringSector(v.sSectorX, v.sSectorY))
+				if (HandleHeliEnteringSector(v.coords.x, v.coords.y))
 				{ // Helicopter destroyed
 					group_destroyed = true;
 				}
@@ -3218,9 +3218,7 @@ static void SetLocationOfAllPlayerSoldiersInGroup(GROUP const& g, INT16 const x,
 	if (g.fVehicle)
 	{
 		VEHICLETYPE& v = GetVehicleFromMvtGroup(g);
-		v.sSectorX = x;
-		v.sSectorY = y;
-		v.sSectorZ = z;
+		v.coords = sector_coords{x, y, z};
 
 		if (!IsHelicopter(v))
 		{
@@ -3605,7 +3603,7 @@ bool WildernessSectorWithAllProfiledNPCsNotSpokenWith(INT16 const x, INT16 const
 	if (StrategicMap[CALCULATE_STRATEGIC_INDEX(x, y)].bNameId != BLANK_SECTOR) return false;
 
 	// Skip SAM sites.
-	if (IsThisSectorASAMSector(x, y, z)) return false;
+	if (IsThisSectorASAMSector({x, y, z})) return false;
 
 	for (const MercProfile* profile : GCM->listMercProfiles())
 	{

@@ -15,7 +15,7 @@
 
 Observable<> OnAirspaceControlUpdated = {};
 
-static void UpdateAndDamageSAMIfFound(INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ, INT16 sGridNo, void*, UINT8 ubDamage, BOOLEAN fIsDestroyed);
+static void UpdateAndDamageSAMIfFound(INT16 sSectorX, INT16 sSectorY, INT8 sSectorZ, INT16 sGridNo, void*, UINT8 ubDamage, BOOLEAN fIsDestroyed);
 
 void InitializeSAMSites()
 {
@@ -32,23 +32,22 @@ void InitializeSAMSites()
 	UpdateAirspaceControl();
 }
 
-void UpdateSAMDoneRepair(INT16 const x, INT16 const y, INT16 const z)
+void UpdateSAMDoneRepair(sector_coords const& coords)
 {
 	// ATE: If we are below, return right away
-	if (z != 0) return;
+	if (coords.z != 0) return;
 
-	UINT8 const sector = SECTOR(x, y);
-	auto samSite = GCM->findSamSiteBySector(sector);
+	auto samSite = GCM->findSamSiteBySector(coords);
 	if (samSite == NULL)
 	{
-		STLOGW("There is no SAM site at sector {}", GetShortSectorString(x, y));
+		STLOGW("There is no SAM site at sector {}", coords.get_short_string());
 		return;
 	}
 
 	UINT16 const good_graphic = GetTileIndexFromTypeSubIndex(EIGHTISTRUCT, samSite->graphicIndex);
 	UINT16 const damaged_graphic = good_graphic - 2; // Damaged one (current) is 2 less
 	GridNo const gridno = samSite->gridNos[0];
-	if (x == gWorldSectorX && y == gWorldSectorY && z == gbWorldSectorZ)
+	if (coords.equals_world_coords())
 	{ // Sector loaded, update graphic
 		ApplyMapChangesToMapTempFile app;
 		RemoveStruct(gridno, damaged_graphic);
@@ -56,8 +55,8 @@ void UpdateSAMDoneRepair(INT16 const x, INT16 const y, INT16 const z)
 	}
 	else
 	{ // We add temp changes to map not loaded
-		RemoveStructFromUnLoadedMapTempFile(gridno, damaged_graphic, x, y, z);
-		AddStructToUnLoadedMapTempFile(gridno, good_graphic, x, y, z);
+		RemoveStructFromUnLoadedMapTempFile(gridno, damaged_graphic, coords.x, coords.y, coords.z);
+		AddStructToUnLoadedMapTempFile(gridno, good_graphic, coords.x, coords.y, coords.z);
 	}
 
 	// SAM site may have been put back into working order
@@ -103,45 +102,43 @@ INT32 GetNumberOfSAMSitesUnderPlayerControl()
 	return n;
 }
 
-bool IsThereAFunctionalSAMSiteInSector(INT16 const x, INT16 const y, INT8 const z)
+bool IsThereAFunctionalSAMSiteInSector(sector_coords const& coords)
 {
 	return
-		IsThisSectorASAMSector(x, y, z) &&
-		StrategicMap[CALCULATE_STRATEGIC_INDEX(x, y)].bSAMCondition >= MIN_CONDITION_FOR_SAM_SITE_TO_WORK;
+		IsThisSectorASAMSector(coords) &&
+		StrategicMap[coords.get_strategic_index()].bSAMCondition >= MIN_CONDITION_FOR_SAM_SITE_TO_WORK;
 }
 
 
-bool IsThisSectorASAMSector(INT16 const x, INT16 const y, INT8 const z)
+bool IsThisSectorASAMSector(sector_coords const& coords)
 {
-	if (z != 0) return false;
+	if (coords.z != 0) return false;
 
-	UINT8 ubSector = SECTOR(x, y);
-	return (GCM->findSamIDBySector(ubSector) > -1);
+	return (GCM->findSamIDBySector(coords) > -1);
 }
 
 
 // a -1 will be returned upon failure
-INT8 GetSAMIdFromSector(INT16 sSectorX, INT16 sSectorY, INT8 bSectorZ)
+INT8 GetSAMIdFromSector(sector_coords const& coords)
 {
 	// check if valid sector
-	if (bSectorZ != 0)
+	if (coords.z != 0)
 	{
 		return(-1);
 	}
 
 	// get the sector value
-	INT16 sSectorValue = SECTOR(sSectorX, sSectorY);
-	return GCM->findSamIDBySector(sSectorValue);
+	return GCM->findSamIDBySector(coords);
 }
 
-bool DoesSAMExistHere(INT16 const x, INT16 const y, INT16 const z, GridNo const gridno)
+bool DoesSAMExistHere(sector_coords const& coords, GridNo const gridno)
 {
 	// ATE: If we are below, return right away
-	if (z != 0) return false;
+	if (coords.z != 0) return false;
 
 	for (auto s : GCM->getSamSites())
 	{
-		if (s->doesSamExistHere(x, y, gridno))
+		if (s->doesSamExistHere(coords.x, coords.y, gridno))
 		{
 			return true;
 		}
@@ -150,17 +147,19 @@ bool DoesSAMExistHere(INT16 const x, INT16 const y, INT16 const z, GridNo const 
 }
 
 // Look for a SAM site, update
-static void UpdateAndDamageSAMIfFound(INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ, INT16 sGridNo, void*, UINT8 ubDamage, BOOLEAN fIsDestroyed)
+static void UpdateAndDamageSAMIfFound(INT16 sSectorX, INT16 sSectorY, INT8 sSectorZ, INT16 sGridNo, void*, UINT8 ubDamage, BOOLEAN fIsDestroyed)
 {
+	sector_coords const coords{sSectorX, sSectorY, sSectorZ};
+
 	// OK, First check if SAM exists, and if not, return
-	if (!DoesSAMExistHere(sSectorX, sSectorY, sSectorZ, sGridNo))
+	if (!DoesSAMExistHere(coords, sGridNo))
 	{
 		return;
 	}
 
 	// Damage.....
-	INT16 sSectorNo = CALCULATE_STRATEGIC_INDEX(sSectorX, sSectorY);
-	STLOGD("SAM site at sector #{} is damaged by {} points", sSectorNo, ubDamage);
+	INT16 sSectorNo = coords.get_strategic_index();
+	STLOGD("SAM site at sector {} is damaged by {} points", coords.get_short_string(), ubDamage);
 	if (StrategicMap[sSectorNo].bSAMCondition >= ubDamage)
 	{
 		StrategicMap[sSectorNo].bSAMCondition -= ubDamage;

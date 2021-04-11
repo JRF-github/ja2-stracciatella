@@ -31,6 +31,7 @@
 #include "Random.h"
 #include "SamSiteModel.h"
 #include "ScreenIDs.h"
+#include "Sector_Coords.h"
 #include "Soldier_Profile.h"
 #include "Squads.h"
 #include "StrategicMap.h"
@@ -70,9 +71,7 @@ static const UINT16 gusMeanWhileGridNo[] =
 struct NPC_SAVE_INFO
 {
 	UINT8 ubProfile;
-	INT16 sX;
-	INT16 sY;
-	INT16 sZ;
+	sector_coords coords;
 	INT16 sGridNo;
 };
 
@@ -83,12 +82,8 @@ MEANWHILE_DEFINITION gMeanwhileDef[NUM_MEANWHILES];
 BOOLEAN              gfMeanwhileTryingToStart = FALSE;
 BOOLEAN              gfInMeanwhile = FALSE;
 // END SERIALIZATION
-static INT16 gsOldSectorX;
-static INT16 gsOldSectorY;
-static INT16 gsOldSectorZ;
-static INT16 gsOldSelectedSectorX;
-static INT16 gsOldSelectedSectorY;
-static INT16 gsOldSelectedSectorZ;
+static sector_coords gOldSector;
+static sector_coords gOldSelectedSector;
 
 static UINT32        guiOldScreen;
 static NPC_SAVE_INFO gNPCSaveData[MAX_MEANWHILE_PROFILES];
@@ -288,10 +283,8 @@ static void SetNPCMeanwhile(const ProfileID pid, const INT16 sector_x, const INT
 
 	MERCPROFILESTRUCT& p = GetProfile(pid);
 	si->ubProfile = pid;
-	si->sX        = p.sSectorX;
-	si->sY        = p.sSectorY;
-	si->sZ        = p.bSectorZ;
-	si->sGridNo   = p.sGridNo;
+	si->coords = { p.sSectorX, p.sSectorY, p.bSectorZ };
+	si->sGridNo = p.sGridNo;
 
 	ReloadQuoteFile(pid);
 	ChangeNpcToDifferentSector(p, sector_x, sector_y, 0);
@@ -306,14 +299,10 @@ static void StartMeanwhile(void)
 	// OK, save old position...
 	if ( gfWorldLoaded )
 	{
-		gsOldSectorX = gWorldSectorX;
-		gsOldSectorY = gWorldSectorY;
-		gsOldSectorZ = gbWorldSectorZ;
+		gOldSector = { gWorldSectorX, gWorldSectorY, gbWorldSectorZ };
 	}
 
-	gsOldSelectedSectorX = sSelMapX;
-	gsOldSelectedSectorY = sSelMapY;
-	gsOldSelectedSectorZ = (INT16) iCurrentMapSectorZ;
+	gOldSelectedSector = { sSelMapX, sSelMapY, iCurrentMapSectorZ };
 
 	gfInMeanwhile = TRUE;
 
@@ -535,10 +524,10 @@ static void RestoreNPCMeanwhile(void)
 		if (pid == NO_PROFILE) continue;
 
 		MERCPROFILESTRUCT& p = GetProfile(pid);
-		p.sSectorX = si->sX;
-		p.sSectorY = si->sY;
-		p.bSectorZ = (INT8)si->sZ;
-		p.sGridNo  = (INT8)si->sGridNo;
+		p.sSectorX = si->coords.x;
+		p.sSectorY = si->coords.y;
+		p.bSectorZ = si->coords.z;
+		p.sGridNo  = si->sGridNo;
 
 		// Ensure NPC files loaded...
 		ReloadQuoteFile(pid);
@@ -598,7 +587,7 @@ static void DoneFadeOutMeanwhileOnceDone(void)
 
 	if( gfWorldWasLoaded )
 	{
-		SetCurrentWorldSector( gsOldSectorX, gsOldSectorY, (INT8)gsOldSectorZ );
+		SetCurrentWorldSector( gOldSector.x, gOldSector.y, gOldSector.z );
 
 		ExamineCurrentSquadLights( );
 	}
@@ -609,7 +598,7 @@ static void DoneFadeOutMeanwhileOnceDone(void)
 		SetWorldSectorInvalid();
 	}
 
-	ChangeSelectedMapSector( gsOldSelectedSectorX, gsOldSelectedSectorY, (INT8) gsOldSelectedSectorZ );
+	ChangeSelectedMapSector( gOldSelectedSector.x, gOldSelectedSector.y, gOldSelectedSector.z );
 
 	gfReloadingScreenFromMeanwhile = FALSE;
 

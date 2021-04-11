@@ -2,6 +2,7 @@
 #define __PREBATTLE_INTERFACE_H
 
 #include "Types.h"
+#include "Sector_Coords.h"
 #include "Strategic_Movement.h"
 
 void InitPreBattleInterface(GROUP* battle_group, bool persistent_pbi);
@@ -71,10 +72,7 @@ extern BOOLEAN gubExplicitEnemyEncounterCode;
 //Location of the current battle (determines where the animated icon is blitted) and if the
 //icon is to be blitted.
 extern BOOLEAN gfBlitBattleSectorLocator;
-
-extern UINT8 gubPBSectorX;
-extern UINT8 gubPBSectorY;
-extern UINT8 gubPBSectorZ;
+extern sector_coords preBattleSector;
 
 extern BOOLEAN gfCantRetreatInPBI;
 //SAVE END

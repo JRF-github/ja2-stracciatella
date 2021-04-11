@@ -38,18 +38,18 @@ UINT32 guiPabloExtraDaysBribed = 0;
 UINT8		gubCambriaMedicalObjects;
 
 
-static BOOLEAN CloseCrate(const INT16 x, const INT16 y, const INT8 z, const GridNo grid_no)
+static bool CloseCrate(sector_coords const& coords, const GridNo grid_no)
 {
 	// Determine if the sector is loaded
-	if (gWorldSectorX == x && gWorldSectorY == y && gbWorldSectorZ == z)
+	if (sector_coords::from_world_coords() == coords)
 	{
 		SetOpenableStructureToClosed(grid_no, 0);
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		ChangeStatusOfOpenableStructInUnloadedSector(x, y, z, grid_no, FALSE);
-		return FALSE;
+		ChangeStatusOfOpenableStructInUnloadedSector(coords.x, coords.y, coords.z, grid_no, FALSE);
+		return false;
 	}
 }
 
@@ -118,8 +118,7 @@ void BobbyRayPurchaseEventCallback(const UINT8 ubOrderID)
 		}
 	}
 
-	const BOOLEAN fSectorLoaded =
-		CloseCrate(dest->deliverySectorX, dest->deliverySectorY, dest->deliverySectorZ, dest->deliverySectorGridNo);
+	const bool fSectorLoaded = CloseCrate(dest->deliverySector, dest->deliverySectorGridNo);
 
 	OBJECTTYPE* pObject       = NULL;
 	OBJECTTYPE* pStolenObject = NULL;
@@ -276,10 +275,10 @@ void BobbyRayPurchaseEventCallback(const UINT8 ubOrderID)
 	{
 		//add all the items from the array that was built above
 		//The item are to be added to the Top part of Drassen, grid loc's  10112, 9950
-		AddItemsToUnLoadedSector(dest->deliverySectorX, dest->deliverySectorY, dest->deliverySectorZ, usStandardMapPos, uiCount, pObject, 0, 0, 0, INVISIBLE);
+		AddItemsToUnLoadedSector(dest->deliverySector, usStandardMapPos, uiCount, pObject, 0, 0, 0, INVISIBLE);
 		if (uiStolenCount > 0)
 		{
-			AddItemsToUnLoadedSector(dest->deliverySectorX, dest->deliverySectorY, dest->deliverySectorZ, PABLOS_STOLEN_DEST_GRIDNO, uiStolenCount, pStolenObject, 0, 0, 0, INVISIBLE);
+			AddItemsToUnLoadedSector(dest->deliverySector, PABLOS_STOLEN_DEST_GRIDNO, uiStolenCount, pStolenObject, 0, 0, 0, INVISIBLE);
 		}
 		delete[] pObject;
 		delete[] pStolenObject;
@@ -398,13 +397,13 @@ static void HandleDelayedItemsArrival(UINT32 uiReason)
 					CreateItems( SW38, (INT8) (90 + Random( 10 )), 2, &Object );
 					break;
 			}
-			if ( ( gWorldSectorX == shippingDest->deliverySectorX) && ( gWorldSectorY == shippingDest->deliverySectorY) && ( gbWorldSectorZ == shippingDest->deliverySectorZ ) )
+			if ( shippingDest->deliverySector.equals_world_coords() )
 			{
 				AddItemToPool(shippingDest->deliverySectorGridNo, &Object, INVISIBLE, 0, 0, 0);
 			}
 			else
 			{
-				AddItemsToUnLoadedSector(shippingDest->deliverySectorX, shippingDest->deliverySectorY, shippingDest->deliverySectorZ, shippingDest->deliverySectorGridNo, 1, &Object, 0, 0, 0, INVISIBLE);
+				AddItemsToUnLoadedSector(shippingDest->deliverySector, shippingDest->deliverySectorGridNo, 1, &Object, 0, 0, 0, INVISIBLE);
 			}
 		}
 	}
@@ -418,7 +417,7 @@ static void HandleDelayedItemsArrival(UINT32 uiReason)
 	}
 
 	// If the Drassen airport sector is already loaded, move the item pools...
-	if ( ( gWorldSectorX == shippingDest->deliverySectorX ) && ( gWorldSectorY == shippingDest->deliverySectorY ) && ( gbWorldSectorZ == shippingDest->deliverySectorZ ) )
+	if (shippingDest->deliverySector.equals_world_coords())
 	{
 		// sector is loaded!
 		// just move the hidden item pool
@@ -427,7 +426,7 @@ static void HandleDelayedItemsArrival(UINT32 uiReason)
 	else
 	{
 		// otherwise load the saved items from the item file and change the records of their locations
-		std::vector<WORLDITEM> pTemp = LoadWorldItemsFromTempItemFile(shippingDest->deliverySectorX, shippingDest->deliverySectorY, shippingDest->deliverySectorZ);
+		std::vector<WORLDITEM> pTemp = LoadWorldItemsFromTempItemFile(shippingDest->deliverySector);
 
 		for (WORLDITEM& wi : pTemp)
 		{
@@ -436,7 +435,7 @@ static void HandleDelayedItemsArrival(UINT32 uiReason)
 				wi.sGridNo = shippingDest->deliverySectorGridNo;
 			}
 		}
-		SaveWorldItemsToTempItemFile(shippingDest->deliverySectorX, shippingDest->deliverySectorY, shippingDest->deliverySectorZ, pTemp);
+		SaveWorldItemsToTempItemFile(shippingDest->deliverySector, pTemp);
 	}
 }
 
@@ -447,9 +446,9 @@ void AddSecondAirportAttendant( void )
 	MERCPROFILESTRUCT& sal = GetProfile(SAL);
 	auto shippingDest = GCM->getPrimaryShippingDestination();
 
-	sal.sSectorX = shippingDest->deliverySectorX;
-	sal.sSectorY = shippingDest->deliverySectorY;
-	sal.bSectorZ = shippingDest->deliverySectorZ;
+	sal.sSectorX = shippingDest->deliverySector.x;
+	sal.sSectorY = shippingDest->deliverySector.y;
+	sal.bSectorZ = shippingDest->deliverySector.z;
 }
 
 
@@ -981,8 +980,7 @@ static void DropOffItemsInDestination(UINT8 ubOrderNum, const ShippingDestinatio
 		return;
 	}
 
-	const BOOLEAN fSectorLoaded =
-		CloseCrate(shippingDest->deliverySectorX, shippingDest->deliverySectorY, shippingDest->deliverySectorZ, shippingDest->deliverySectorGridNo);
+	const bool fSectorLoaded = CloseCrate(shippingDest->deliverySector, shippingDest->deliverySectorGridNo);
 
 	for(i=0; i<gpNewBobbyrShipments[ ubOrderNum ].ubNumberPurchases; i++)
 	{
@@ -1033,7 +1031,7 @@ static void DropOffItemsInDestination(UINT8 ubOrderNum, const ShippingDestinatio
 		//add all the items from the array that was built above
 
 		//The item are to be added to the Top part of Drassen, grid loc's  10112, 9950
-		AddItemsToUnLoadedSector(shippingDest->deliverySectorX, shippingDest->deliverySectorY, shippingDest->deliverySectorZ, shippingDest->deliverySectorGridNo, uiCount, pObject, 0, 0, 0, INVISIBLE);
+		AddItemsToUnLoadedSector(shippingDest->deliverySector, shippingDest->deliverySectorGridNo, uiCount, pObject, 0, 0, 0, INVISIBLE);
 		delete[] pObject;
 		pObject = NULL;
 	}

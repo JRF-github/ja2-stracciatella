@@ -1414,7 +1414,7 @@ static UINT8 CalcImportantSectorControl(void)
 
 					// SAM sites count double - they have no income, but have significant
 					// air control value
-					if ( IsThisSectorASAMSector( ubMapX, ubMapY, 0 ) )
+					if ( IsThisSectorASAMSector( {ubMapX, ubMapY} ) )
 					{
 						ubSectorControlPts++;
 					}

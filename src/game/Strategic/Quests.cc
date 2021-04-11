@@ -18,6 +18,7 @@
 #include "Overhead.h"
 #include "Queen_Command.h"
 #include "Render_Fun.h"
+#include "Sector_Coords.h"
 #include "ShippingDestinationModel.h"
 #include "Soldier_Profile.h"
 #include "Strategic_Event_Handler.h"
@@ -64,9 +65,7 @@ void SetFactFalse(Fact const usFact)
 static bool CheckForNewShipment(void)
 {
 	auto shippingDest = GCM->getPrimaryShippingDestination();
-	if (gWorldSectorX  != shippingDest->deliverySectorX) return false;
-	if (gWorldSectorY  != shippingDest->deliverySectorY) return false;
-	if (gbWorldSectorZ != shippingDest->deliverySectorZ) return false;
+	if (!shippingDest->deliverySector.equals_world_coords()) return false;
 
 	ITEM_POOL const* const ip = GetItemPool(shippingDest->deliverySectorGridNo, 0);
 	return ip && !IsItemPoolVisible(ip);
@@ -996,31 +995,31 @@ BOOLEAN CheckFact(Fact const usFact, UINT8 const ubProfileID)
 			gubFact[usFact] = SpokenToHeadMiner( MINE_DRASSEN );
 			break;
 		case FACT_PLAYER_IN_CONTROLLED_DRASSEN_MINE:
-			gubFact[usFact] = ( GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ ) == MINE_DRASSEN && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
+			gubFact[usFact] = ( GetIdOfMineForSector( sector_coords::from_world_coords() ) == MINE_DRASSEN && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
 			break;
 		case FACT_PLAYER_SPOKE_TO_CAMBRIA_MINER:
 			gubFact[usFact] = SpokenToHeadMiner( MINE_CAMBRIA );
 			break;
 		case FACT_PLAYER_IN_CONTROLLED_CAMBRIA_MINE:
-			gubFact[usFact] = ( GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ ) == MINE_CAMBRIA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
+			gubFact[usFact] = ( GetIdOfMineForSector( sector_coords::from_world_coords() ) == MINE_CAMBRIA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
 			break;
 		case FACT_PLAYER_SPOKE_TO_CHITZENA_MINER:
 			gubFact[usFact] = SpokenToHeadMiner( MINE_CHITZENA );
 			break;
 		case FACT_PLAYER_IN_CONTROLLED_CHITZENA_MINE:
-			gubFact[usFact] = ( GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ ) == MINE_CHITZENA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
+			gubFact[usFact] = ( GetIdOfMineForSector( sector_coords::from_world_coords() ) == MINE_CHITZENA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
 			break;
 		case FACT_PLAYER_SPOKE_TO_ALMA_MINER:
 			gubFact[usFact] = SpokenToHeadMiner( MINE_ALMA );
 			break;
 		case FACT_PLAYER_IN_CONTROLLED_ALMA_MINE:
-			gubFact[usFact] = ( GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ ) == MINE_ALMA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
+			gubFact[usFact] = ( GetIdOfMineForSector( sector_coords::from_world_coords() ) == MINE_ALMA && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
 			break;
 		case FACT_PLAYER_SPOKE_TO_GRUMM_MINER:
 			gubFact[usFact] = SpokenToHeadMiner( MINE_GRUMM );
 			break;
 		case FACT_PLAYER_IN_CONTROLLED_GRUMM_MINE:
-			gubFact[usFact] = ( GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ ) == MINE_GRUMM && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
+			gubFact[usFact] = ( GetIdOfMineForSector( sector_coords::from_world_coords() ) == MINE_GRUMM && !(StrategicMap[ gWorldSectorX + MAP_WORLD_X * gWorldSectorY ].fEnemyControlled) );
 			break;
 
 		case FACT_ENOUGH_LOYALTY_TO_TRAIN_MILITIA:

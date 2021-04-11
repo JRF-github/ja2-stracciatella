@@ -628,7 +628,7 @@ void PrepareLoadedSector()
 		//in a mine that is shutdown.
 		if( gbWorldSectorZ )
 		{
-			bMineIndex = GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ );
+			bMineIndex = GetIdOfMineForSector( sector_coords::from_world_coords() );
 			if( bMineIndex != -1 )
 			{
 				if( !AreThereMinersInsideThisMine( (UINT8)bMineIndex ) )
@@ -1286,7 +1286,7 @@ ST::string GetSectorIDString(INT16 x, INT16 y, INT8 z, BOOLEAN detailed)
 		}
 	}
 
-	INT8    const  mine_index = GetIdOfMineForSector(x, y, z);
+	INT8    const  mine_index = GetIdOfMineForSector({x, y, z});
 	ST::string add;
 	if (mine_index != -1)
 	{
@@ -3243,9 +3243,7 @@ BOOLEAN HandlePotentialBringUpAutoresolveToFinishBattle( )
 					gfEnteringMapScreenToEnterPreBattleInterface = TRUE;
 					gfAutomaticallyStartAutoResolve = TRUE;
 					gfUsePersistantPBI = FALSE;
-					gubPBSectorX = (UINT8)gWorldSectorX;
-					gubPBSectorY = (UINT8)gWorldSectorY;
-					gubPBSectorZ = (UINT8)gbWorldSectorZ;
+					preBattleSector = sector_coords::from_world_coords();
 					gfBlitBattleSectorLocator = TRUE;
 					gfTransferTacticalOppositionToAutoResolve = TRUE;
 					if( gubEnemyEncounterCode != CREATURE_ATTACK_CODE )

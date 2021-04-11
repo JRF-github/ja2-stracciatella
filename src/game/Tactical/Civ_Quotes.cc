@@ -22,6 +22,7 @@
 #include "Dialogue_Control.h"
 #include "Quests.h"
 #include "MapScreen.h"
+#include "Sector_Coords.h"
 #include "Strategic_Town_Loyalty.h"
 #include "NPC.h"
 #include "Strategic_Mines.h"
@@ -579,7 +580,7 @@ static UINT8 DetermineCivQuoteEntry(SOLDIERTYPE* pCiv, UINT8* pubCivHintToUse, B
 	// ATE: OK, check if we should look for a civ hint....
 	if ( fCanUseHints )
 	{
-		bCivHint = ConsiderCivilianQuotes( gWorldSectorX, gWorldSectorY, gbWorldSectorZ,  FALSE );
+		bCivHint = ConsiderCivilianQuotes( sector_coords::from_world_coords(), FALSE );
 	}
 	else
 	{
@@ -600,7 +601,7 @@ static UINT8 DetermineCivQuoteEntry(SOLDIERTYPE* pCiv, UINT8* pubCivHintToUse, B
 			// Not done yet.
 
 			// Are they working for us?
-			bMineId = GetIdOfMineForSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ );
+			bMineId = GetIdOfMineForSector( sector_coords::from_world_coords() );
 
 			if ( PlayerControlsMine( bMineId ) )
 			{
@@ -633,7 +634,7 @@ static UINT8 DetermineCivQuoteEntry(SOLDIERTYPE* pCiv, UINT8* pubCivHintToUse, B
 			(*pubCivHintToUse) = bCivHint;
 
 			// Set quote as used...
-			ConsiderCivilianQuotes( gWorldSectorX, gWorldSectorY, gbWorldSectorZ, TRUE );
+			ConsiderCivilianQuotes( sector_coords::from_world_coords(), TRUE );
 
 			// retrun value....
 			return( CIV_QUOTE_HINT );

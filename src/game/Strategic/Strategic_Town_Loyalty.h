@@ -2,6 +2,7 @@
 #define __STRATEGIC_TOWN_LOYALTY_H
 
 #include "JA2Types.h"
+#include "Sector_Coords.h"
 #include <vector>
 
 
@@ -117,7 +118,7 @@ void HandleMurderOfCivilian(const SOLDIERTYPE* pSoldier);
 void HandleTownLoyaltyForNPCRecruitment( SOLDIERTYPE *pSoldier );
 
 // remove random item from this sector
-void RemoveRandomItemsInSector( INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ, UINT8 ubChance );
+void RemoveRandomItemsInSector(sector_coords const& coords, UINT8 ubChance );
 
 // build list of town sectors
 void BuildListOfTownSectors( void );

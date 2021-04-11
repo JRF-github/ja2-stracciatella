@@ -25,11 +25,11 @@ void SaveCurrentSectorsInformationToTempItemFile(void);
 void LoadCurrentSectorsInformationFromTempItemsFile();
 
 // Loads a World Item array from that sectors temp item file
-std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(INT16 sMapX, INT16 sMapY, INT8 bMapZ);
+std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(sector_coords const& coords);
 
 //  Adds an array of Item Objects to the specified location on a unloaded map.
 //  If you want to overwrite all the items in the array set fReplaceEntireFile to TRUE.
-void AddItemsToUnLoadedSector(INT16 sMapX, INT16 sMapY, INT8 bMapZ, INT16 sGridNo, UINT32 uiNumberOfItems, OBJECTTYPE const* pObject, UINT8 ubLevel, UINT16 usFlags, INT8 bRenderZHeightAboveLevel, Visibility);
+void AddItemsToUnLoadedSector(sector_coords const& coords, INT16 sGridNo, UINT32 uiNumberOfItems, OBJECTTYPE const* pObject, UINT8 ubLevel, UINT16 usFlags, INT8 bRenderZHeightAboveLevel, Visibility);
 
 
 void AddWorldItemsToUnLoadedSector(INT16 sMapX, INT16 sMapY, INT8 bMapZ, const std::vector<WORLDITEM>& wis);
@@ -59,7 +59,7 @@ void AddRottingCorpseToUnloadedSectorsRottingCorpseFile(INT16 sMapX, INT16 sMapY
 //The gridno if you are passing in either of the flags ADD_DEAD_SOLDIER_USE_GRIDNO, or the ADD_DEAD_SOLDIER_TO_SWEETSPOT
 //
 // This function DOES NOT remove the soldier from the soldier struct.  YOU must do it.
-void AddDeadSoldierToUnLoadedSector(INT16 sMapX, INT16 sMapY, UINT8 bMapZ, SOLDIERTYPE* pSoldier, INT16 sGridNo, UINT32 uiFlags);
+void AddDeadSoldierToUnLoadedSector(INT16 sMapX, INT16 sMapY, INT8 bMapZ, SOLDIERTYPE* pSoldier, INT16 sGridNo, UINT32 uiFlags);
 
 
 BOOLEAN GetSectorFlagStatus(INT16 sMapX, INT16 sMapY, UINT8 bMapZ, SectorFlags);
@@ -88,13 +88,13 @@ void HandleAllReachAbleItemsInTheSector(INT16 x, INT16 y, INT8 z);
 ST::string GetMapTempFileName(SectorFlags uiType, INT16 sMapX, INT16 sMapY, INT8 bMapZ);
 
 
-UINT32	GetNumberOfVisibleWorldItemsFromSectorStructureForSector( INT16 sMapX, INT16 sMapY, INT8 bMapZ );
-void		SetNumberOfVisibleWorldItemsInSectorStructureForSector( INT16 sMapX, INT16 sMapY, INT8 bMapZ, UINT32 uiNumberOfItems );
+UINT32	GetNumberOfVisibleWorldItemsFromSectorStructureForSector(sector_coords const& coords);
+void	SetNumberOfVisibleWorldItemsInSectorStructureForSector(sector_coords const& coords, UINT32 uiNumberOfItems );
 
 #define NEW_ROTATION_ARRAY_SIZE			49
 #define BASE_NUMBER_OF_ROTATION_ARRAYS			19
 
 
-void SaveWorldItemsToTempItemFile(INT16 sMapX, INT16 sMapY, INT8 bMapZ, const std::vector<WORLDITEM>& items);
+void SaveWorldItemsToTempItemFile(sector_coords const& coords, const std::vector<WORLDITEM>& items);
 
 #endif

@@ -68,6 +68,10 @@ extern Observable<> BeforePrepareSector;
 UINT8 GetTownIdForSector(UINT8 sector);
 
 void SetCurrentWorldSector(INT16 x, INT16 y, INT8 z);
+static inline void SetCurrentWorldSector(sector_coords const& coords)
+{
+	SetCurrentWorldSector(coords.x, coords.y, coords.z);
+}
 
 void UpdateMercsInSector();
 void UpdateMercInSector(SOLDIERTYPE&, INT16 sSectorX, INT16 sSectorY, INT8 bSectorZ);
@@ -77,6 +81,10 @@ ST::string GetShortSectorString(INT16 sMapX, INT16 sMapY);
 
 // Return a string like 'A9: Omerta'
 ST::string GetSectorIDString(INT16 x, INT16 y, INT8 z, BOOLEAN detailed);
+static inline ST::string GetSectorIDString(sector_coords const& coords, bool detailed)
+{
+	return GetSectorIDString(coords.x, coords.y, coords.z, detailed);
+}
 
 // Returns a sector description string based on the sector land type
 ST::string GetSectorLandTypeString(UINT8 ubSectorID, UINT8 ubSectorZ, bool fDetailed);

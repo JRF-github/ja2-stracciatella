@@ -1034,10 +1034,10 @@ static BOOLEAN EvaluateGroupSituation(GROUP* pGroup)
 					SLOGD("%d reinforcements have arrived to garrison sector %c%d",
 							pGroup->pEnemyGroup->ubNumAdmins + pGroup->pEnemyGroup->ubNumTroops +
 							pGroup->pEnemyGroup->ubNumElites, pGroup->ubSectorY + 'A' - 1, pGroup->ubSectorX );
-					if( IsThisSectorASAMSector( pGroup->ubSectorX, pGroup->ubSectorY, 0 ) )
+					if( IsThisSectorASAMSector({pGroup->ubSectorX, pGroup->ubSectorY, 0} ) )
 					{
 						StrategicMap[ pGroup->ubSectorX + pGroup->ubSectorY * MAP_WORLD_X ].bSAMCondition = 100;
-						UpdateSAMDoneRepair( pGroup->ubSectorX, pGroup->ubSectorY, 0 );
+						UpdateSAMDoneRepair({pGroup->ubSectorX, pGroup->ubSectorY, 0});
 					}
 				}
 				else

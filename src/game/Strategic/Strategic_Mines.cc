@@ -20,6 +20,7 @@
 #include "MineModel.h"
 #include "Quests.h"
 #include "Random.h"
+#include "Sector_Coords.h"
 #include "Soldier_Profile.h"
 #include "StrategicMap.h"
 #include "Strategic_AI.h"
@@ -593,7 +594,7 @@ INT32 CalcMaxPlayerIncomeFromMines()
 
 INT8 GetMineIndexForSector(UINT8 const sector)
 {
-	return GetIdOfMineForSector(SECTORX(sector), SECTORY(sector), 0);
+	return GetIdOfMineForSector(sector_coords{sector});
 }
 
 
@@ -991,9 +992,9 @@ BOOLEAN HasHisMineBeenProducingForPlayerForSomeTime( UINT8 ubMinerProfileId )
 }
 
 
-INT8 GetIdOfMineForSector(INT16 const x, INT16 const y, INT8 const z)
+INT8 GetIdOfMineForSector(sector_coords const& coords)
 {
-	auto mine = GCM->getMineForSector(x, y, z);
+	auto mine = GCM->getMineForSector(coords.x, coords.y, coords.z);
 	if (mine != NULL)
 	{
 		return mine->mineId;

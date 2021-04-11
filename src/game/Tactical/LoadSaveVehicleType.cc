@@ -16,9 +16,10 @@ void ExtractVehicleTypeFromFile(HWFILE const file, VEHICLETYPE* const v, UINT32 
 	EXTR_PTR(d, v->pMercPath)
 	EXTR_U8(d, v->ubMovementGroup)
 	EXTR_U8(d, v->ubVehicleType)
-	EXTR_I16(d, v->sSectorX)
-	EXTR_I16(d, v->sSectorY)
-	EXTR_I16(d, v->sSectorZ)
+	INT16 temp;
+	EXTR_I16(d, temp); v->coords.x = temp;
+	EXTR_I16(d, temp); v->coords.y = temp;
+	EXTR_I16(d, temp); v->coords.z = static_cast<uint8_t>(temp);
 	EXTR_BOOL(d, v->fBetweenSectors)
 	EXTR_SKIP(d, 1)
 	EXTR_I16(d, v->sGridNo);
@@ -50,9 +51,9 @@ void InjectVehicleTypeIntoFile(HWFILE const file, VEHICLETYPE const* const v)
 	INJ_PTR(d, v->pMercPath)
 	INJ_U8(d, v->ubMovementGroup)
 	INJ_U8(d, v->ubVehicleType)
-	INJ_I16(d, v->sSectorX)
-	INJ_I16(d, v->sSectorY)
-	INJ_I16(d, v->sSectorZ)
+	INJ_I16(d, v->coords.x)
+	INJ_I16(d, v->coords.y)
+	INJ_I16(d, static_cast<INT16>(v->coords.z))
 	INJ_BOOL(d, v->fBetweenSectors)
 	INJ_SKIP(d, 1)
 	INJ_I16(d, v->sGridNo);

@@ -617,24 +617,22 @@ void HandleTownLoyaltyForNPCRecruitment( SOLDIERTYPE *pSoldier )
 	}
 }
 
-void RemoveRandomItemsInSector(INT16 const sSectorX, INT16 const sSectorY, INT16 const sSectorZ, UINT8 const ubChance)
+void RemoveRandomItemsInSector(sector_coords const& coords, UINT8 const ubChance)
 {
 	/* Stealing should fail anyway 'cause there shouldn't be a temp file for
 	 * unvisited sectors, but let's check anyway */
-	Assert(GetSectorFlagStatus(sSectorX, sSectorY, sSectorZ, SF_ALREADY_VISITED));
+	Assert(GetSectorFlagStatus(coords.x, coords.y, coords.z, SF_ALREADY_VISITED));
 
-	ST::string wSectorName = GetSectorIDString(sSectorX, sSectorY, sSectorZ, TRUE);
+	ST::string wSectorName = GetSectorIDString(coords.x, coords.y, coords.z, TRUE);
 
 	// go through list of items in sector and randomly remove them
 
 	// if unloaded sector
-	if (gWorldSectorX  != sSectorX ||
-			gWorldSectorY  != sSectorY ||
-			gbWorldSectorZ != sSectorZ)
+	if (!coords.equals_world_coords())
 	{
 		/* if the player has never been there, there's no temp file, and 0 items
 		 * will get returned, preventing any stealing */
-		std::vector<WORLDITEM> pItemList = LoadWorldItemsFromTempItemFile(sSectorX, sSectorY, sSectorZ);
+		std::vector<WORLDITEM> pItemList = LoadWorldItemsFromTempItemFile(coords);
 		if (pItemList.size() == 0) return;
 
 		bool somethingWasStolen = false;
@@ -658,7 +656,7 @@ void RemoveRandomItemsInSector(INT16 const sSectorX, INT16 const sSectorY, INT16
 		// only save if something was stolen
 		if (somethingWasStolen)
 		{
-			SaveWorldItemsToTempItemFile(sSectorX, sSectorY, sSectorZ, pItemList);
+			SaveWorldItemsToTempItemFile(coords, pItemList);
 		}
 	}
 	else	// handle a loaded sector

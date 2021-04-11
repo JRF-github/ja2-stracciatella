@@ -188,8 +188,8 @@ BOOLEAN RemoveSoldierFromHelicopter( SOLDIERTYPE *pSoldier )
 	if (fHeliReturnStraightToBase) return FALSE;
 
 	VEHICLETYPE const& v = GetHelicopter();
-	pSoldier->sSectorX = v.sSectorX;
-	pSoldier->sSectorY = v.sSectorY;
+	pSoldier->sSectorX = v.coords.x;
+	pSoldier->sSectorY = v.coords.y;
 	pSoldier->bSectorZ = 0;
 
 	// reset between sectors
@@ -320,9 +320,9 @@ static RefuelSite const* FindClosestRefuelSite(bool const must_be_available)
 	INT32             shortest_distance = 9999;
 	RefuelSite const* closest_site      = 0;
 
-	VEHICLETYPE const& v        				= GetHelicopter();
-	INT16 sectorID											= CALCULATE_STRATEGIC_INDEX(v.sSectorX , v.sSectorY);
-	GROUP& g														= *GetGroup(v.ubMovementGroup);
+	VEHICLETYPE const& v = GetHelicopter();
+	INT16 sectorID       = v.coords.get_strategic_index();
+	GROUP& g             = *GetGroup(v.ubMovementGroup);
 	// find shortest distance to refuel site
 	for (INT32 i = 0; i < NUMBER_OF_REFUEL_SITES; ++i)
 	{
@@ -476,7 +476,7 @@ void HandleHeliHoverTooLong( void )
 	HeliCharacterDialogue(RETURN_TO_BASE);
 	VEHICLETYPE const& v = GetHelicopter();
 	// If the sector is safe
-	if (NumEnemiesInSector(v.sSectorX, v.sSectorY) == 0)
+	if (NumEnemiesInSector(v.coords) == 0)
 	{
 		// kick everyone out!
 		MoveAllInHelicopterToFootMovementGroup( );
@@ -553,7 +553,7 @@ void SetUpHelicopterForMovement( void )
 	if (v.ubMovementGroup == 0)
 	{
 		// get the vehicle a mvt group
-		GROUP& g = *CreateNewVehicleGroupDepartingFromSector(v.sSectorX, v.sSectorY);
+		GROUP& g = *CreateNewVehicleGroupDepartingFromSector(v.coords.x, v.coords.y);
 		v.ubMovementGroup = g.ubGroupID;
 
 		// add everyone in vehicle to this mvt group
@@ -963,10 +963,8 @@ void HandleAnimationOfSectors( void )
 		switch( gubBlitSectorLocatorCode )
 		{
 			case LOCATOR_COLOR_RED: // normal one used for mines (will now be overriden with yellow)
-				HandleBlitOfSectorLocatorIcon( gsSectorLocatorX, gsSectorLocatorY, 0, LOCATOR_COLOR_RED );
-				break;
 			case LOCATOR_COLOR_YELLOW: // used for all other dialogues
-				HandleBlitOfSectorLocatorIcon( gsSectorLocatorX, gsSectorLocatorY, 0, LOCATOR_COLOR_YELLOW );
+				HandleBlitOfSectorLocatorIcon( sectorLocator.x, sectorLocator.y, 0, gubBlitSectorLocatorCode);
 				break;
 		}
 	}
@@ -1038,8 +1036,7 @@ static bool IsHelicopterOnGroundAtRefuelingSite(RefuelSite const& r)
 	}
 
 	// on the ground, but is it at this site or at another one?
-	VEHICLETYPE const& v = GetHelicopter();
-	return CALCULATE_STRATEGIC_INDEX(v.sSectorX, v.sSectorY) == r.sector;
+	return GetHelicopter().coords.get_strategic_index() == r.sector;
 }
 
 static void HeliCrashSoundStopCallback(void* pData)
@@ -1147,7 +1144,7 @@ BOOLEAN CanHelicopterTakeOff( void )
 
 	VEHICLETYPE const& v = GetHelicopter();
 	// grab location
-	INT16 const sHelicopterSector = CALCULATE_STRATEGIC_INDEX(v.sSectorX, v.sSectorY);
+	INT16 const sHelicopterSector = v.coords.get_strategic_index();
 	// if it's not in enemy control, we can take off
 	if (!StrategicMap[sHelicopterSector].fEnemyControlled)
 	{
@@ -1212,7 +1209,7 @@ bool IsSkyriderFlyingInSector(INT16 const x, INT16 const y)
 	if (!fHelicopterIsAirBorne)     return false;
 	VEHICLETYPE const& v = GetHelicopter();
 	// the right sector?
-	return x == v.sSectorX && y == v.sSectorY;
+	return x == v.coords.x && y == v.coords.y;
 }
 
 bool IsGroupTheHelicopterGroup(GROUP const& g)
@@ -1229,7 +1226,7 @@ INT16 GetNumSafeSectorsInPath()
 	if (!CanHelicopterFly()) return 0;
 
 	VEHICLETYPE const& v      = GetHelicopter();
-	INT32       const  sector = CALCULATE_STRATEGIC_INDEX(v.sSectorX, v.sSectorY);
+	INT32       const  sector = v.coords.get_strategic_index();
 	GROUP*      const  g      = GetGroup(v.ubMovementGroup);
 	UINT32             n      = 0;
 
@@ -1289,7 +1286,7 @@ INT16 GetNumUnSafeSectorsInPath( void )
 
 	VEHICLETYPE const& v = GetHelicopter();
 	// may need to skip the sector the chopper is currently in
-	INT32 const iHeliSector = CALCULATE_STRATEGIC_INDEX(v.sSectorX, v.sSectorY);
+	INT32 const iHeliSector = v.coords.get_strategic_index();
 
 	// get chopper's group ptr
 	GROUP* const pGroup = GetGroup(v.ubMovementGroup);
@@ -1421,9 +1418,8 @@ void PayOffSkyriderDebtIfAny( )
 static void MakeHeliReturnToBase(void)
 {
 	VEHICLETYPE& v = GetHelicopter();
-	INT16 sectorID;
 
-	sectorID = CALCULATE_STRATEGIC_INDEX(v.sSectorX, v.sSectorY);
+	INT16 sectorID = v.coords.get_strategic_index();
 	// if already at a refueling point
 	if (IsRefuelAvailableInSector(sectorID))
 	{

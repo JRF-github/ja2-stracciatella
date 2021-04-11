@@ -2,6 +2,7 @@
 #define __CAMPAIGN_TYPES_H
 
 #include "Debug.h"
+#include "Sector_Coords.h"
 #include "Types.h"
 
 static inline bool IS_VALID_SECTOR(UINT8 const x, UINT8 const y)
@@ -42,13 +43,13 @@ static inline UINT8 SECTOR_FROM_SECTOR_SHORT_STRING(const char* coordinates)
 	return SECTOR(x, y);
 }
 
-#define SECTORX(SectorID) ((SectorID % 16) + 1)
-#define SECTORY(SectorID) ((SectorID / 16) + 1)
+constexpr int16_t SECTORX(uint8_t const SectorID) { return (SectorID % 16) + 1; }
+constexpr int16_t SECTORY(uint8_t const SectorID) { return (SectorID / 16) + 1; }
 
 // short string representation of the sector, e.g. A1, P16
 static inline ST::string SECTOR_SHORT_STRING(UINT8 sector)
 {
-	return ST::format("{c}{}", SECTORY(sector) + 'A' - 1, SECTORX(sector));
+	return sector_coords{sector}.get_short_string();
 }
 
 //Sector enumerations

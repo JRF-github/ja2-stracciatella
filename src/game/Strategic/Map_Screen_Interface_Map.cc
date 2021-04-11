@@ -319,7 +319,7 @@ INT16 gsHighlightSectorX=-1;
 INT16 gsHighlightSectorY=-1;
 
 // the current sector Z value of the map being displayed
-INT32 iCurrentMapSectorZ = 0;
+INT8 iCurrentMapSectorZ = 0;
 
 // the palettes
 static UINT16* pMapLTRedPalette;
@@ -619,6 +619,13 @@ void GetScreenXYFromMapXY( INT16 sMapX, INT16 sMapY, INT16 *psX, INT16 *psY )
 	*psY = ( sMapY * MAP_GRID_Y ) + MAP_VIEW_START_Y;
 }
 
+
+std::pair<INT16, INT16> GetScreenXYFromSectorCoords(sector_coords const& coords)
+{
+	return { coords.x * MAP_GRID_X + MAP_VIEW_START_X, coords.y * MAP_GRID_Y + MAP_VIEW_START_Y };
+}
+
+
 // display the town names and loyalty on the screen
 static void ShowTownText(void)
 {
@@ -729,9 +736,7 @@ static INT32 ShowVehicles(INT16 const x, INT16 const y, INT32 icon_pos)
 	{
 		// skip the chopper, it has its own icon and displays in airspace mode
 		if (IsHelicopter(v))                          continue;
-		if (v.sSectorX != x)                          continue;
-		if (v.sSectorY != y)                          continue;
-		if (v.sSectorZ != iCurrentMapSectorZ)         continue;
+		if (v.coords != sector_coords{x, y, iCurrentMapSectorZ}) continue;
 		if (PlayerIDGroupInMotion(v.ubMovementGroup)) continue;
 
 		SOLDIERTYPE const& vs = GetSoldierStructureForVehicle(v);
@@ -1163,7 +1168,7 @@ UINT32 ClearPathAfterThisSectorForHelicopter( INT16 sX, INT16 sY )
 
 
 	// are we clearing everything beyond the helicopter's CURRENT sector?
-	if (sX == v.sSectorX && sY == v.sSectorY)
+	if (sX == v.coords.x && sY == v.coords.y)
 	{
 		// if we're in confirm map move mode, cancel that (before new UI messages are issued)
 		EndConfirmMapMoveMode( );
@@ -1196,7 +1201,7 @@ INT16 GetLastSectorOfHelicoptersPath( void )
 {
 	VEHICLETYPE const& v = GetHelicopter();
 	// will return the last sector of the helicopter's current path
-	INT16 sLastSector = v.sSectorX + v.sSectorY * MAP_WORLD_X;
+	INT16 sLastSector = v.coords.get_strategic_index();
 	PathSt* pNode = v.pMercPath;
 
 	while( pNode )
@@ -2548,8 +2553,8 @@ BOOLEAN CheckForClickOverHelicopterIcon( INT16 sClickedSectorX, INT16 sClickedSe
 	else
 	{
 		// use current sector's coordinates
-		sSectorX = v.sSectorX;
-		sSectorY = v.sSectorY;
+		sSectorX = v.coords.x;
+		sSectorY = v.coords.y;
 	}
 
 	// check if helicopter appears where he clicked
@@ -2783,7 +2788,7 @@ static void PickUpATownPersonFromSector(UINT8 const type, UINT8 const sector)
 	// Are they in the same town as they were picked up from?
 	if (GetTownIdForSector(sector) != sSelectedMilitiaTown) return;
 
-	if (!SectorOursAndPeaceful(SECTORX(sector), SECTORY(sector), 0)) return;
+	if (!SectorOursAndPeaceful({sector})) return;
 
 	UINT8& n_type = SectorInfo[sector].ubNumberOfCivsAtLevel[type];
 	// See if there are any militia of this type in this sector
@@ -2801,7 +2806,7 @@ static void DropAPersonInASector(UINT8 const type, UINT8 const sector)
 	// Are they in the same town as they were picked up from?
 	if (GetTownIdForSector(sector) != sSelectedMilitiaTown) return;
 
-	if (!SectorOursAndPeaceful(SECTORX(sector), SECTORY(sector), 0)) return;
+	if (!SectorOursAndPeaceful({sector})) return;
 
 	UINT8 (&n_milita)[MAX_MILITIA_LEVELS] = SectorInfo[sector].ubNumberOfCivsAtLevel;
 	if (n_milita[GREEN_MILITIA] + n_milita[REGULAR_MILITIA] + n_milita[ELITE_MILITIA] >= MAX_ALLOWABLE_MILITIA_PER_SECTOR) return;
@@ -3264,11 +3269,8 @@ static bool IsThisMilitiaTownSectorAllowable(INT16 const sSectorIndexValue)
 {
 	INT16 const base_sector = GetBaseSectorForCurrentTown();
 	INT16 const sector      = base_sector + sSectorIndexValue % MILITIA_BOX_ROWS + sSectorIndexValue / MILITIA_BOX_ROWS * 16;
-	INT16 const x           = SECTORX(sector);
-	INT16 const y           = SECTORY(sector);
-	return
-		StrategicMap[CALCULATE_STRATEGIC_INDEX(x, y)].bNameId != BLANK_SECTOR &&
-		SectorOursAndPeaceful(x, y, 0);
+	sector_coords const coords{sector};
+	return StrategicMap[coords.get_strategic_index()].bNameId != BLANK_SECTOR && SectorOursAndPeaceful(coords);
 }
 
 
@@ -3302,7 +3304,7 @@ static void HandleShutDownOfMilitiaPanelIfPeopleOnTheCursor(INT16 const town)
 	FOR_EACH_SECTOR_IN_TOWN(i, town)
 	{
 		UINT8 const sector    = i->sector;
-		if (!SectorOursAndPeaceful(SECTORX(sector), SECTORY(sector), 0)) continue;
+		if (!SectorOursAndPeaceful({sector})) continue;
 		SECTORINFO& si        = SectorInfo[sector];
 		UINT8&      n_green   = si.ubNumberOfCivsAtLevel[GREEN_MILITIA];
 		UINT8&      n_regular = si.ubNumberOfCivsAtLevel[REGULAR_MILITIA];
@@ -3909,7 +3911,7 @@ static void ShowItemsOnMap(void)
 			// to speed this up, only look at sector that player has visited
 			if (!GetSectorFlagStatus(x, y, iCurrentMapSectorZ, SF_ALREADY_VISITED)) continue;
 
-			UINT32 const n_items = GetNumberOfVisibleWorldItemsFromSectorStructureForSector(x, y, iCurrentMapSectorZ);
+			UINT32 const n_items = GetNumberOfVisibleWorldItemsFromSectorStructureForSector({x, y, iCurrentMapSectorZ});
 			if (n_items == 0) continue;
 
 			INT16       usXPos;

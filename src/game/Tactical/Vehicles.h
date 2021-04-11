@@ -2,6 +2,7 @@
 #define _VEHICLES_H
 
 #include "JA2Types.h"
+#include "Sector_Coords.h"
 #include "Strategic_Movement.h"
 
 #include <vector>
@@ -27,9 +28,7 @@ struct VEHICLETYPE
 	PathSt  *pMercPath; // vehicle's stategic path list
 	UINT8   ubMovementGroup; // the movement group this vehicle belongs to
 	UINT8   ubVehicleType; // type of vehicle
-	INT16   sSectorX; // X position on the Stategic Map
-	INT16   sSectorY; // Y position on the Stategic Map
-	INT16   sSectorZ;
+	sector_coords coords; // position on the Stategic Map
 	BOOLEAN fBetweenSectors; // between sectors?
 	INT16   sGridNo; // location in tactical
 	SOLDIERTYPE *pPassengers[ 10 ];

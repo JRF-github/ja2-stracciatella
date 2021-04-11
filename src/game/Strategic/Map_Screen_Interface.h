@@ -227,7 +227,7 @@ extern BOOLEAN fDisableDueToBattleRoster;
 extern BOOLEAN gfAtLeastOneMercWasHired;
 
 // curtrent map sector z that is being displayed in the mapscreen
-extern INT32 iCurrentMapSectorZ;
+extern INT8 iCurrentMapSectorZ;
 
 // y position of the pop up box
 extern INT32 giBoxY;
@@ -357,8 +357,7 @@ void HandleMinerEvent(ProfileID ubMinerProfileID, INT16 sQuoteNumber, BOOLEAN fF
 void TurnOnSectorLocator( UINT8 ubProfileID );
 void TurnOffSectorLocator(void);
 
-extern INT16 gsSectorLocatorX;
-extern INT16 gsSectorLocatorY;
+extern sector_coords sectorLocator;
 extern UINT8 gubBlitSectorLocatorCode;
 
 enum

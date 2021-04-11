@@ -75,7 +75,7 @@ void TownMilitiaTrainingCompleted( SOLDIERTYPE *pTrainer, INT16 sMapX, INT16 sMa
 
 	if( ubTownId == BLANK_SECTOR )
 	{
-		Assert( IsThisSectorASAMSector( sMapX, sMapY, 0 ) );
+		Assert( IsThisSectorASAMSector( {sMapX, sMapY} ) );
 	}
 
 
@@ -351,11 +351,10 @@ UINT8 MilitiaInSectorOfRank(INT16 sMapX, INT16 sMapY, UINT8 ubRank)
 	return( SectorInfo[ SECTOR( sMapX, sMapY ) ].ubNumberOfCivsAtLevel[ ubRank ] );
 }
 
-
-BOOLEAN SectorOursAndPeaceful( INT16 sMapX, INT16 sMapY, INT8 bMapZ )
+bool SectorOursAndPeaceful(sector_coords const& coords)
 {
 	// if this sector is currently loaded
-	if ( ( sMapX == gWorldSectorX ) && ( sMapY == gWorldSectorY ) && ( bMapZ == gbWorldSectorZ ) )
+	if (coords.equals_world_coords())
 	{
 		// and either there are enemies prowling this sector, or combat is in progress
 		if ( gTacticalStatus.fEnemyInSector || ( gTacticalStatus.uiFlags & INCOMBAT ) )
@@ -365,12 +364,12 @@ BOOLEAN SectorOursAndPeaceful( INT16 sMapX, INT16 sMapY, INT8 bMapZ )
 	}
 
 	// if sector is controlled by enemies, it's not ours (duh!)
-	if (!bMapZ && StrategicMap[sMapX + sMapY * MAP_WORLD_X].fEnemyControlled)
+	if (coords.z == 0 && StrategicMap[coords.get_strategic_index()].fEnemyControlled)
 	{
 		return FALSE;
 	}
 
-	if( NumHostilesInSector( sMapX, sMapY, bMapZ ) )
+	if( NumHostilesInSector(coords) > 0)
 	{
 		return FALSE;
 	}
@@ -411,7 +410,7 @@ static bool ServeNextFriendlySectorInTown(INT16* const neighbour_x, INT16* const
 		if (x == gsTownSectorServerSkipX && y == gsTownSectorServerSkipY) continue;
 
 		// check if it's "friendly" - not enemy controlled, no enemies in it, no combat in progress
-		if (!SectorOursAndPeaceful(x, y, 0)) continue;
+		if (!SectorOursAndPeaceful({x, y, 0})) continue;
 
 		*neighbour_x = x;
 		*neighbour_y = y;
@@ -661,7 +660,7 @@ BOOLEAN IsAreaFullOfMilitia(const INT16 sector_x, const INT16 sector_y, const IN
 		{
 			INT16 const town_x = SECTORX(i->sector);
 			INT16 const town_y = SECTORY(i->sector);
-			if (SectorOursAndPeaceful(town_x, town_y, 0))
+			if (SectorOursAndPeaceful({town_x, town_y, 0}))
 			{
 				// don't count GREEN militia, they can be trained into regulars first
 				count_milita += MilitiaInSectorOfRank(town_x, town_y, REGULAR_MILITIA);
@@ -670,7 +669,7 @@ BOOLEAN IsAreaFullOfMilitia(const INT16 sector_x, const INT16 sector_y, const IN
 			}
 		}
 	}
-	else if (IsThisSectorASAMSector(sector_x, sector_y, 0))
+	else if (IsThisSectorASAMSector({sector_x, sector_y, 0}))
 	{
 		// don't count GREEN militia, they can be trained into regulars first
 		count_milita += MilitiaInSectorOfRank(sector_x, sector_y, REGULAR_MILITIA);
@@ -921,7 +920,7 @@ BOOLEAN MilitiaTrainingAllowedInSector( INT16 sSectorX, INT16 sSectorY, INT8 bSe
 		return( FALSE );
 	}
 
-	fSamSitePresent = IsThisSectorASAMSector( sSectorX, sSectorY, bSectorZ );
+	fSamSitePresent = IsThisSectorASAMSector( { sSectorX, sSectorY, bSectorZ } );
 
 	if( fSamSitePresent )
 	{

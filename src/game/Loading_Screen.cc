@@ -40,7 +40,7 @@ UINT8 GetLoadScreenID(INT16 const x, INT16 const y, INT8 const z)
 	switch (z)
 	{
 		case 0:
-			if (IsThisSectorASAMSector(x, y, z))
+			if (IsThisSectorASAMSector({x, y, z}))
 			{
 				return night ? LOADINGSCREEN_NIGHTSAM : LOADINGSCREEN_DAYSAM;
 			}

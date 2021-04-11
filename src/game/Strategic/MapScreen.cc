@@ -2141,7 +2141,7 @@ static void RenderMapCursorsIndexesAnims(void)
 
 	if( gfBlitBattleSectorLocator )
 	{
-		HandleBlitOfSectorLocatorIcon( gubPBSectorX, gubPBSectorY, gubPBSectorZ, LOCATOR_COLOR_RED );
+		HandleBlitOfSectorLocatorIcon(preBattleSector.x, preBattleSector.y, preBattleSector.z, LOCATOR_COLOR_RED );
 	}
 
 	fDrawCursors = CanDrawSectorCursor( );
@@ -2511,8 +2511,7 @@ static UINT32 HandleMapUI(void)
 				}
 
 
-				if( gfBlitBattleSectorLocator &&
-						sMapX == gubPBSectorX && sMapY == gubPBSectorY && iCurrentMapSectorZ == gubPBSectorZ )
+				if (gfBlitBattleSectorLocator && sector_coords{sMapX, sMapY, iCurrentMapSectorZ} == preBattleSector)
 				{ //Bring up a non-persistant version of mapscreen if the user clicks on the sector where a
 					//battle is taking place.
 					InitPreBattleInterface(0, false);
@@ -7719,7 +7718,7 @@ static void HandleMilitiaRedistributionClick(void)
 		}
 		else
 		{
-			INT8 const sam_id = GetSAMIdFromSector(sSelMapX, sSelMapY, 0);
+			INT8 const sam_id = GetSAMIdFromSector({sSelMapX, sSelMapY, 0});
 			if (sam_id != -1 && IsSecretFoundAt(SECTOR(sSelMapX, sSelMapY)))
 			{ // Cannot move militia around sam sites.
 				DoScreenIndependantMessageBox(pMapErrorString[30], MSG_BOX_FLAG_OK, NULL);

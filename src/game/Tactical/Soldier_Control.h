@@ -10,6 +10,7 @@
 #include "JA2Types.h"
 #include "Overhead_Types.h"
 #include "Item_Types.h"
+#include "Sector_Coords.h"
 
 #include <string_theory/string>
 
@@ -804,6 +805,12 @@ struct SOLDIERTYPE
 	BOOLEAN fComplainedThatTired;
 	INT16 sLastTwoLocations[2];
 	INT32 uiTimeSinceLastBleedGrunt;
+
+	// TBD: temporary until the coords are stored as a sector_coords
+	sector_coords get_sector_coords() const
+	{
+		return sector_coords{sSectorX, sSectorY, bSectorZ};
+	}
 };
 
 #define BASE_FOR_EACH_SOLDIER_INV_SLOT(type, iter, soldier) \

@@ -203,10 +203,16 @@ enum Quests
 #define START_SECTOR_LEAVE_EQUIP_GRIDNO	4868
 
 // NB brothel rooms 88-90 removed because they are the antechamber
-#define IN_BROTHEL( room )		(gWorldSectorX == 5 && gWorldSectorY == MAP_ROW_C && (room) >= 91 && (room) <= 119)
+static inline bool IN_BROTHEL(int const room)
+{
+	return sector_coords{5, MAP_ROW_C, 0}.equals_world_coords() && room >= 91 && room <= 119;
+}
 #define IN_BROTHEL_GUARD_ROOM( room )	( room == 110 )
 
-#define IN_KINGPIN_HOUSE( room )	( gWorldSectorX == 5 && gWorldSectorY == MAP_ROW_D && (room) >= 30 && (room) <= 39 )
+static inline bool IN_KINGPIN_HOUSE(int const room)
+{
+	return sector_coords{5, MAP_ROW_D, 0}.equals_world_coords() && room >= 30 && room <= 39;
+}
 
 #define LOYALTY_LOW_THRESHOLD		30
 #define LOYALTY_OK_THRESHOLD		50

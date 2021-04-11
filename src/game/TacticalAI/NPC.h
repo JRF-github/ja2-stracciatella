@@ -2,6 +2,7 @@
 #define NPC_H
 
 #include "Facts.h"
+#include "Sector_Coords.h"
 #include "Types.h"
 struct OBJECTTYPE;
 struct SOLDIERTYPE;
@@ -105,7 +106,7 @@ BOOLEAN GetInfoForAbandoningEPC(UINT8 ubNPC, UINT16* pusQuoteNum, Fact* fact_to_
 
 BOOLEAN RecordHasDialogue( UINT8 ubNPC, UINT8 ubRecord );
 
-INT8 ConsiderCivilianQuotes( INT16 sSectorX, INT16 sSectorY, INT16 sSectorZ,  BOOLEAN fSetAsUsed );
+INT8 ConsiderCivilianQuotes( sector_coords const& sector, bool fSetAsUsed );
 
 void ResetOncePerConvoRecordsForNPC( UINT8 ubNPC );
 

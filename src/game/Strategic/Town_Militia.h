@@ -4,7 +4,7 @@
 // header for town militia strategic control module
 
 #include "JA2Types.h"
-
+#include "Sector_Coords.h"
 #include <string_theory/string>
 
 
@@ -39,8 +39,8 @@ ST::string BuildMilitiaPromotionsString();
 UINT8 CountAllMilitiaInSector(INT16 sMapX, INT16 sMapY);
 UINT8 MilitiaInSectorOfRank(INT16 sMapX, INT16 sMapY, UINT8 ubRank);
 
-// Returns TRUE if sector is under player control, has no enemies in it, and isn't currently in combat mode
-BOOLEAN SectorOursAndPeaceful( INT16 sMapX, INT16 sMapY, INT8 bMapZ );
+// Returns true if sector is under player control, has no enemies in it, and isn't currently in combat mode
+bool SectorOursAndPeaceful(sector_coords const& coords);
 
 // tell player how much it will cost
 void HandleInterfaceMessageForCostOfTrainingMilitia( SOLDIERTYPE *pSoldier );

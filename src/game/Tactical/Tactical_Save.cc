@@ -120,7 +120,7 @@ static void RetrieveTempFileFromSavedGame(HWFILE const f, UINT32 const flags, Se
 }
 
 
-static void SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(INT16 sMapX, INT16 sMapY, INT8 bMapZ, bool check_consistency);
+static void SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(sector_coords const& coords, bool check_consistency);
 
 
 static void RetrieveTempFilesFromSavedGame(HWFILE const f, UINT32& flags, INT16 const x, INT16 const y, INT8 const z, UINT32 const savegame_version)
@@ -138,7 +138,7 @@ static void RetrieveTempFilesFromSavedGame(HWFILE const f, UINT32& flags, INT16 
 
 	if (flags & SF_ITEM_TEMP_FILE_EXISTS)
 	{
-		SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(x, y, z, savegame_version >= 86);
+		SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems({x, y, z}, savegame_version >= 86);
 	}
 
 	if (flags & SF_CIV_PRESERVED_TEMP_FILE_EXISTS && savegame_version < 78)
@@ -211,10 +211,10 @@ void LoadMapTempFilesFromSavedGameFile(HWFILE const f, UINT32 const savegame_ver
 }
 
 
-void SaveWorldItemsToTempItemFile(INT16 const sMapX, INT16 const sMapY, INT8 const bMapZ, const std::vector<WORLDITEM>& items)
+void SaveWorldItemsToTempItemFile(sector_coords const& coords, const std::vector<WORLDITEM>& items)
 {
 	{
-		AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(SF_ITEM_TEMP_FILE_EXISTS, sMapX, sMapY, bMapZ)));
+		AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(SF_ITEM_TEMP_FILE_EXISTS, coords.x, coords.y, coords.z)));
 		Assert(items.size() <= UINT32_MAX);
 		UINT32 numItems = static_cast<UINT32>(items.size());
 		FileWriteArray(f, numItems, items.data());
@@ -222,14 +222,14 @@ void SaveWorldItemsToTempItemFile(INT16 const sMapX, INT16 const sMapY, INT8 con
 		// SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems() reads it
 	}
 
-	SetSectorFlag(sMapX, sMapY, bMapZ, SF_ITEM_TEMP_FILE_EXISTS);
-	SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(sMapX, sMapY, bMapZ, false);
+	SetSectorFlag(coords.x, coords.y, coords.z, SF_ITEM_TEMP_FILE_EXISTS);
+	SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(coords, false);
 }
 
 
-std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(INT16 const x, INT16 const y, INT8 const z)
+std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(sector_coords const& coords)
 {
-	ST::string const filename = GetMapTempFileName(SF_ITEM_TEMP_FILE_EXISTS, x, y, z);
+	ST::string const filename = GetMapTempFileName(SF_ITEM_TEMP_FILE_EXISTS, coords.x, coords.y, coords.z);
 
 	std::vector<WORLDITEM> l_items;
 	// If the file doesn't exists, it's no problem
@@ -249,9 +249,9 @@ std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(INT16 const x, INT16 const
 }
 
 
-void AddItemsToUnLoadedSector(INT16 const sMapX, INT16 const sMapY, INT8 const bMapZ, INT16 const sGridNo, UINT32 const uiNumberOfItemsToAdd, OBJECTTYPE const* const pObject, UINT8 const ubLevel, UINT16 const usFlags, INT8 const bRenderZHeightAboveLevel, Visibility const bVisible)
+void AddItemsToUnLoadedSector(sector_coords const& coords, INT16 const sGridNo, UINT32 const uiNumberOfItemsToAdd, OBJECTTYPE const* const pObject, UINT8 const ubLevel, UINT16 const usFlags, INT8 const bRenderZHeightAboveLevel, Visibility const bVisible)
 {
-	std::vector<WORLDITEM> wis = LoadWorldItemsFromTempItemFile(sMapX, sMapY, bMapZ);
+	std::vector<WORLDITEM> wis = LoadWorldItemsFromTempItemFile(coords);
 
 	//loop through all the objects to add
 	for (UINT32 uiLoop1 = 0; uiLoop1 < uiNumberOfItemsToAdd; ++uiLoop1)
@@ -288,7 +288,7 @@ void AddItemsToUnLoadedSector(INT16 const sMapX, INT16 const sMapY, INT8 const b
 		}
 	}
 
-	SaveWorldItemsToTempItemFile(sMapX, sMapY, bMapZ, wis);
+	SaveWorldItemsToTempItemFile(coords, wis);
 }
 
 
@@ -328,7 +328,7 @@ void SaveCurrentSectorsInformationToTempItemFile()
 	// handle all reachable before save
 	HandleAllReachAbleItemsInTheSector(x, y, z);
 
-	SaveWorldItemsToTempItemFile(x, y, z, gWorldItems);
+	SaveWorldItemsToTempItemFile({x, y, z}, gWorldItems);
 	SaveRottingCorpsesToTempCorpseFile(x, y, z);
 	SaveDoorTableToDoorTableTempFile(x, y, z);
 	SaveRevealedStatusArrayToRevealedTempFile(x, y, z);
@@ -599,7 +599,7 @@ static UINT32 GetLastTimePlayerWasInSector(void)
 
 static void LoadAndAddWorldItemsFromTempFile(INT16 const sMapX, INT16 const sMapY, INT8 const bMapZ)
 {
-	std::vector<WORLDITEM> items = LoadWorldItemsFromTempItemFile(sMapX, sMapY, bMapZ);
+	std::vector<WORLDITEM> items = LoadWorldItemsFromTempItemFile({sMapX, sMapY, bMapZ});
 
 	// Have we already been to the sector?
 	if (GetSectorFlagStatus(sMapX, sMapY, bMapZ, SF_ALREADY_LOADED))
@@ -741,7 +741,7 @@ void AddWorldItemsToUnLoadedSector(const INT16 sMapX, const INT16 sMapY, const I
 	for (const WORLDITEM& wi : wis)
 	{
 		if (!wi.fExists) continue;
-		AddItemsToUnLoadedSector(sMapX, sMapY, bMapZ, wi.sGridNo, 1, &wi.o, wi.ubLevel, wi.usFlags, wi.bRenderZHeightAboveLevel, static_cast<Visibility>(wi.bVisible));
+		AddItemsToUnLoadedSector({sMapX, sMapY, bMapZ}, wi.sGridNo, 1, &wi.o, wi.ubLevel, wi.usFlags, wi.bRenderZHeightAboveLevel, static_cast<Visibility>(wi.bVisible));
 	}
 }
 
@@ -876,7 +876,7 @@ BOOLEAN GetSectorFlagStatus(INT16 const x, INT16 const y, UINT8 const z, SectorF
 }
 
 
-void AddDeadSoldierToUnLoadedSector(INT16 const x, INT16 const y, UINT8 const z, SOLDIERTYPE* const s, INT16 const grid_no, UINT32 const flags)
+void AddDeadSoldierToUnLoadedSector(INT16 const x, INT16 const y, INT8 const z, SOLDIERTYPE* const s, INT16 const grid_no, UINT32 const flags)
 {
 	// Setup the flags for the items and the rotting corpses
 	UINT16 flags_for_world_items    = 0;
@@ -920,7 +920,7 @@ void AddDeadSoldierToUnLoadedSector(INT16 const x, INT16 const y, UINT8 const z,
 			}
 
 			ReduceAmmoDroppedByNonPlayerSoldiers(*s, o);
-			AddItemsToUnLoadedSector(x, y, z, grid_no, 1, &o, s->bLevel, flags_for_world_items, 0, VISIBLE);
+			AddItemsToUnLoadedSector({x, y, z}, grid_no, 1, &o, s->bLevel, flags_for_world_items, 0, VISIBLE);
 		}
 	}
 
@@ -1088,54 +1088,51 @@ ST::string GetMapTempFileName(SectorFlags const uiType, INT16 const sMapX, INT16
 }
 
 
-static UINT32 UpdateLoadedSectorsItemInventory(INT16 x, INT16 y, INT8 z, UINT32 n_items);
+static UINT32 UpdateLoadedSectorsItemInventory(sector_coords const& coords, UINT32 n_items);
 
 
-UINT32 GetNumberOfVisibleWorldItemsFromSectorStructureForSector(INT16 const x, INT16 const y, INT8 const z)
+UINT32 GetNumberOfVisibleWorldItemsFromSectorStructureForSector(sector_coords const& coords)
 {
 	UINT32 n_items;
-	if (z == 0)
+	if (coords.z == 0)
 	{
-		n_items = SectorInfo[SECTOR(x, y)].uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer;
+		n_items = SectorInfo[coords].uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer;
 	}
 	else
 	{
 		//find the underground sector
-		UNDERGROUND_SECTORINFO const* const u = FindUnderGroundSector(x, y, z);
+		UNDERGROUND_SECTORINFO const* const u = FindUnderGroundSector(coords.x, coords.y, coords.z);
 		n_items = u ? u->uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer : 0;
 	}
 
 	// If the requested sector is currently loaded
-	if (gfWorldLoaded &&
-		x == gWorldSectorX &&
-		y == gWorldSectorY &&
-		z == gbWorldSectorZ)
+	if (gfWorldLoaded && coords.equals_world_coords())
 	{
 		// Since items might have been added, update
-		n_items = UpdateLoadedSectorsItemInventory(x, y, z, n_items);
+		n_items = UpdateLoadedSectorsItemInventory(coords, n_items);
 	}
 
 	return n_items;
 }
 
 
-void SetNumberOfVisibleWorldItemsInSectorStructureForSector(INT16 const x, INT16 const y, INT8 const z, UINT32 const n_items)
+void SetNumberOfVisibleWorldItemsInSectorStructureForSector(sector_coords const& coords, UINT32 const n_items)
 {
-	if (z == 0)
+	if (coords.z == 0)
 	{
-		SectorInfo[SECTOR(x, y)].uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer = n_items;
+		SectorInfo[coords].uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer = n_items;
 	}
 	else
 	{
-		UNDERGROUND_SECTORINFO* const u = FindUnderGroundSector(x, y, z);
+		UNDERGROUND_SECTORINFO* const u = FindUnderGroundSector(coords.x, coords.y, coords.z);
 		if (u) u->uiNumberOfWorldItemsInTempFileThatCanBeSeenByPlayer = n_items;
 	}
 }
 
 
-static void SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(INT16 const sMapX, INT16 const sMapY, INT8 const bMapZ, bool const check_consistency)
+static void SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(sector_coords const& coords, bool const check_consistency)
 {
-	std::vector<WORLDITEM> pTotalSectorList = LoadWorldItemsFromTempItemFile(sMapX, sMapY, bMapZ);
+	std::vector<WORLDITEM> pTotalSectorList = LoadWorldItemsFromTempItemFile(coords);
 
 	UINT32 uiItemCount = 0;
 	if (pTotalSectorList.size() > 0)
@@ -1150,17 +1147,17 @@ static void SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems(INT16 cons
 
 	if (check_consistency)
 	{
-		const UINT32 uiReported = GetNumberOfVisibleWorldItemsFromSectorStructureForSector(sMapX, sMapY, bMapZ);
+		const UINT32 uiReported = GetNumberOfVisibleWorldItemsFromSectorStructureForSector(coords);
 		if (uiItemCount != uiReported)
 		{
 			SLOGW("SynchronizeItemTempFile() Reported %d, should be %d", uiReported, uiItemCount);
 		}
 	}
-	SetNumberOfVisibleWorldItemsInSectorStructureForSector(sMapX, sMapY, bMapZ, uiItemCount);
+	SetNumberOfVisibleWorldItemsInSectorStructureForSector(coords, uiItemCount);
 }
 
 
-static UINT32 UpdateLoadedSectorsItemInventory(INT16 const x, INT16 const y, INT8 const z, UINT32 const n_items)
+static UINT32 UpdateLoadedSectorsItemInventory(sector_coords const& coords, UINT32 const n_items)
 {
 	UINT32 n = 0;
 	CFOR_EACH_WORLD_ITEM(wi)
@@ -1172,7 +1169,7 @@ static UINT32 UpdateLoadedSectorsItemInventory(INT16 const x, INT16 const y, INT
 	// Update the value in the sector info struct, if the item count is different
 	if (n != n_items)
 	{
-		SetNumberOfVisibleWorldItemsInSectorStructureForSector(x, y, z, n);
+		SetNumberOfVisibleWorldItemsInSectorStructureForSector(coords, n);
 	}
 
 	return n;

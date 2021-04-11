@@ -3242,7 +3242,7 @@ action_punch_pc:
 				break;
 
 			case NPC_ACTION_TRIGGER_ELLIOT_BY_SAM_DISABLED:
-				if ( IsThereAFunctionalSAMSiteInSector( gTacticalStatus.ubLastBattleSectorX, gTacticalStatus.ubLastBattleSectorY, 0 ) )
+				if ( IsThereAFunctionalSAMSiteInSector( gTacticalStatus.lastBattleSector ) )
 				{
 					TriggerNPCRecord( QUEEN, 6 );
 				}

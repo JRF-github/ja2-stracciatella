@@ -3,7 +3,7 @@
 #include "BobbyRMailOrder.h"
 #include "Campaign_Types.h"
 #include "JsonObject.h"
-
+#include "Sector_Coords.h"
 #include "rapidjson/document.h"
 
 
@@ -14,7 +14,7 @@ public:
 		uint16_t chargeRateOverNight_, uint16_t chargeRate2Days_, uint16_t chargeRateStandard_,
 		uint8_t flowersNextDayDeliveryCost_, uint8_t flowersWhenItGetsThereCost_,
 		bool canDeliver_, bool isPrimary_,
-		uint8_t deliverySectorId_, uint8_t deliverySectorZ_, int16_t deliverySectorGridNo_, 
+		uint8_t deliverySectorId_, int8_t deliverySectorZ_, int16_t deliverySectorGridNo_,
 		int16_t emailOffset_, int16_t emailLength_);
 
 	uint8_t getDeliverySector() const;
@@ -34,9 +34,7 @@ public:
 	const bool canDeliver;
 	const bool isPrimary;
 
-	const uint8_t deliverySectorX;
-	const uint8_t deliverySectorY;
-	const uint8_t deliverySectorZ;
+	const sector_coords deliverySector;
 	const int16_t deliverySectorGridNo;
 	const int32_t emailOffset;
 	const int32_t emailLength;

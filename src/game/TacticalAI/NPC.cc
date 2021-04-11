@@ -2765,23 +2765,23 @@ BOOLEAN RecordHasDialogue(UINT8 const ubNPC, UINT8 const ubRecord)
 }
 
 
-static INT8 FindCivQuoteFileIndex(INT16 const x, INT16 const y, INT16 const z)
+static INT8 FindCivQuoteFileIndex(sector_coords const& coords)
 {
-	if (z > 0) return MINERS_CIV_QUOTE_INDEX;
+	if (coords.z > 0) return MINERS_CIV_QUOTE_INDEX;
 
 	for (UINT8 i = 0; i != NUM_CIVQUOTE_SECTORS; ++i)
 	{
-		if (gsCivQuoteSector[i][0] != x) continue;
-		if (gsCivQuoteSector[i][1] != y) continue;
+		if (gsCivQuoteSector[i][0] != coords.x) continue;
+		if (gsCivQuoteSector[i][1] != coords.y) continue;
 		return i;
 	}
 	return -1;
 }
 
 
-INT8 ConsiderCivilianQuotes(INT16 const x, INT16 const y, INT16 const z, BOOLEAN const set_as_used)
+INT8 ConsiderCivilianQuotes(sector_coords const& coords, bool const set_as_used)
 {
-	INT8 const quote_file_idx = FindCivQuoteFileIndex(x, y, z);
+	INT8 const quote_file_idx = FindCivQuoteFileIndex(coords);
 	if (quote_file_idx == -1) return -1; // no hints for this sector
 
 	NPCQuoteInfo* const quotes = EnsureCivQuoteFileLoaded(quote_file_idx);

@@ -3,6 +3,7 @@
 
 // the .h to the mine management system
 
+#include "Sector_Coords.h"
 #include "Types.h"
 
 
@@ -149,7 +150,7 @@ void PlayerAttackedHeadMiner( UINT8 ubMinerProfileId );
 BOOLEAN HasHisMineBeenProducingForPlayerForSomeTime( UINT8 ubMinerProfileId );
 
 // Get the id of the mine for this sector x,y,z; -1 is invalid
-INT8 GetIdOfMineForSector(INT16 x, INT16 y, INT8 z);
+INT8 GetIdOfMineForSector(sector_coords const&);
 
 // use this to determine whether or not to place miners into a underground mine level
 BOOLEAN AreThereMinersInsideThisMine( UINT8 ubMineIndex );

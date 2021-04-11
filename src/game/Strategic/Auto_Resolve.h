@@ -1,6 +1,7 @@
 #ifndef __AUTO_RESOLVE_H
 #define __AUTO_RESOLVE_H
 
+#include "Sector_Coords.h"
 #include "ScreenIDs.h"
 #include "Types.h"
 struct OBJECTTYPE;
@@ -13,6 +14,10 @@ void EnterAutoResolveMode( UINT8 ubSectorX, UINT8 ubSectorY );
 BOOLEAN IsAutoResolveActive( void );
 
 void EliminateAllEnemies( UINT8 ubSectorX, UINT8 ubSectorY );
+static inline void EliminateAllEnemies(sector_coords const& coords)
+{
+    EliminateAllEnemies(coords.x, coords.y);
+}
 
 void ConvertTacticalBattleIntoStrategicAutoResolveBattle(void);
 

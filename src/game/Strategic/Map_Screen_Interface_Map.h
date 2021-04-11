@@ -1,6 +1,7 @@
 #ifndef _MAP_SCREEN_INTERFACE_MAP_H
 #define _MAP_SCREEN_INTERFACE_MAP_H
 
+#include "Sector_Coords.h"
 #include "Types.h"
 #include "UILayout.h"
 struct SOLDIERTYPE;
@@ -16,6 +17,7 @@ void DrawMapIndexBigMap( BOOLEAN fSelectedCursorIsYellow );
 void DrawMap(void);
 
 void GetScreenXYFromMapXY( INT16 sMapX, INT16 sMapY, INT16 *psX, INT16 *psY );
+std::pair<INT16, INT16> GetScreenXYFromSectorCoords(sector_coords const&);
 
 void InitializePalettesForMap(void);
 void ShutDownPalettesForMap( void );

@@ -141,7 +141,7 @@ BOOLEAN SetThisSectorAsPlayerControlled( INT16 sMapX, INT16 sMapY, INT8 bMapZ, B
 			}
 
 			// if it's a SAM site sector
-			INT8 const sam_id = GetSAMIdFromSector(sMapX, sMapY, bMapZ);
+			INT8 const sam_id = GetSAMIdFromSector({sMapX, sMapY, bMapZ});
 			if (sam_id != -1)
 			{
 				if ( 1 /*!GetSectorFlagStatus( sMapX, sMapY, bMapZ, SF_SECTOR_HAS_BEEN_LIBERATED_ONCE ) */)
@@ -276,7 +276,7 @@ BOOLEAN SetThisSectorAsEnemyControlled(INT16 const sMapX, INT16 const sMapY, INT
 			}
 
 			// if it's a SAM site sector
-			if( IsThisSectorASAMSector( sMapX, sMapY, bMapZ ) )
+			if( IsThisSectorASAMSector( {sMapX, sMapY, bMapZ} ) )
 			{
 				HandleMoraleEvent( NULL, MORALE_SAM_SITE_LOST, sMapX, sMapY, bMapZ );
 				HandleGlobalLoyaltyEvent( GLOBAL_LOYALTY_LOSE_SAM, sMapX, sMapY, bMapZ );
@@ -305,7 +305,7 @@ BOOLEAN SetThisSectorAsEnemyControlled(INT16 const sMapX, INT16 const sMapY, INT
 			{
 				ubTheftChance = 90;
 			}
-			RemoveRandomItemsInSector( sMapX, sMapY, bMapZ, ubTheftChance );
+			RemoveRandomItemsInSector({sMapX, sMapY, bMapZ}, ubTheftChance );
 		}
 
 		// don't touch fPlayer flag for a surface sector lost to the enemies!

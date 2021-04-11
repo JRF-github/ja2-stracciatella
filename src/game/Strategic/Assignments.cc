@@ -562,11 +562,11 @@ static BOOLEAN CanCharacterPatient(const SOLDIERTYPE* const s)
 }
 
 
-static BOOLEAN CanSectorContainMilita(const INT16 x, const INT16 y, const INT16 z)
+static BOOLEAN CanSectorContainMilita(sector_coords const& coords)
 {
 	return
-		(z == 0 && StrategicMap[CALCULATE_STRATEGIC_INDEX(x, y)].bNameId != BLANK_SECTOR) || // is there a town?
-		IsThisSectorASAMSector(x, y, z);
+		(coords.z == 0 && StrategicMap[coords.get_strategic_index()].bNameId != BLANK_SECTOR) || // is there a town?
+		IsThisSectorASAMSector(coords);
 }
 
 
@@ -577,8 +577,8 @@ static BOOLEAN BasicCanCharacterTrainMilitia(const SOLDIERTYPE* const s)
 	// they must be alive/conscious and in the sector with the town
 	return
 		s->bLeadership > 0 &&
-		CanSectorContainMilita(s->sSectorX, s->sSectorY, s->bSectorZ) &&
-		NumEnemiesInAnySector(s->sSectorX, s->sSectorY, s->bSectorZ) == 0 &&
+		CanSectorContainMilita(s->get_sector_coords()) &&
+		NumEnemiesInAnySector(s->get_sector_coords()) == 0 &&
 		AreAssignmentConditionsMet(*s, AC_NONE);
 }
 
@@ -610,7 +610,7 @@ BOOLEAN DoesSectorMercIsInHaveSufficientLoyaltyToTrainMilitia(const SOLDIERTYPE*
 	}
 	else
 	{
-		return IsThisSectorASAMSector(s->sSectorX, s->sSectorY, s->bSectorZ);
+		return IsThisSectorASAMSector(s->get_sector_coords());
 	}
 }
 
@@ -623,9 +623,7 @@ static INT8 CountMilitiaTrainersInSoldiersSector(const SOLDIERTYPE* const pSoldi
 	{
 		if (s != pSoldier &&
 				s->bLife >= OKLIFE &&
-				s->sSectorX == pSoldier->sSectorX &&
-				s->sSectorY == pSoldier->sSectorY &&
-				s->bSectorZ == pSoldier->bSectorZ &&
+				s->get_sector_coords() == pSoldier->get_sector_coords() &&
 				s->bAssignment == TRAIN_TOWN)
 		{
 			++bCount;
@@ -1988,7 +1986,6 @@ static BOOLEAN TrainTownInSector(SOLDIERTYPE* pTrainer, INT16 sMapX, INT16 sMapY
 static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const INT8 bZ)
 {
 	UINT8 ubStat;
-	BOOLEAN fAtGunRange = FALSE;
 	INT16 sTotalTrainingPts = 0;
 	INT16 sTrainingPtsDueToInstructor = 0;
 	INT16 sBestTrainingPts;
@@ -2004,8 +2001,10 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 		return;
 	}
 
+	sector_coords const coords{sMapX, sMapY, bZ};
+
 	// if sector not under our control, has enemies in it, or is currently in combat mode
-	if (!SectorOursAndPeaceful( sMapX, sMapY, bZ ))
+	if (!SectorOursAndPeaceful( coords ) )
 	{
 		// then training is canceled for this hour.
 		// This is partly logical, but largely to prevent newly trained militia from appearing in mid-battle
@@ -2013,10 +2012,7 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 	}
 
 	// are we training in the sector with gun range in Alma?
-	if ( (sMapX == GUN_RANGE_X) && (sMapY == GUN_RANGE_Y) && (bZ == GUN_RANGE_Z) )
-	{
-		fAtGunRange = TRUE;
-	}
+	bool fAtGunRange = (coords == sector_coords{GUN_RANGE_X, GUN_RANGE_Y, GUN_RANGE_Z} );
 
 	// init trainer list
 	const SOLDIERTYPE* pStatTrainerList[NUM_TRAINABLE_STATS]; // can't have more "best" trainers than trainable stats
@@ -2035,7 +2031,7 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 		// search team for active instructors in this sector
 		CFOR_EACH_IN_TEAM(pTrainer, OUR_TEAM)
 		{
-			if (pTrainer->sSectorX == sMapX && pTrainer->sSectorY == sMapY && pTrainer->bSectorZ == bZ)
+			if (pTrainer->get_sector_coords() == coords)
 			{
 				// if he's training teammates in this stat
 				if (pTrainer->bAssignment == TRAIN_TEAMMATE &&
@@ -2062,7 +2058,7 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 	FOR_EACH_IN_TEAM(pStudent, OUR_TEAM)
 	{
 		// see if this merc is active and in the same sector
-		if (pStudent->sSectorX == sMapX && pStudent->sSectorY == sMapY && pStudent->bSectorZ == bZ)
+		if (pStudent->get_sector_coords() == coords)
 		{
 			// if he's training himself (alone, or by others), then he's a student
 			if ( ( pStudent -> bAssignment == TRAIN_SELF ) || ( pStudent -> bAssignment == TRAIN_BY_OTHER ) )
@@ -2107,7 +2103,7 @@ static void HandleTrainingInSector(const INT16 sMapX, const INT16 sMapY, const I
 	}
 
 	// check if we're doing a sector where militia can be trained
-	if (CanSectorContainMilita(sMapX, sMapY, bZ))
+	if (CanSectorContainMilita(coords))
 	{
 		// init town trainer list
 		std::fill(std::begin(TownTrainer), std::end(TownTrainer), TOWN_TRAINER_TYPE{});
@@ -2477,7 +2473,7 @@ static void TrainSoldierWithPts(SOLDIERTYPE* const s, const INT16 train_pts)
 // train militia in this sector with this soldier
 static BOOLEAN TrainTownInSector(SOLDIERTYPE* pTrainer, INT16 sMapX, INT16 sMapY, INT16 sTrainingPts)
 {
-	Assert(CanSectorContainMilita(pTrainer->sSectorX, pTrainer->sSectorY, pTrainer->bSectorZ));
+	Assert(CanSectorContainMilita(pTrainer->get_sector_coords()));
 
 	SECTORINFO *pSectorInfo = &( SectorInfo[ SECTOR( sMapX, sMapY ) ] );
 

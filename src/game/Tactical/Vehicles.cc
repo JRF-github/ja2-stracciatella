@@ -119,9 +119,7 @@ INT32 AddVehicleToList(const INT16 sMapX, const INT16 sMapY, const INT16 sGridNo
 	// found a slot
 	*v = VEHICLETYPE{};
 	v->ubMovementGroup = 0;
-	v->sSectorX        = sMapX;
-	v->sSectorY        = sMapY;
-	v->sSectorZ        = 0;
+	v->coords          = sector_coords{sMapX, sMapY, 0};
 	v->sGridNo         = sGridNo;
 	v->fValid          = TRUE;
 	v->ubVehicleType   = ubType;
@@ -172,9 +170,7 @@ bool IsThisVehicleAccessibleToSoldier(SOLDIERTYPE const& s, VEHICLETYPE const& v
 {
 	return !s.fBetweenSectors &&
 		!v.fBetweenSectors &&
-		s.sSectorX == v.sSectorX &&
-		s.sSectorY == v.sSectorY &&
-		s.bSectorZ == v.sSectorZ &&
+		s.get_sector_coords() == v.coords &&
 		OKUseVehicle(g_vehicle_type_info[v.ubVehicleType].profile);
 }
 
@@ -314,9 +310,7 @@ void SetSoldierExitHelicopterInsertionData(SOLDIERTYPE* const s)
 	if (s->bInSector) return;
 
 	auto shippingDest = GCM->getPrimaryShippingDestination();
-	if (s->sSectorX == shippingDest->deliverySectorX &&
-		s->sSectorY == shippingDest->deliverySectorY &&
-		s->bSectorZ == shippingDest->deliverySectorZ)
+	if (sector_coords{s->sSectorX, s->sSectorY, s->bSectorZ} == shippingDest->deliverySector)
 	{
 		// This is Drassen, make insertion gridno specific
 		s->ubStrategicInsertionCode = INSERTION_CODE_GRIDNO;
@@ -351,9 +345,9 @@ static bool RemoveSoldierFromVehicle(SOLDIERTYPE& s)
 	RemovePlayerFromGroup(s);
 
 	s.ubGroupID      = 0;
-	s.sSectorY       = v.sSectorY;
-	s.sSectorX       = v.sSectorX;
-	s.bSectorZ       = v.sSectorZ;
+	s.sSectorX       = v.coords.x;
+	s.sSectorY       = v.coords.y;
+	s.bSectorZ       = v.coords.z;
 	s.uiStatusFlags &= ~(SOLDIER_DRIVER | SOLDIER_PASSENGER);
 
 	if (IsHelicopter(v))
@@ -811,8 +805,8 @@ void LoadVehicleInformationFromSavedGameFile(HWFILE const hFile, UINT32 const ui
 
 void SetVehicleSectorValues(VEHICLETYPE& v, UINT8 const x, UINT8 const y)
 {
-	v.sSectorX = x;
-	v.sSectorY = y;
+	v.coords.x = x;
+	v.coords.y = y;
 
 	MERCPROFILESTRUCT& p = GetProfile(g_vehicle_type_info[v.ubVehicleType].profile);
 	p.sSectorX = x;

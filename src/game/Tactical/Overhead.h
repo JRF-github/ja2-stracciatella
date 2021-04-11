@@ -2,6 +2,7 @@
 #define __OVERHEAD_H
 
 #include "Debug.h"
+#include "Sector_Coords.h"
 #include "Soldier_Control.h"
 
 
@@ -52,8 +53,7 @@ struct TacticalStatusType
 	UINT32           uiTimeOfLastInput;
 	UINT32           uiTimeSinceDemoOn;
 	BOOLEAN          fCivGroupHostile[ NUM_CIV_GROUPS ];
-	UINT8            ubLastBattleSectorX;
-	UINT8            ubLastBattleSectorY;
+	sector_coords    lastBattleSector;
 	BOOLEAN          fLastBattleWon;
 	BOOLEAN          fVirginSector;
 	BOOLEAN          fEnemyInSector;
