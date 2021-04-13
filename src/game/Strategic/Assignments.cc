@@ -427,15 +427,15 @@ static BOOLEAN DoesCharacterHaveAnyItemsToRepair(SOLDIERTYPE const* const pSoldi
 	UINT8 ubPassType;
 
 	// check for jams
-	CFOR_EACH_SOLDIER_INV_SLOT(i, *pSoldier)
+	for (OBJECTTYPE const& o : pSoldier->inv)
 	{
-		ubItemsInPocket = i->ubNumberOfObjects;
+		ubItemsInPocket = o.ubNumberOfObjects;
 		// unjam any jammed weapons
 		// run through pocket and repair
 		for( ubObjectInPocketCounter = 0; ubObjectInPocketCounter < ubItemsInPocket; ubObjectInPocketCounter++ )
 		{
 			// jammed gun?
-			if (GCM->getItem(i->usItem)->getItemClass() == IC_GUN && i->bGunAmmoStatus < 0)
+			if (GCM->getItem(o.usItem)->getItemClass() == IC_GUN && o.bGunAmmoStatus < 0)
 			{
 				return( TRUE );
 			}
@@ -443,10 +443,8 @@ static BOOLEAN DoesCharacterHaveAnyItemsToRepair(SOLDIERTYPE const* const pSoldi
 	}
 
 	// now check for items to repair
-	CFOR_EACH_SOLDIER_INV_SLOT(i, *pSoldier)
+	for (OBJECTTYPE const& o : pSoldier->inv)
 	{
-		OBJECTTYPE const& o = *i;
-
 		ubItemsInPocket = o.ubNumberOfObjects;
 
 		// run through pocket

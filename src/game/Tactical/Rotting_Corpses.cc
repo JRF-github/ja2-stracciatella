@@ -720,21 +720,21 @@ BOOLEAN TurnSoldierIntoCorpse(SOLDIERTYPE& s)
 	else
 	{
 		// OK, Place what objects this guy was carrying on the ground!
-		FOR_EACH_SOLDIER_INV_SLOT(pObj, s)
+		for (OBJECTTYPE & o : s.inv)
 		{
-			if ( pObj->usItem != NOTHING )
+			if ( o.usItem != NOTHING )
 			{
 				// Check if it's supposed to be dropped
-				if (!(pObj->fFlags & OBJECT_UNDROPPABLE)
+				if (!(o.fFlags & OBJECT_UNDROPPABLE)
 					|| (s.bTeam == OUR_TEAM)
 					|| gamepolicy(f_drop_everything))
 				{
 					// and make sure that it really is a droppable item type
-					if ( !(GCM->getItem(pObj->usItem)->getFlags() & ITEM_DEFAULT_UNDROPPABLE) )
+					if ( !(GCM->getItem(o.usItem)->getFlags() & ITEM_DEFAULT_UNDROPPABLE) )
 					{
-						ReduceAmmoDroppedByNonPlayerSoldiers(s, *pObj);
+						ReduceAmmoDroppedByNonPlayerSoldiers(s, o);
 						Visibility vis = gamepolicy(f_all_dropped_visible) ? VISIBLE : bVisible;
-						AddItemToPool(s.sGridNo, pObj, vis, s.bLevel, usItemFlags, -1);
+						AddItemToPool(s.sGridNo, &o, vis, s.bLevel, usItemFlags, -1);
 					}
 				}
 			}

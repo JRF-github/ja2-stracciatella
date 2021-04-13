@@ -27,10 +27,10 @@ static UINT32 MercChecksum(SOLDIERTYPE const& s)
 	sum *= 1 + s.bExpLevel;
 	sum += 1 + s.ubProfile;
 
-	CFOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE const& o : s.inv)
 	{
-		sum += i->usItem;
-		sum += i->ubNumberOfObjects;
+		sum += o.usItem;
+		sum += o.ubNumberOfObjects;
 	}
 
 	return sum;
@@ -53,9 +53,9 @@ void ExtractSoldierType(const BYTE* const data, SOLDIERTYPE* const s, bool strac
 	EXTR_I8(d, s->bInitialActionPoints)
 	EXTR_SKIP(d, 3)
 	EXTR_U32(d, s->uiStatusFlags)
-	FOR_EACH_SOLDIER_INV_SLOT(i, *s)
+	for (OBJECTTYPE & i : s->inv)
 	{
-		ExtractObject(d, i);
+		ExtractObject(d, &i);
 	}
 	EXTR_PTR(d, s->pTempObject)
 	EXTR_PTR(d, s->pKeyRing)
@@ -574,9 +574,9 @@ void InjectSoldierType(BYTE* const data, const SOLDIERTYPE* const s)
 	INJ_I8(d, s->bInitialActionPoints)
 	INJ_SKIP(d, 3)
 	INJ_U32(d, s->uiStatusFlags)
-	CFOR_EACH_SOLDIER_INV_SLOT(i, *s)
+	for (OBJECTTYPE const& o : s->inv)
 	{
-		InjectObject(d, i);
+		InjectObject(d, &o);
 	}
 	INJ_PTR(d, s->pTempObject)
 	INJ_PTR(d, s->pKeyRing)

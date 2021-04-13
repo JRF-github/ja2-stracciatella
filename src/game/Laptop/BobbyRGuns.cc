@@ -1357,9 +1357,8 @@ static UINT8 CheckPlayersInventoryForGunMatchingGivenAmmoID(ItemModel const* con
 	CFOR_EACH_IN_TEAM(s, OUR_TEAM)
 	{
 		// Loop through all the pockets on the merc
-		CFOR_EACH_SOLDIER_INV_SLOT(i, *s)
+		for (OBJECTTYPE const& o : s->inv)
 		{
-			OBJECTTYPE const& o = *i;
 			// If there is a weapon here
 			if (GCM->getItem(o.usItem)->getItemClass() != IC_GUN) continue;
 			// If the weapon uses the same kind of ammo as the one passed in

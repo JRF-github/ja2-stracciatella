@@ -142,10 +142,10 @@ bool KeyExistsInKeyRing(SOLDIERTYPE const& s, UINT8 const key_id)
 
 static bool KeyExistsInInventory(SOLDIERTYPE const& s, UINT8 const key_id)
 {
-	CFOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE const& o : s.inv)
 	{
-		if (GCM->getItem(i->usItem)->getItemClass() != IC_KEY)    continue;
-		if (i->ubKeyID != key_id && key_id != ANYKEY) continue;
+		if (GCM->getItem(o.usItem)->getItemClass() != IC_KEY)    continue;
+		if (o.ubKeyID != key_id && key_id != ANYKEY) continue;
 		return true;
 	}
 	return false;

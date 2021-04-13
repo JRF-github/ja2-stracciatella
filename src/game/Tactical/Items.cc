@@ -885,13 +885,13 @@ UINT8 CalculateObjectWeight(OBJECTTYPE const* const o)
 UINT32 CalculateCarriedWeight(SOLDIERTYPE const* const s)
 {
 	UINT32 total_weight = 0;
-	CFOR_EACH_SOLDIER_INV_SLOT(i, *s)
+	for (OBJECTTYPE const& o : s->inv)
 	{
-		UINT16 weight = i->ubWeight;
-		if (GCM->getItem(i->usItem)->getPerPocket() > 1)
+		UINT16 weight = o.ubWeight;
+		if (GCM->getItem(o.usItem)->getPerPocket() > 1)
 		{
 			// Account for # of items
-			weight *= i->ubNumberOfObjects;
+			weight *= o.ubNumberOfObjects;
 		}
 		total_weight += weight;
 	}
@@ -3256,22 +3256,22 @@ void CheckEquipmentForDamage( SOLDIERTYPE *pSoldier, INT32 iDamage )
 		return;
 	}
 
-	FOR_EACH_SOLDIER_INV_SLOT(i, *pSoldier)
+	for (OBJECTTYPE & i : pSoldier->inv)
 	{
-		ubNumberOfObjects = i->ubNumberOfObjects;
-		fBlowsUp = DamageItem(i, iDamage, FALSE);
+		ubNumberOfObjects = i.ubNumberOfObjects;
+		fBlowsUp = DamageItem(&i, iDamage, FALSE);
 		if (fBlowsUp)
 		{
 			// blow it up!
 			SOLDIERTYPE* const owner = (gTacticalStatus.ubAttackBusyCount ? pSoldier->attacker : pSoldier);
-			IgniteExplosion(owner, 0, pSoldier->sGridNo, i->usItem, pSoldier->bLevel);
+			IgniteExplosion(owner, 0, pSoldier->sGridNo, i.usItem, pSoldier->bLevel);
 
 			// Remove item!
-			DeleteObj(i);
+			DeleteObj(&i);
 
 			DirtyMercPanelInterface( pSoldier, DIRTYLEVEL2 );
 		}
-		else if (ubNumberOfObjects != i->ubNumberOfObjects)
+		else if (ubNumberOfObjects != i.ubNumberOfObjects)
 		{
 			DirtyMercPanelInterface( pSoldier, DIRTYLEVEL2 );
 		}
@@ -3284,17 +3284,17 @@ void CheckEquipmentForFragileItemDamage( SOLDIERTYPE *pSoldier, INT32 iDamage )
 	UINT8   ubNumberOfObjects;
 	BOOLEAN fPlayedGlassBreak = FALSE;
 
-	FOR_EACH_SOLDIER_INV_SLOT(i, *pSoldier)
+	for (OBJECTTYPE & i : pSoldier->inv)
 	{
-		switch (i->usItem)
+		switch (i.usItem)
 		{
 			case JAR_CREATURE_BLOOD:
 			case JAR:
 			case JAR_HUMAN_BLOOD:
 			case JAR_ELIXIR:
-				ubNumberOfObjects = i->ubNumberOfObjects;
-				DamageItem(i, iDamage, FALSE);
-				if (!fPlayedGlassBreak && ubNumberOfObjects != i->ubNumberOfObjects)
+				ubNumberOfObjects = i.ubNumberOfObjects;
+				DamageItem(&i, iDamage, FALSE);
+				if (!fPlayedGlassBreak && ubNumberOfObjects != i.ubNumberOfObjects)
 				{
 					PlayLocationJA2Sample(pSoldier->sGridNo, GLASS_CRACK, MIDVOLUME, 1);
 					fPlayedGlassBreak = TRUE;
@@ -3376,10 +3376,10 @@ void WaterDamage(SOLDIERTYPE& s)
 
 	if (s.bOverTerrainType == DEEP_WATER)
 	{
-		FOR_EACH_SOLDIER_INV_SLOT(i, s)
+		for (OBJECTTYPE & o : s.inv)
 		{
 			// if there's an item here that can get water damaged...
-			if (i->usItem && GCM->getItem(i->usItem)->getFlags() & ITEM_WATER_DAMAGES)
+			if (o.usItem && GCM->getItem(o.usItem)->getFlags() & ITEM_WATER_DAMAGES)
 			{
 				// roll the 'ol 100-sided dice
 				uiRoll = PreRandom(100);
@@ -3389,7 +3389,7 @@ void WaterDamage(SOLDIERTYPE& s)
 				{
 					// lose between 1 and 10 status points each time
 					// but don't let anything drop lower than 1%
-					i->bStatus[0] = std::max<INT8>(1, i->bStatus[0] - 10 + uiRoll);
+					o.bStatus[0] = std::max<INT8>(1, o.bStatus[0] - 10 + uiRoll);
 				}
 			}
 		}

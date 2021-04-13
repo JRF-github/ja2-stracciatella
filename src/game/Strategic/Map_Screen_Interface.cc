@@ -993,17 +993,17 @@ void HandleLeavingOfEquipmentInCurrentSector(SOLDIERTYPE& s)
 		}
 	}
 
-	FOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE & i : s.inv)
 	{
-		if (i->ubNumberOfObjects == 0) continue;
+		if (i.ubNumberOfObjects == 0) continue;
 
 		if (here)
 		{
-			AddItemToPool(gridno, i, VISIBLE, s.bLevel, WORLD_ITEM_REACHABLE, 0);
+			AddItemToPool(gridno, &i, VISIBLE, s.bLevel, WORLD_ITEM_REACHABLE, 0);
 		}
 		else
 		{
-			AddItemsToUnLoadedSector(s.sSectorX, s.sSectorY, s.bSectorZ, gridno, 1, i, s.bLevel, WOLRD_ITEM_FIND_SWEETSPOT_FROM_GRIDNO | WORLD_ITEM_REACHABLE, 0, VISIBLE);
+			AddItemsToUnLoadedSector(s.sSectorX, s.sSectorY, s.bSectorZ, gridno, 1, &i, s.bLevel, WOLRD_ITEM_FIND_SWEETSPOT_FROM_GRIDNO | WORLD_ITEM_REACHABLE, 0, VISIBLE);
 		}
 	}
 
@@ -1177,12 +1177,12 @@ static INT32 SetUpDropItemListForMerc(SOLDIERTYPE& s)
 	INT32 const slot = FindFreeSlotInLeaveList();
 	if (slot == -1) return -1;
 
-	CFOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE const& o : s.inv)
 	{
-		if (i->ubNumberOfObjects == 0) continue;
+		if (o.ubNumberOfObjects == 0) continue;
 
 		// Make a linked list of the items left behind, with the ptr to its head in this free slot
-		AddItemToLeaveIndex(i, slot);
+		AddItemToLeaveIndex(&o, slot);
 		// Store owner's profile id for the items added to this leave slot index
 		SetUpMercAboutToLeaveEquipment(s.ubProfile, slot);
 	}

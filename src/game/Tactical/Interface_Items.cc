@@ -954,23 +954,17 @@ static BOOLEAN CompatibleItemForApplyingOnMerc(const OBJECTTYPE* const test)
 static BOOLEAN SoldierContainsAnyCompatibleStuff(const SOLDIERTYPE* const s, const OBJECTTYPE* const test)
 {
 	const UINT16 item_class = GCM->getItem(test->usItem)->getItemClass();
-	if (item_class & IC_GUN)
+	if ((item_class & (IC_GUN | IC_AMMO)) == 0) return FALSE;
+	auto const testFn = (item_class & IC_GUN) ? CompatibleAmmoForGun : CompatibleGunForAmmo;
+
+	for (OBJECTTYPE const& o : s->inv)
 	{
-		CFOR_EACH_SOLDIER_INV_SLOT(i, *s)
-		{
-			if (CompatibleAmmoForGun(i, test)) return TRUE;
-		}
+		if (testFn(&o, test)) return TRUE;
 	}
-	else if (item_class & IC_AMMO)
-	{
-		CFOR_EACH_SOLDIER_INV_SLOT(i, *s)
-		{
-			if (CompatibleGunForAmmo(i, test)) return TRUE;
-		}
-	}
+
+	return FALSE;
 
 	// ATE: Put attachment checking here.....
-
 	return FALSE;
 }
 

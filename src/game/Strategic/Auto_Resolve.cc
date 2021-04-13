@@ -2985,15 +2985,11 @@ static BOOLEAN AttackerHasKnife(SOLDIERCELL* const attacker)
 
 static BOOLEAN TargetHasLoadedGun(SOLDIERTYPE* pSoldier)
 {
-	CFOR_EACH_SOLDIER_INV_SLOT(pItem, *pSoldier)
+	for (OBJECTTYPE const& o : pSoldier->inv)
 	{
-		if( GCM->getItem(pItem->usItem)->getItemClass() == IC_GUN )
+		if( GCM->getItem(o.usItem)->getItemClass() == IC_GUN )
 		{
-			if( gpAR->fUnlimitedAmmo )
-			{
-				return TRUE;
-			}
-			if( pItem->ubGunShotsLeft )
+			if( gpAR->fUnlimitedAmmo || o.ubGunShotsLeft > 0 )
 			{
 				return TRUE;
 			}

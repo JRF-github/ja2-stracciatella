@@ -1202,9 +1202,8 @@ static void CaptureSoldier(SOLDIERTYPE* const s, INT16 const x, INT16 const y, G
 	s->usStrategicInsertionData = soldier_pos;
 
 	// Drop all items
-	FOR_EACH_SOLDIER_INV_SLOT(i, *s)
+	for (OBJECTTYPE & o : s->inv)
 	{
-		OBJECTTYPE& o = *i;
 		if (o.usItem == NOTHING) continue;
 
 		AddItemsToUnLoadedSector(x, y, 0, item_pos, 1, &o, 0, 0, 0, VISIBILITY_0);

@@ -1285,10 +1285,8 @@ static INT32 GetNumberOfInventoryItemsOnCurrentMerc(void)
 	if (!fCurrentTeamMode) return 0;
 
 	UINT32             ubCount = 0;
-	SOLDIERTYPE const& s       = GetSoldierOfCurrentSlot();
-	CFOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE const& o : GetSoldierOfCurrentSlot().inv)
 	{
-		OBJECTTYPE const& o = *i;
 		if (o.ubNumberOfObjects != 0 && o.usItem != NOTHING) ubCount++;
 	}
 
@@ -2267,11 +2265,11 @@ static INT32 GetFundsOnMerc(SOLDIERTYPE const& s)
 	// run through mercs pockets, if any money in them, add to total
 
 	// run through grunts pockets and count all the spare change
-	CFOR_EACH_SOLDIER_INV_SLOT(i, s)
+	for (OBJECTTYPE const& o : s.inv)
 	{
-		if (GCM->getItem(i->usItem)->getItemClass() == IC_MONEY)
+		if (GCM->getItem(o.usItem)->getItemClass() == IC_MONEY)
 		{
-			iCurrentAmount += i->uiMoneyAmount;
+			iCurrentAmount +=o.uiMoneyAmount;
 		}
 	}
 

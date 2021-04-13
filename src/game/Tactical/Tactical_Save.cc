@@ -901,9 +901,8 @@ void AddDeadSoldierToUnLoadedSector(INT16 const x, INT16 const y, UINT8 const z,
 	// Loop through all the soldier's items and add them to the world item array
 	if (!AM_A_ROBOT(s)) // If a robot, don't drop anything
 	{
-		FOR_EACH_SOLDIER_INV_SLOT(i, *s)
+		for (OBJECTTYPE & o : s->inv)
 		{
-			OBJECTTYPE& o = *i;
 			if (o.usItem == NOTHING) continue;
 
 			if (s->bTeam != OUR_TEAM)
