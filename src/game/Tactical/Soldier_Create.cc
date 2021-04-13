@@ -430,7 +430,7 @@ try
 
 			s->bVehicleID =
 				c.fUseGivenVehicle ? c.bUseGivenVehicleID :
-				(INT8)AddVehicleToList(s->sSectorX, s->sSectorY, s->bSectorZ, ubVehicleID);
+				AddVehicleToList(s->get_sector_coords(), ubVehicleID);
 			SetVehicleValuesIntoSoldierType(s);
 			break;
 		}

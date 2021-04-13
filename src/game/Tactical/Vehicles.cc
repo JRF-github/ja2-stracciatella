@@ -101,9 +101,9 @@ void SetVehicleValuesIntoSoldierType(SOLDIERTYPE* const vs)
 }
 
 
-INT32 AddVehicleToList(const INT16 sMapX, const INT16 sMapY, const INT16 sGridNo, const UINT8 ubType)
+INT8 AddVehicleToList(sector_coords const& coords, const UINT8 ubType)
 {
-	INT32 vid;
+	INT8 vid;
 	for (vid = 0;; ++vid)
 	{
 		Assert(pVehicleList.size() <= INT32_MAX);
@@ -119,8 +119,8 @@ INT32 AddVehicleToList(const INT16 sMapX, const INT16 sMapY, const INT16 sGridNo
 	// found a slot
 	*v = VEHICLETYPE{};
 	v->ubMovementGroup = 0;
-	v->coords          = sector_coords{sMapX, sMapY, 0};
-	v->sGridNo         = sGridNo;
+	v->coords          = coords;
+	v->sGridNo         = 0;
 	v->fValid          = TRUE;
 	v->ubVehicleType   = ubType;
 	v->pMercPath       = NULL;
@@ -135,10 +135,10 @@ INT32 AddVehicleToList(const INT16 sMapX, const INT16 sMapY, const INT16 sGridNo
 
 	// ARM: setup group movement defaults
 	g->ubTransportationMask = g_vehicle_type_info[ubType].movement_type;
-	g->ubSectorX            = sMapX;
-	g->ubNextX              = sMapX;
-	g->ubSectorY            = sMapY;
-	g->ubNextY              = sMapY;
+	g->ubSectorX            = coords.x;
+	g->ubNextX              = coords.x;
+	g->ubSectorY            = coords.y;
+	g->ubNextY              = coords.y;
 	g->uiTraverseTime       = 0;
 	g->uiArrivalTime        = 0;
 

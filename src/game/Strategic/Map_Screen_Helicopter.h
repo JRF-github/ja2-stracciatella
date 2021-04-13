@@ -59,7 +59,7 @@ enum{
 };
 
 // helicopter vehicle id value
-extern INT32 iHelicopterVehicleId;
+extern INT8 iHelicopterVehicleId;
 
 static inline VEHICLETYPE& GetHelicopter(void)
 {
@@ -72,7 +72,7 @@ static inline VEHICLETYPE& GetHelicopter(void)
 
 static inline bool IsHelicopter(VEHICLETYPE const& v)
 {
-	return (INT32)VEHICLE2ID(v) == iHelicopterVehicleId;
+	return (INT8)VEHICLE2ID(v) == iHelicopterVehicleId;
 }
 
 static inline bool InHelicopter(SOLDIERTYPE const& s)

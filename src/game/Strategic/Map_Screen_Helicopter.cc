@@ -62,7 +62,7 @@ BOOLEAN fSkyRiderSetUp = FALSE;
 BOOLEAN fPlotForHelicopter = FALSE;
 
 // helicopter vehicle id
-INT32 iHelicopterVehicleId = -1;
+INT8 iHelicopterVehicleId = -1;
 
 // total owed to player
 INT32 iTotalAccumulatedCostByPlayer = 0;
@@ -643,7 +643,7 @@ void SetUpHelicopterForPlayer( INT16 sX, INT16 sY )
 {
 	if (!fSkyRiderSetUp)
 	{
-		iHelicopterVehicleId = AddVehicleToList( sX, sY, 0, HELICOPTER );
+		iHelicopterVehicleId = AddVehicleToList( sector_coords{sX, sY}, HELICOPTER );
 
 		// set up for movement
 		SetUpHelicopterForMovement( );
