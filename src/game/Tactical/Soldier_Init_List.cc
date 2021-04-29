@@ -1507,7 +1507,7 @@ void SaveSoldierInitListLinks(HWFILE const hfile)
 	//count the number of soldier init nodes...
 	CFOR_EACH_SOLDIERINITNODE(curr) ++ubSlots;
 	//...and save it.
-	FileWrite(hfile, &ubSlots, 1);
+	hfile->write(ubSlots);
 	//Now, go through each node, and save just the ubSoldierID, if that soldier is alive.
 	FOR_EACH_SOLDIERINITNODE(curr)
 	{
@@ -1515,22 +1515,19 @@ void SaveSoldierInitListLinks(HWFILE const hfile)
 		{
 			curr->ubSoldierID = 0;
 		}
-		FileWrite(hfile, &curr->ubNodeID,    1);
-		FileWrite(hfile, &curr->ubSoldierID, 1);
+		hfile->write(curr->ubNodeID);
+		hfile->write(curr->ubSoldierID);
 	}
 }
 
 
 void LoadSoldierInitListLinks(HWFILE const f)
 {
-	UINT8 slots;
-	FileRead(f, &slots, 1);
+	UINT8 const slots{f->read<UINT8>()};
 	for (UINT8 n = slots; n != 0; --n)
 	{
-		UINT8 node_id;
-		UINT8 soldier_id;
-		FileRead(f, &node_id,    1);
-		FileRead(f, &soldier_id, 1);
+		UINT8 const node_id{f->read<UINT8>()};
+		UINT8 const soldier_id{f->read<UINT8>()};
 
 		if (!(gTacticalStatus.uiFlags & LOADING_SAVED_GAME)) continue;
 
@@ -1797,14 +1794,11 @@ void AddProfilesNotUsingProfileInsertionData()
 
 void NewWayOfLoadingEnemySoldierInitListLinks(HWFILE const f)
 {
-	UINT8 slots;
-	FileRead(f, &slots, 1);
+	UINT8 const slots{f->read<UINT8>()};
 	for (UINT8 n = slots; n != 0; --n)
 	{
-		UINT8 node_id;
-		UINT8 soldier_id;
-		FileRead(f, &node_id,    1);
-		FileRead(f, &soldier_id, 1);
+		UINT8 const node_id{f->read<UINT8>()};
+		UINT8 const soldier_id{f->read<UINT8>()};
 
 		if (!(gTacticalStatus.uiFlags & LOADING_SAVED_GAME)) continue;
 
@@ -1824,14 +1818,11 @@ void NewWayOfLoadingEnemySoldierInitListLinks(HWFILE const f)
 
 void NewWayOfLoadingCivilianInitListLinks(HWFILE const f)
 {
-	UINT8 slots;
-	FileRead(f, &slots, 1);
+	UINT8 const slots{f->read<UINT8>()};
 	for (UINT8 n = slots; n != 0; --n)
 	{
-		UINT8 node_id;
-		UINT8 soldier_id;
-		FileRead(f, &node_id,    1);
-		FileRead(f, &soldier_id, 1);
+		UINT8 const node_id{f->read<UINT8>()};
+		UINT8 const soldier_id{f->read<UINT8>()};
 
 		if (!(gTacticalStatus.uiFlags & LOADING_SAVED_GAME)) continue;
 

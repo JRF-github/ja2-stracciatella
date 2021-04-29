@@ -1851,11 +1851,9 @@ void LightSave(LightTemplate const* const t, char const* const pFilename)
 	const char* const pName = (pFilename != NULL ? pFilename : t->name);
 	AutoSGPFile f(FileMan::openForWriting(pName));
 	Assert(t->lights.size() <= UINT16_MAX);
-	UINT16 numLights = static_cast<UINT16>(t->lights.size());
-	FileWriteArray(f, numLights, t->lights.data());
+	f->writeVector<UINT16>(t->lights);
 	Assert(t->rays.size() <= UINT16_MAX);
-	UINT16 numRays = static_cast<UINT16>(t->rays.size());
-	FileWriteArray(f, numRays, t->rays.data());
+	f->writeVector<UINT16>(t->rays);
 }
 
 
@@ -1865,17 +1863,11 @@ static LightTemplate* LightLoad(const char* pFilename)
 {
 	AutoSGPFile hFile(GCM->openGameResForReading(pFilename));
 
-	UINT16 numLights;
-	FileRead(hFile, &numLights, sizeof(UINT16));
 	std::vector<LIGHT_NODE> lights;
-	lights.assign(numLights, LIGHT_NODE{});
-	FileRead(hFile, lights.data(), sizeof(LIGHT_NODE) * numLights);
+	hFile->readVector<UINT16>(lights);
 
-	UINT16 numRays;
-	FileRead(hFile, &numRays, sizeof(UINT16));
 	std::vector<UINT16> rays;
-	rays.assign(numRays, 0);
-	FileRead(hFile, rays.data(), sizeof(UINT16) * numRays);
+	hFile->readVector<UINT16>(rays);
 
 	SGP::Buffer<char> name(strlen(pFilename) + 1);
 	strcpy(name, pFilename);

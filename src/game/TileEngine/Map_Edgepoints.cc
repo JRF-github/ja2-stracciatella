@@ -769,8 +769,8 @@ static void SaveMapEdgepoint(HWFILE const f, UINT16 const& middle, const std::ve
 {
 	Assert(edgepoints.size() <= UINT16_MAX);
 	UINT16 n = static_cast<UINT16>(edgepoints.size());
-	FileWrite(f, &n,   sizeof(UINT16));
-	FileWrite(f, &middle, sizeof(UINT16));
+	f->write(n);
+	f->write(middle);
 	if (n != 0) FileWrite(f, edgepoints.data(),  sizeof(*edgepoints.data()) * n);
 }
 
@@ -793,12 +793,11 @@ void SaveMapEdgepoints(HWFILE const f)
 
 static void LoadMapEdgepoint(HWFILE const f,  UINT16& middle, std::vector<INT16>& edgepoints)
 {
-	UINT16 n = 0;
-	FileRead(f, &n,   sizeof(UINT16));
-	FileRead(f, &middle, sizeof(UINT16));
+	UINT16 const n{f->read<UINT16>()};
+	middle = f->read<UINT16>();
 	if (n != 0)
 	{
-		edgepoints.resize(n);
+		edgepoints.reserve(n);
 		FileRead(f, edgepoints.data(), sizeof(*edgepoints.data()) * n);
 	}
 }

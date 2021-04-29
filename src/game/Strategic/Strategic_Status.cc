@@ -26,14 +26,14 @@ void InitStrategicStatus(void)
 void SaveStrategicStatusToSaveGameFile(HWFILE const hFile)
 {
 	//Save the Strategic Status structure to the saved game file
-	FileWrite(hFile, &gStrategicStatus, sizeof(STRATEGIC_STATUS));
+	hFile->write(gStrategicStatus);
 }
 
 
 void LoadStrategicStatusFromSaveGameFile(HWFILE const hFile)
 {
 	//Load the Strategic Status structure from the saved game file
-	FileRead(hFile, &gStrategicStatus, sizeof(STRATEGIC_STATUS));
+	gStrategicStatus = hFile->read<STRATEGIC_STATUS>();
 }
 
 

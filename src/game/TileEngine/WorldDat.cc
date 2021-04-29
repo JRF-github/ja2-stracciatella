@@ -29,7 +29,7 @@ try
 	AutoSGPFile f(GCM->openGameResForReading(GCM->getTilesetDBResName()));
 
 	// READ # TILESETS and compare
-	FileRead(f, &gubNumTilesets, sizeof(gubNumTilesets));
+	gubNumTilesets = f->read<UINT8>();
 	switch (gubNumTilesets)
 	{
 	case VANILLA_NUM_TILESETS:
@@ -44,8 +44,7 @@ try
 	}
 
 	// READ #files
-	UINT32 uiNumFiles;
-	FileRead(f, &uiNumFiles, sizeof(uiNumFiles));
+	UINT32 const uiNumFiles{f->read<UINT32>()};
 	if (uiNumFiles != NUMBEROFTILETYPES)
 	{
 		SET_ERROR("Number of tilesets slots in code does not match data file");
@@ -60,7 +59,7 @@ try
 		ts.zName = FileReadString(f, TILESET_NAME_LENGTH);
 
 		// Read ambience value
-		FileRead(f, &(ts.ubAmbientID), sizeof(UINT8));
+		ts.ubAmbientID = f->read<UINT8>();
 
 		// Loop for files
 		for (UINT32 cnt2 = 0; cnt2 < uiNumFiles; ++cnt2)

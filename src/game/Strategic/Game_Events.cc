@@ -341,7 +341,7 @@ void SaveStrategicEventsToSavedGame(HWFILE const f)
 	{
 		++n_game_events;
 	}
-	FileWrite(f, &n_game_events, sizeof(UINT32));
+	f->write(n_game_events);
 
 	for (STRATEGICEVENT* i = gpEventList; i; i = i->next)
 	{
@@ -368,8 +368,7 @@ void LoadStrategicEventsFromSavedGame(HWFILE const f)
 	DeleteAllStrategicEvents();
 
 	// Read the number of strategic events
-	UINT32 n_game_events;
-	FileRead(f, &n_game_events, sizeof(UINT32));
+	UINT32 const n_game_events{f->read<UINT32>()};
 
 	STRATEGICEVENT** anchor = &gpEventList;
 	for (size_t n = n_game_events; n != 0; --n)

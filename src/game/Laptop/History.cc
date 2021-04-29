@@ -343,6 +343,21 @@ static void ProcessAndEnterAHistoryRecord(const UINT8 ubCode, const UINT32 uiDat
 	*anchor = h;
 }
 
+
+static void ReadProcessAndEnterHistoryRecord(SGPFile * const f)
+{
+	UINT8  const ubCode       = f->read<UINT8>();
+	UINT8  const ubSecondCode = f->read<UINT8>();
+	UINT32 const uiDate       = f->read<UINT32>();
+	INT16  const sSectorX     = f->read<INT16>();
+	INT16  const sSectorY     = f->read<INT16>();
+	INT8   const bSectorZ     = f->read<INT8>();
+	FileSeek(f, 1, FILE_SEEK_FROM_CURRENT);
+
+	ProcessAndEnterAHistoryRecord(ubCode, uiDate,  ubSecondCode, sSectorX, sSectorY, bSectorZ);
+}
+
+
 // open and read in data to the History list
 static void OpenAndReadHistoryFile(void)
 {
@@ -353,22 +368,7 @@ static void OpenAndReadHistoryFile(void)
 	UINT entry_count = FileGetSize(f) / SIZE_OF_HISTORY_FILE_RECORD;
 	while (entry_count-- > 0)
 	{
-		UINT8  ubCode;
-		UINT8  ubSecondCode;
-		UINT32 uiDate;
-		INT16  sSectorX;
-		INT16  sSectorY;
-		INT8   bSectorZ;
-
-		FileRead(f, &ubCode,       sizeof(UINT8));
-		FileRead(f, &ubSecondCode, sizeof(UINT8));
-		FileRead(f, &uiDate,       sizeof(UINT32));
-		FileRead(f, &sSectorX,     sizeof(INT16));
-		FileRead(f, &sSectorY,     sizeof(INT16));
-		FileRead(f, &bSectorZ,     sizeof(INT8));
-		FileSeek(f, 1, FILE_SEEK_FROM_CURRENT);
-
-		ProcessAndEnterAHistoryRecord(ubCode, uiDate, ubSecondCode, sSectorX, sSectorY, bSectorZ);
+		ReadProcessAndEnterHistoryRecord(f);
 	}
 }
 
@@ -697,22 +697,7 @@ try
 
 	while (entry_count-- > 0)
 	{
-		UINT8  ubCode;
-		UINT8  ubSecondCode;
-		UINT32 uiDate;
-		INT16  sSectorX;
-		INT16  sSectorY;
-		INT8   bSectorZ;
-
-		FileRead(f, &ubCode,       sizeof(UINT8));
-		FileRead(f, &ubSecondCode, sizeof(UINT8));
-		FileRead(f, &uiDate,       sizeof(UINT32));
-		FileRead(f, &sSectorX,     sizeof(INT16));
-		FileRead(f, &sSectorY,     sizeof(INT16));
-		FileRead(f, &bSectorZ,     sizeof(INT8));
-		FileSeek(f, 1, FILE_SEEK_FROM_CURRENT);
-
-		ProcessAndEnterAHistoryRecord(ubCode, uiDate,  ubSecondCode, sSectorX, sSectorY, bSectorZ);
+		ReadProcessAndEnterHistoryRecord(f);
 	}
 
 	return TRUE;

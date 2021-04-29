@@ -675,14 +675,7 @@ BOOLEAN AttemptToBlowUpLock( SOLDIERTYPE * pSoldier, DOOR * pDoor )
 //the exact number of slots when loading.
 void LoadDoorTableFromMap(HWFILE const f)
 {
-	TrashDoorTable();
-
-	UINT8 numDoors = 0;
-	FileRead(f, &numDoors, sizeof(numDoors));
-	if (numDoors == 0) return;
-
-	DoorTable.assign(numDoors, DOOR{});
-	FileRead(f, DoorTable.data(), sizeof(DOOR) * numDoors);
+	f->readVector<UINT8>(DoorTable);
 
 	// OK, reset perceived values to nothing...
 	FOR_EACH_DOOR(d)
@@ -708,8 +701,7 @@ void SaveDoorTableToMap( HWFILE fp )
 			i++;
 	}
 	Assert(DoorTable.size() <= UINT8_MAX);
-	UINT8 numDoors = static_cast<UINT8>(DoorTable.size());
-	FileWriteArray(fp, numDoors, DoorTable.data());
+	fp->writeVector<UINT8>(DoorTable);
 }
 
 
@@ -786,8 +778,7 @@ void SaveDoorTableToDoorTableTempFile(INT16 const x, INT16 const y, INT8 const z
 {
 	AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(SF_DOOR_TABLE_TEMP_FILES_EXISTS, x, y, z)));
 	Assert(DoorTable.size() <= UINT8_MAX);
-	UINT8 numDoors = static_cast<UINT8>(DoorTable.size());
-	FileWriteArray(f, numDoors, DoorTable.data());
+	f->writeVector<UINT8>(DoorTable);
 	// Set the sector flag indicating that there is a Door table temp file present
 	SetSectorFlag(x, y, z, SF_DOOR_TABLE_TEMP_FILES_EXISTS);
 }
@@ -800,21 +791,8 @@ void LoadDoorTableFromDoorTableTempFile()
 	//If the file doesnt exists, its no problem.
 	if (!GCM->doesGameResExists(zMapName)) return;
 
-	//Get rid of the existing door table
-	TrashDoorTable();
-
-	AutoSGPFile hFile(GCM->openGameResForReading(zMapName));
-
-	//Read in the number of doors
-	UINT8 numDoors = 0;
-	FileRead(hFile, &numDoors, sizeof(UINT8));
-
-	//if there is no doors to load
-	if (numDoors != 0)
-	{
-		DoorTable.assign(numDoors, DOOR{});
-		FileRead(hFile, DoorTable.data(), sizeof(DOOR) * numDoors);
-	}
+	AutoSGPFile f{GCM->openGameResForReading(zMapName)};
+	f->readVector<UINT8>(DoorTable);
 }
 
 
@@ -1153,8 +1131,7 @@ void SaveDoorStatusArrayToDoorStatusTempFile(INT16 const x, INT16 const y, INT8 
 
 	AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(SF_DOOR_STATUS_TEMP_FILE_EXISTS, x, y, z)));
 	Assert(gpDoorStatus.size() <= UINT8_MAX);
-	UINT8 numDoorStatus = static_cast<UINT8>(gpDoorStatus.size());
-	FileWriteArray(f, numDoorStatus, gpDoorStatus.data());
+	f->writeVector<UINT8>(gpDoorStatus);
 
 	// Set the flag indicating that there is a door status array
 	SetSectorFlag(x, y, z, SF_DOOR_STATUS_TEMP_FILE_EXISTS);
@@ -1163,17 +1140,8 @@ void SaveDoorStatusArrayToDoorStatusTempFile(INT16 const x, INT16 const y, INT8 
 
 void LoadDoorStatusArrayFromDoorStatusTempFile()
 {
-	TrashDoorStatusArray();
-
 	AutoSGPFile f(GCM->openGameResForReading(GetMapTempFileName(SF_DOOR_STATUS_TEMP_FILE_EXISTS, gWorldSectorX, gWorldSectorY, gbWorldSectorZ)));
-
-	// Load the number of elements in the door status array
-	UINT8 numDoorStatus = 0;
-	FileRead(f, &numDoorStatus, sizeof(UINT8));
-	if (numDoorStatus == 0) return;
-
-	gpDoorStatus.assign(numDoorStatus, DOOR_STATUS{});
-	FileRead(f, gpDoorStatus.data(), sizeof(DOOR_STATUS) * numDoorStatus);
+	f->readVector<UINT8>(gpDoorStatus);
 
 	// Set flags in map for containing a door status
 	FOR_EACH_DOOR_STATUS(d)

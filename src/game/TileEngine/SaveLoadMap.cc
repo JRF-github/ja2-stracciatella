@@ -49,7 +49,7 @@ static std::unique_ptr<AutoSGPFile> OpenMapModificationTempFile(INT16 const sSec
 // Writes map modification to the open temp file
 static void SaveModifiedMapStructToMapTempFile(MODIFY_MAP const* const pMap, AutoSGPFile& hFile)
 {
-	FileWrite(hFile, pMap, sizeof(MODIFY_MAP));
+	hFile->write(*pMap);
 }
 
 // Opens the map temp file, writes the modification, then close the file

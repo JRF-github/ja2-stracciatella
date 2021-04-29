@@ -2394,8 +2394,7 @@ void SaveStrategicInfoToSavedFile(HWFILE const f)
 	FileSeek(f, MAP_WORLD_X * MAP_WORLD_Y, FILE_SEEK_FROM_CURRENT);
 
 	// Save the state of the 2nd map secret (fFoundOrta)
-	BOOLEAN fFound = GetMapSecretStateForSave(1);
-	FileWrite(f, &fFound, sizeof(BOOLEAN));
+	f->write(GetMapSecretStateForSave(1));
 }
 
 
@@ -2417,9 +2416,7 @@ void LoadStrategicInfoFromSavedFile(HWFILE const f)
 	FileSeek(f, MAP_WORLD_X * MAP_WORLD_Y, FILE_SEEK_FROM_CURRENT);
 
 	// Load state of the 2nd map secret (fFoundOrta)
-	BOOLEAN fFound;
-	FileRead(f, &fFound, sizeof(BOOLEAN));
-	SetMapSecretStateFromSave(1, fFound);
+	SetMapSecretStateFromSave(1, f->read<BOOLEAN>());
 }
 
 

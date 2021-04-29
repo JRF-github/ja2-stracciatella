@@ -216,8 +216,7 @@ void SaveWorldItemsToTempItemFile(INT16 const sMapX, INT16 const sMapY, INT8 con
 	{
 		AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(SF_ITEM_TEMP_FILE_EXISTS, sMapX, sMapY, bMapZ)));
 		Assert(items.size() <= UINT32_MAX);
-		UINT32 numItems = static_cast<UINT32>(items.size());
-		FileWriteArray(f, numItems, items.data());
+		f->writeVector<UINT32>(items);
 		// Close the file before
 		// SynchronizeItemTempFileVisbleItemsToSectorInfoVisbleItems() reads it
 	}
@@ -235,15 +234,8 @@ std::vector<WORLDITEM> LoadWorldItemsFromTempItemFile(INT16 const x, INT16 const
 	// If the file doesn't exists, it's no problem
 	if (GCM->doesGameResExists(filename))
 	{
-		AutoSGPFile f(GCM->openGameResForReading(filename));
-
-		UINT32 numItems = 0;
-		FileRead(f, &numItems, sizeof(UINT32));
-		if (numItems != 0)
-		{
-			l_items.assign(numItems, WORLDITEM{});
-			FileRead(f, l_items.data(), numItems * sizeof(WORLDITEM));
-		}
+		AutoSGPFile f{GCM->openGameResForReading(filename)};
+		f->readVector<UINT32>(l_items);
 	}
 	return l_items;
 }
@@ -652,7 +644,7 @@ static void SaveRottingCorpsesToTempCorpseFile(INT16 const x, INT16 const y, INT
 	// Save the number of the rotting corpses
 	UINT32 n_corpses = 0;
 	CFOR_EACH_ROTTING_CORPSE(c) ++n_corpses;
-	FileWrite(f, &n_corpses, sizeof(UINT32));
+	f->write(n_corpses);
 
 	// Loop through all the carcases in the array and save the active ones
 	CFOR_EACH_ROTTING_CORPSE(c)
@@ -676,8 +668,7 @@ static void LoadRottingCorpsesFromTempCorpseFile(INT16 const x, INT16 const y, I
 	AutoSGPFile f(GCM->openGameResForReading(map_name));
 
 	// Load the number of Rotting corpses
-	UINT32 n_corpses;
-	FileRead(f, &n_corpses, sizeof(UINT32));
+	UINT32 const n_corpses{f->read<UINT32>()};
 
 	bool const maybe_dont_add = !(gTacticalStatus.uiFlags & LOADING_SAVED_GAME) &&
 					z == 0 && GetTownIdForSector(SECTOR(x, y)) != BLANK_SECTOR; // In town?
@@ -798,7 +789,7 @@ void AddRottingCorpseToUnloadedSectorsRottingCorpseFile(INT16 const sMapX, INT16
 	UINT32 corpse_count;
 	if (FileGetSize(f) != 0)
 	{
-		FileRead(f, &corpse_count, sizeof(corpse_count));
+		corpse_count = f->read<UINT32>();
 		FileSeek(f, 0, FILE_SEEK_FROM_START);
 	}
 	else
@@ -807,7 +798,7 @@ void AddRottingCorpseToUnloadedSectorsRottingCorpseFile(INT16 const sMapX, INT16
 	}
 
 	++corpse_count;
-	FileWrite(f, &corpse_count, sizeof(corpse_count));
+	f->write(corpse_count);
 
 	FileSeek(f, 0, FILE_SEEK_FROM_END);
 	InjectRottingCorpseIntoFile(f, corpse_def);
@@ -961,17 +952,14 @@ void AddDeadSoldierToUnLoadedSector(INT16 const x, INT16 const y, UINT8 const z,
 void SaveTempNpcQuoteArrayToSaveGameFile(HWFILE const f)
 {
 	// Write zero size marker for the obsolescent temporary NPC quote file.
-	UINT32 const size = 0;
-	FileWrite(f, &size, sizeof(size));
+	f->write<UINT32>(0);
 }
 
 
 void LoadTempNpcQuoteArrayToSaveGameFile(HWFILE const f)
 {
 	// Skip obsolescent temporary NPC quote file.
-	UINT32 size;
-	FileRead(f, &size, sizeof(size));
-	FileSeek(f, size, FILE_SEEK_FROM_CURRENT);
+	FileSeek(f, f->read<UINT32>(), FILE_SEEK_FROM_CURRENT);
 }
 
 

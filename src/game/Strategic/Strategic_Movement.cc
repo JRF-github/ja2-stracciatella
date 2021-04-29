@@ -2460,7 +2460,7 @@ void SaveStrategicMovementGroupsToSaveGameFile(HWFILE const f)
 	// Save the number of movement groups to the saved game file
 	UINT32 uiNumberOfGroups = 0;
 	CFOR_EACH_GROUP(g) ++uiNumberOfGroups;
-	FileWrite(f, &uiNumberOfGroups, sizeof(UINT32));
+	f->write(uiNumberOfGroups);
 
 	CFOR_EACH_GROUP(g)
 	{
@@ -2525,8 +2525,7 @@ void LoadStrategicMovementGroupsFromSavedGameFile(HWFILE const f)
 	Assert(gpGroupList == NULL);
 
 	// Load the number of nodes in the list
-	UINT32 uiNumberOfGroups;
-	FileRead(f, &uiNumberOfGroups, sizeof(UINT32));
+	UINT32 const uiNumberOfGroups{f->read<UINT32>()};
 
 	//loop through all the nodes and add them to the LL
 	GROUP** anchor = &gpGroupList;
@@ -2606,14 +2605,14 @@ static void SavePlayerGroupList(HWFILE const f, GROUP const* const g)
 	// Save the number of nodes in the list
 	UINT32 uiNumberOfNodesInList = 0;
 	CFOR_EACH_PLAYER_IN_GROUP(p, g) ++uiNumberOfNodesInList;
-	FileWrite(f, &uiNumberOfNodesInList, sizeof(UINT32));
+	f->write(uiNumberOfNodesInList);
 
 	// Loop through and save only the players profile id
 	CFOR_EACH_PLAYER_IN_GROUP(p, g)
 	{
 		// Save the ubProfile ID for this node
 		const UINT32 uiProfileID = p->pSoldier->ubProfile;
-		FileWrite(f, &uiProfileID, sizeof(UINT32));
+		f->write(uiProfileID);
 	}
 }
 
@@ -2622,16 +2621,14 @@ static void SavePlayerGroupList(HWFILE const f, GROUP const* const g)
 static void LoadPlayerGroupList(HWFILE const f, GROUP* const g)
 {
 	// Load the number of nodes in the player list
-	UINT32 node_count;
-	FileRead(f, &node_count, sizeof(UINT32));
+	UINT32 const node_count{f->read<UINT32>()};
 
 	PLAYERGROUP** anchor = &g->pPlayerList;
 	for (UINT32 i = node_count; i != 0; --i)
 	{
 		PLAYERGROUP* const pg = new PLAYERGROUP{};
 
-		UINT32 profile_id;
-		FileRead(f, &profile_id, sizeof(UINT32));
+		UINT32 const profile_id{f->read<UINT32>()};
 
 		SOLDIERTYPE* const s = FindSoldierByProfileIDOnPlayerTeam(profile_id);
 		//Should never happen
@@ -2699,7 +2696,7 @@ static void SaveWayPointList(HWFILE const f, GROUP const* const g)
 	{
 		++uiNumberOfWayPoints;
 	}
-	FileWrite(f, &uiNumberOfWayPoints, sizeof(UINT32));
+	f->write(uiNumberOfWayPoints);
 
 	for (const WAYPOINT* w = g->pWaypoints; w != NULL; w = w->next)
 	{
@@ -2718,8 +2715,7 @@ static void SaveWayPointList(HWFILE const f, GROUP const* const g)
 static void LoadWayPointList(HWFILE const f, GROUP* const g)
 {
 	// Load the number of waypoints
-	UINT32 uiNumberOfWayPoints;
-	FileRead(f, &uiNumberOfWayPoints, sizeof(UINT32));
+	UINT32 const uiNumberOfWayPoints{f->read<UINT32>()};
 
 	WAYPOINT** anchor = &g->pWaypoints;
 	for (UINT32 i = uiNumberOfWayPoints; i != 0; --i)

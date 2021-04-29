@@ -875,7 +875,7 @@ static void WriteBalanceToDisk(void)
 {
 	// will write the current balance to disk
 	AutoSGPFile hFileHandle(GCM->openTempFileForWriting(NEWTMP_FINANCES_DATA_FILE, false));
-	FileWrite(hFileHandle, &LaptopSaveInfo.iCurrentBalance, sizeof(INT32));
+	hFileHandle->write(LaptopSaveInfo.iCurrentBalance);
 }
 
 
@@ -896,7 +896,7 @@ static void GetBalanceFromDisk(void)
 	}
 
 	// get balance from disk first
-	FileRead(f, &LaptopSaveInfo.iCurrentBalance, sizeof(INT32));
+	LaptopSaveInfo.iCurrentBalance = f->read<UINT32>();
 }
 
 

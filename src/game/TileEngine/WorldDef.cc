@@ -1358,10 +1358,10 @@ try
 
 	// Write JA2 Version ID
 	FLOAT mapVersion = getMajorMapVersion();
-	FileWrite(f, &mapVersion, sizeof(FLOAT));
+	f->write(mapVersion);
 	if (mapVersion >= 4.00)
 	{
-		FileWrite(f, &gubMinorMapVersion, sizeof(UINT8));
+		f->write(gubMinorMapVersion);
 	}
 
 	// Write FLAGS FOR WORLD
@@ -1376,14 +1376,13 @@ try
 	if (gfBasement || gfCaves)
 		flags |= MAP_AMBIENTLIGHTLEVEL_SAVED;
 
-	FileWrite(f, &flags, sizeof(INT32));
+	f->write(flags);
 
 	// Write tileset ID
-	FileWrite(f, &giCurrentTilesetID, sizeof(INT32));
+	f->write(giCurrentTilesetID);
 
 	// Write soldier control size
-	UINT32 const uiSoldierSize = sizeof(SOLDIERTYPE);
-	FileWrite(f, &uiSoldierSize, sizeof(UINT32));
+	f->write<UINT32>(sizeof(SOLDIERTYPE));
 
 	// Remove world visibility tiles
 	RemoveWorldWireFrameTiles();
@@ -1441,8 +1440,7 @@ try
 		if (!LimitCheck(n_structs, cnt, n_warnings, "Struct")) return FALSE;
 
 		ubCombine = (n_objects & 0xf) | ((n_structs & 0xf) << 4);
-		FileWrite(f, &ubCombine, sizeof(ubCombine));
-
+		f->write(ubCombine);
 
 		// Determine # of shadows
 		UINT8 n_shadows = 0;
@@ -1465,8 +1463,7 @@ try
 		if (!LimitCheck(n_roofs, cnt, n_warnings, "Roof")) return FALSE;
 
 		ubCombine = (n_shadows & 0xf) | ((n_roofs & 0xf) << 4);
-		FileWrite(f, &ubCombine, sizeof(ubCombine));
-
+		f->write(ubCombine);
 
 		// Determine # of OnRoofs
 		UINT8 n_on_roofs = 0;
@@ -1478,7 +1475,7 @@ try
 
 		// Write combination of onroof and nothing
 		ubCombine = n_on_roofs & 0xf;
-		FileWrite(f, &ubCombine, sizeof(ubCombine));
+		f->write(ubCombine);
 	}
 
 	if(getMajorMapVersion() == 6.00 && gubMinorMapVersion == 26)
@@ -1588,9 +1585,9 @@ try
 
 	if (flags & MAP_AMBIENTLIGHTLEVEL_SAVED)
 	{
-		FileWrite(f, &gfBasement,          1);
-		FileWrite(f, &gfCaves,             1);
-		FileWrite(f, &ubAmbientLightLevel, 1);
+		f->write(gfBasement);
+		f->write(gfCaves);
+		f->write(ubAmbientLightLevel);
 	}
 
 	if (flags & MAP_WORLDLIGHTS_SAVED)
@@ -1748,20 +1745,17 @@ try
 	pSummary->dMajorMapVersion = getMajorMapVersion();
 
 	//skip JA2 Version ID
-	FLOAT	dMajorMapVersion;
-	FileRead(f, &dMajorMapVersion, sizeof(dMajorMapVersion));
+	FLOAT const dMajorMapVersion{f->read<FLOAT>()};
 	if (dMajorMapVersion >= 4.00)
 	{
 		FileSeek(f, sizeof(UINT8), FILE_SEEK_FROM_CURRENT);
 	}
 
 	//Read FLAGS FOR WORLD
-	UINT32 uiFlags;
-	FileRead(f, &uiFlags, sizeof(uiFlags));
+	UINT32 const uiFlags{f->read<UINT32>()};
 
 	//Read tilesetID
-	INT32 iTilesetID;
-	FileRead(f, &iTilesetID, sizeof(iTilesetID));
+	INT32 const iTilesetID{f->read<INT32>()};
 	pSummary->ubTilesetID = (UINT8)iTilesetID;
 
 	// Skip soldier size and height values
@@ -1808,8 +1802,7 @@ try
 		//            resides.  Checking this value and comparing to usNumItems will ensure validity.
 		pSummary->uiNumItemsPosition = FileGetPos(f);
 		//get number of items (for now)
-		UINT32 n_items;
-		FileRead(f, &n_items, sizeof(n_items));
+		UINT32 const n_items{f->read<UINT32>()};
 		pSummary->usNumItems = n_items;
 		//Skip the contents of the world items.
 		FileSeek(f, sizeof(WORLDITEM) * n_items, FILE_SEEK_FROM_CURRENT);
@@ -1822,24 +1815,21 @@ try
 		RenderProgressBar(0, 92);
 
 		//skip number of light palette entries
-		UINT8 n_light_colours;
-		FileRead(f, &n_light_colours, sizeof(n_light_colours));
+		UINT8 const n_light_colours{f->read<UINT8>()};
 		FileSeek(f, sizeof(SGPPaletteEntry) * n_light_colours, FILE_SEEK_FROM_CURRENT);
 
 		//get number of lights
-		FileRead(f, &pSummary->usNumLights, sizeof(pSummary->usNumLights));
+		pSummary->usNumLights = f->read<UINT16>();
 		//skip the light loading
 		for (INT32 n = pSummary->usNumLights; n != 0; --n)
 		{
 			FileSeek(f, 24 /* size of a LIGHT_SPRITE on disk */, FILE_SEEK_FROM_CURRENT);
-			UINT8 ubStrLen;
-			FileRead(f, &ubStrLen, sizeof(ubStrLen));
-			FileSeek(f, ubStrLen, FILE_SEEK_FROM_CURRENT);
+			FileSeek(f, f->read<UINT8>(), FILE_SEEK_FROM_CURRENT);
 		}
 	}
 
 	//read the mapinformation
-	FileRead(f, &pSummary->MapInfo, sizeof(pSummary->MapInfo));
+	pSummary->MapInfo = f->read<MAPCREATE_STRUCT>();
 
 	if (uiFlags & MAP_FULLSOLDIER_SAVED)
 	{
@@ -1971,13 +1961,10 @@ try
 	{
 		RenderProgressBar(0, 98);
 
-		UINT16 cnt;
-		FileRead(f, &cnt, sizeof(cnt));
-
-		for (INT32 n = cnt; n != 0; --n)
+		for (INT32 n = f->read<UINT16>(); n != 0; --n)
 		{
-			UINT16 usMapIndex;
-			FileRead(f, &usMapIndex, sizeof(usMapIndex));
+			// Skip past unused map index
+			FileSeek(f, sizeof(UINT16), FILE_SEEK_FROM_CURRENT);
 			EXITGRID exitGrid;
 			FileRead(f, &exitGrid, 5 /* XXX sic! The 6th byte luckily is padding */);
 			for (INT32 loop = 0;; ++loop)
@@ -2021,12 +2008,11 @@ try
 
 	if (uiFlags & MAP_DOORTABLE_SAVED)
 	{
-		FileRead(f, &pSummary->ubNumDoors, sizeof(pSummary->ubNumDoors));
+		pSummary->ubNumDoors = f->read<UINT8>();
 
 		for (INT32 n = pSummary->ubNumDoors; n != 0; --n)
 		{
-			DOOR Door;
-			FileRead(f, &Door, sizeof(Door));
+			DOOR const Door{f->read<DOOR>()};
 
 			if      (Door.ubLockID && Door.ubTrapID) ++pSummary->ubNumDoorsLockedAndTrapped;
 			else if (Door.ubLockID)                  ++pSummary->ubNumDoorsLocked;
@@ -2062,15 +2048,14 @@ try
 	LightReset();
 
 	// Read JA2 Version ID
-	FLOAT dMajorMapVersion;
-	FileRead(f, &dMajorMapVersion, sizeof(dMajorMapVersion));
+	FLOAT const dMajorMapVersion{f->read<FLOAT>()};
 
 	UINT8 ubMinorMapVersion;
 	if (dMajorMapVersion >= 4.00)
 	{
 		// major version 4 probably started in minor version 15 since
 		// this value is needed to detect the change in the object layer
-		FileRead(f, &ubMinorMapVersion, sizeof(ubMinorMapVersion));
+		ubMinorMapVersion = f->read<UINT8>();
 	}
 	else
 	{
@@ -2083,11 +2068,9 @@ try
 	}
 
 	// Read flags for world
-	UINT32 uiFlags;
-	FileRead(f, &uiFlags, sizeof(uiFlags));
+	UINT32 const uiFlags{f->read<UINT32>()};
 
-	INT32 iTilesetID;
-	FileRead(f, &iTilesetID, sizeof(iTilesetID));
+	INT32 const iTilesetID{f->read<INT32>()};
 
 	LoadMapTileset(static_cast<TileSetID>(iTilesetID));
 
@@ -2356,9 +2339,9 @@ try
 
 	if (uiFlags & MAP_AMBIENTLIGHTLEVEL_SAVED)
 	{ // Ambient light levels are only saved in underground levels
-		FileRead(f, &gfBasement,          sizeof(gfBasement));
-		FileRead(f, &gfCaves,             sizeof(gfCaves));
-		FileRead(f, &ubAmbientLightLevel, sizeof(ubAmbientLightLevel));
+		gfBasement          = f->read<BOOLEAN>();
+		gfCaves             = f->read<BOOLEAN>();
+		ubAmbientLightLevel = f->read<UINT8>();
 	}
 	else
 	{ // We are above ground.
@@ -2981,10 +2964,9 @@ static void SaveMapLights(HWFILE hfile)
 	UINT16 usNumLights = 0;
 
 	// Save the current light colors!
-	const UINT8 ubNumColors = 1;
-	FileWrite(hfile, &ubNumColors, 1);
+	hfile->write<UINT8>(1);
 	const SGPPaletteEntry* LColor = LightGetColor();
-	FileWrite(hfile, LColor, sizeof(*LColor));
+	hfile->write(*LColor);
 
 	//count number of non-merc lights.
 	CFOR_EACH_LIGHT_SPRITE(l)
@@ -2993,7 +2975,7 @@ static void SaveMapLights(HWFILE hfile)
 	}
 
 	//save the number of lights.
-	FileWrite(hfile, &usNumLights, 2);
+	hfile->write(usNumLights);
 
 	CFOR_EACH_LIGHT_SPRITE(l)
 	{
@@ -3005,14 +2987,12 @@ static void SaveMapLights(HWFILE hfile)
 static void LoadMapLights(HWFILE const f)
 {
 	SGPPaletteEntry	LColors[3];
-	UINT8 ubNumColors;
-	UINT16 usNumLights;
 
 	//reset the lighting system, so that any current lights are toasted.
 	LightReset();
 
 	// read in the light colors!
-	FileRead(f, &ubNumColors, sizeof(ubNumColors));
+	UINT8 const ubNumColors{f->read<UINT8>()};
 	FileRead(f, LColors,      sizeof(*LColors) * ubNumColors); // XXX buffer overflow if ubNumColors is too large
 
 	LightSetColor(LColors);
@@ -3032,7 +3012,7 @@ static void LoadMapLights(HWFILE const f)
 		}
 	}
 
-	FileRead(f, &usNumLights, sizeof(usNumLights));
+	UINT16 const usNumLights{f->read<UINT16>()};
 	for (INT32 cnt = 0; cnt < usNumLights; ++cnt)
 	{
 		ExtractLightSprite(f, light_time);

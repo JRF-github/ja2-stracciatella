@@ -20,13 +20,11 @@ static SGPImage* ReadUncompRGBImage(   HWFILE, UINT8 uiImgID, UINT8 uiColMap, UI
 
 SGPImage* LoadTGAFileToImage(const ST::string filename, UINT16 const fContents)
 {
-	UINT8		uiImgID, uiColMap, uiType;
-
 	AutoSGPFile hFile(GCM->openGameResForReading(filename));
 
-	FileRead(hFile, &uiImgID,  sizeof(UINT8));
-	FileRead(hFile, &uiColMap, sizeof(UINT8));
-	FileRead(hFile, &uiType,   sizeof(UINT8));
+	UINT8 const uiImgID{hFile->read<UINT8>()};
+	UINT8 const uiColMap{hFile->read<UINT8>()};
+	UINT8 const uiType{hFile->read<UINT8>()};
 
 	switch (uiType)
 	{

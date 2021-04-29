@@ -1426,7 +1426,7 @@ static void SaveFileToSavedGame(SGPFile* fileToSave, HWFILE const hFile)
 	UINT32 uiFileSize = FileGetSize( fileToSave );
 
 	// Write the the size of the file to the saved game file
-	FileWrite(hFile, &uiFileSize, sizeof(UINT32));
+	hFile->write(uiFileSize);
 
 	if (uiFileSize == 0) return;
 
@@ -1454,8 +1454,7 @@ void SaveFilesToSavedGame(char const* const pSrcFileName, HWFILE const hFile)
 static void LoadFileFromSavedGame(SGPFile* fileToWrite, HWFILE const hFile)
 {
 	// Read the size of the data
-	UINT32 uiFileSize;
-	FileRead(hFile, &uiFileSize, sizeof(UINT32));
+	UINT32 const uiFileSize{hFile->read<UINT32>()};
 
 	if (uiFileSize == 0) return;
 

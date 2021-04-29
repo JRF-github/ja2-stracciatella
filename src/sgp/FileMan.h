@@ -20,12 +20,6 @@ ST::string FileReadString(SGPFile* const f, size_t const uiBytesToRead);
 
 SDL_RWops* FileGetRWOps(SGPFile* const f);
 
-template<typename T, typename U> static inline void FileWriteArray(SGPFile* const f, T const& n, U const* const data)
-{
-	FileWrite(f, &n, sizeof(n));
-	if (n != 0) FileWrite(f, data, sizeof(*data) * n);
-}
-
 void  FileSeek(SGPFile*, INT32 distance, FileSeekMode);
 INT32 FileGetPos(const SGPFile*);
 

@@ -1009,29 +1009,21 @@ void CheckConditionsForTriggeringCreatureQuest( INT16 sSectorX, INT16 sSectorY, 
 
 void SaveCreatureDirectives(HWFILE const hFile)
 {
-	FileWrite(hFile, &giHabitatedDistance,  4);
-	FileWrite(hFile, &giPopulationModifier, 4);
-	FileWrite(hFile, &giLairID,             4);
-	FileWrite(hFile, &gfUseCreatureMusic,   1);
-	FileWrite(hFile, &giDestroyedLairID,    4);
+	hFile->write(giHabitatedDistance);
+	hFile->write(giPopulationModifier);
+	hFile->write(giLairID);
+	hFile->write(gfUseCreatureMusic);
+	hFile->write(giDestroyedLairID);
 }
 
 
 void LoadCreatureDirectives(HWFILE const hFile, UINT32 const uiSavedGameVersion)
 {
-	FileRead(hFile, &giHabitatedDistance,  4);
-	FileRead(hFile, &giPopulationModifier, 4);
-	FileRead(hFile, &giLairID,             4);
-	FileRead(hFile, &gfUseCreatureMusic,   1);
-
-	if( uiSavedGameVersion >= 82 )
-	{
-		FileRead(hFile, &giDestroyedLairID, 4);
-	}
-	else
-	{
-		giDestroyedLairID = 0;
-	}
+	giHabitatedDistance = hFile->read<INT32>();
+	giPopulationModifier = hFile->read<INT32>();
+	giLairID = hFile->read<INT32>();
+	gfUseCreatureMusic = hFile->read<BOOLEAN>();
+	giDestroyedLairID = uiSavedGameVersion >= 82 ? hFile->read<INT32>() : 0;
 
 	switch( giLairID )
 	{

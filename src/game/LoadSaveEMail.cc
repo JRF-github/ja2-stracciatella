@@ -86,7 +86,7 @@ void SaveEmailToSavedGame(HWFILE const File)
 	{
 		uiNumOfEmails++;
 	}
-	FileWrite(File, &uiNumOfEmails, sizeof(UINT32));
+	File->write(uiNumOfEmails);
 
 	for (pEmail = pEmailList; pEmail != NULL; pEmail = pEmail->Next)
 	{

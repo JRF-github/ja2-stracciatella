@@ -226,10 +226,8 @@ void TrashWorldItems()
 
 void SaveWorldItemsToMap(HWFILE const f)
 {
-	UINT32 const n_actual_world_items = GetNumUsedWorldItems();
-	FileWrite(f, &n_actual_world_items, sizeof(n_actual_world_items));
-
-	CFOR_EACH_WORLD_ITEM(wi) FileWrite(f, &wi, sizeof(WORLDITEM));
+	f->write<UINT32>(GetNumUsedWorldItems());
+	CFOR_EACH_WORLD_ITEM(wi) f->write(wi);
 }
 
 
@@ -243,9 +241,8 @@ void LoadWorldItemsFromMap(HWFILE const f)
 	TrashWorldItems();
 
 	// Read the number of items that were saved in the map
-	UINT32 n_world_items;
 	auto itemReplacements = GCM->getMapItemReplacements();
-	FileRead(f, &n_world_items, sizeof(n_world_items));
+	UINT32 const n_world_items{f->read<UINT32>()};
 
 	if (gTacticalStatus.uiFlags & LOADING_SAVED_GAME && !gfEditMode)
 	{
@@ -260,8 +257,7 @@ void LoadWorldItemsFromMap(HWFILE const f)
 	{
 		// Add all of the items to the world indirectly through AddItemToPool, but
 		// only if the chance associated with them succeed.
-		WORLDITEM wi;
-		FileRead(f, &wi, sizeof(wi));
+		WORLDITEM wi{f->read<WORLDITEM>()};
 		OBJECTTYPE& o = wi.o;
 
 		if (o.usItem == OWNERSHIP) wi.ubNonExistChance = 0;

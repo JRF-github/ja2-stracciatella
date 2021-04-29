@@ -448,8 +448,8 @@ static void WriteOutCurrentImpCharacter(INT32 iProfileId)
 	AutoSGPFile hFile(FileMan::openForWriting(IMP_MERC_FILE));
 
 	// Write the profile id, portrait id and the profile itself. Abort on error
-	FileWrite(hFile, &iProfileId,      sizeof(INT32));
-	FileWrite(hFile, &iPortraitNumber, sizeof(INT32));
+	hFile->write(iProfileId);
+	hFile->write(iPortraitNumber);
 	InjectMercProfileIntoFile(hFile, gMercProfiles[iProfileId]);
 }
 

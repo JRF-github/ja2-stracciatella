@@ -2510,7 +2510,7 @@ void SaveExplosionTableToSaveGameFile(HWFILE const hFile)
 
 
 	//Write the number of explosion queues
-	FileWrite(hFile, &gubElementsOnExplosionQueue, sizeof(gubElementsOnExplosionQueue));
+	hFile->write(gubElementsOnExplosionQueue);
 	FileSeek(hFile, 3, FILE_SEEK_FROM_CURRENT);
 
 	//loop through and add all the explosions
@@ -2542,7 +2542,7 @@ void SaveExplosionTableToSaveGameFile(HWFILE const hFile)
 	}
 
 	//Save the number of explosions
-	FileWrite(hFile, &uiExplosionCount, sizeof(UINT32));
+	hFile->write(uiExplosionCount);
 
 	//loop through and count all the active explosions
 	for( uiCnt=0; uiCnt< NUM_EXPLOSION_SLOTS; uiCnt++)
@@ -2563,7 +2563,7 @@ void LoadExplosionTableFromSavedGameFile(HWFILE const hFile)
 	//
 
 	//Read the number of explosions queue's
-	FileRead(hFile, &gubElementsOnExplosionQueue, sizeof(gubElementsOnExplosionQueue));
+	gubElementsOnExplosionQueue = hFile->read<UINT8>();
 	FileSeek(hFile, 3, FILE_SEEK_FROM_CURRENT);
 
 	//loop through read all the active explosions fro the file
@@ -2585,8 +2585,7 @@ void LoadExplosionTableFromSavedGameFile(HWFILE const hFile)
 	//
 
 	//Load the number of explosions
-	UINT32 num_explosions;
-	FileRead(hFile, &num_explosions, sizeof(num_explosions));
+	UINT32 const num_explosions{hFile->read<UINT32>()};
 
 	//loop through and load all the active explosions
 	const EXPLOSIONTYPE* const end = gExplosionData + num_explosions;

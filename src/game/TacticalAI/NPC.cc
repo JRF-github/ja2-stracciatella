@@ -211,8 +211,7 @@ static NPCQuoteInfo* ExtractNPCQuoteInfoArrayFromFile(HWFILE const f)
 
 static void ConditionalExtractNPCQuoteInfoArrayFromFile(HWFILE const f, NPCQuoteInfo*& q)
 {
-	UINT8 present;
-	FileRead(f, &present, sizeof(present));
+	UINT8 const present{f->read<UINT8>()};
 	FreeNullArray(q);
 	if (!present) return;
 	q = ExtractNPCQuoteInfoArrayFromFile(f);
@@ -223,13 +222,11 @@ static void ConditionalInjectNPCQuoteInfoArrayIntoFile(HWFILE const f, NPCQuoteI
 {
 	if (!q)
 	{
-		static UINT8 const zero = 0;
-		FileWrite(f, &zero, sizeof(zero));
+		f->write<UINT8>(0);
 		return;
 	}
 
-	static UINT8 const one = 1;
-	FileWrite(f, &one, sizeof(one));
+	f->write<UINT8>(1);
 
 	for (NPCQuoteInfo const* i = q; i != q + NUM_NPC_QUOTE_RECORDS; ++i)
 	{

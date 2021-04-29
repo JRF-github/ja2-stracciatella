@@ -1102,7 +1102,7 @@ void SaveUnderGroundSectorInfoToSaveGame(HWFILE const f)
 	{
 		++n_records;
 	}
-	FileWrite(f, &n_records, sizeof(UINT32));
+	f->write(n_records);
 
 	// Save the nodes
 	for (UNDERGROUND_SECTORINFO const* i = gpUndergroundSectorInfoHead; i; i = i->next)
@@ -1117,8 +1117,7 @@ void LoadUnderGroundSectorInfoFromSavedGame(HWFILE const f)
 	TrashUndergroundSectorInfo();
 
 	// Read the number of nodes stored
-	UINT32 n_records;
-	FileRead(f, &n_records, sizeof(UINT32));
+	UINT32 const n_records{f->read<UINT32>()};
 
 	UNDERGROUND_SECTORINFO** anchor = &gpUndergroundSectorInfoHead;
 	for (UINT32 n = n_records; n != 0; --n)

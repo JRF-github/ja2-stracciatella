@@ -54,8 +54,7 @@ void LoadEnemySoldiersFromTempFile()
 	// STEP TWO: Determine whether or not we should use this data.  Because it
 	// is the demo, it is automatically used.
 
-	INT16 saved_y;
-	FileRead(f, &saved_y, 2);
+	INT16 const saved_y{f->read<INT16>()};
 	if (y != saved_y)
 	{
 		throw std::runtime_error("Sector Y mismatch");
@@ -65,22 +64,18 @@ void LoadEnemySoldiersFromTempFile()
 
 	// STEP THREE: Read the data
 
-	INT16 saved_x;
-	FileRead(f, &saved_x, 2);
+	INT16 const saved_x{f->read<INT16>()};
 	if (x != saved_x)
 	{
 		throw std::runtime_error("Sector X mismatch");
 	}
 
-	INT32 saved_slots;
-	FileRead(f, &saved_slots, 4);
+	INT32 const saved_slots{f->read<INT32>()};
 	INT32 const slots = saved_slots;
 
-	UINT32 timestamp;
-	FileRead(f, &timestamp, 4);
+	UINT32 const timestamp{f->read<UINT32>()};
 
-	INT8 saved_z;
-	FileRead(f, &saved_z, 1);
+	INT8 const saved_z{f->read<INT8>()};
 	if (z != saved_z)
 	{
 		throw std::runtime_error("Sector Z mismatch");
@@ -233,8 +228,7 @@ no_add:
 		}
 	}
 
-	UINT8 saved_sector_id;
-	FileRead(f, &saved_sector_id, 1);
+	UINT8 const saved_sector_id{f->read<UINT8>()};
 	if (saved_sector_id != SECTOR(x, y))
 	{
 		throw std::runtime_error("Sector ID mismatch");
@@ -320,8 +314,7 @@ void NewWayOfLoadingEnemySoldiersFromTempFile()
 	// STEP TWO:  Determine whether or not we should use this data.  Because it
 	// is the demo, it is automatically used.
 
-	INT16 saved_y;
-	FileRead(f, &saved_y, 2);
+	INT16 const saved_y{f->read<INT16>()};
 	if (y != saved_y)
 	{
 		throw std::runtime_error("Sector Y mismatch");
@@ -331,22 +324,18 @@ void NewWayOfLoadingEnemySoldiersFromTempFile()
 
 	// STEP THREE:  read the data
 
-	INT16 saved_x;
-	FileRead(f, &saved_x, 2);
+	INT16 const saved_x{f->read<INT16>()};
 	if (x != saved_x)
 	{
 		throw std::runtime_error("Sector X mismatch");
 	}
 
-	INT32 saved_slots;
-	FileRead(f, &saved_slots, 4);
+	INT32 const saved_slots{f->read<INT32>()};
 	INT32 const slots = saved_slots;
 
-	UINT32 timestamp;
-	FileRead(f, &timestamp, 4);
+	UINT32 const timestamp{f->read<UINT32>()};
 
-	INT8 saved_z;
-	FileRead(f, &saved_z, 1);
+	INT8 const saved_z{f->read<INT8>()};
 	if (z != saved_z)
 	{
 		throw std::runtime_error("Sector Z mismatch");
@@ -470,8 +459,7 @@ void NewWayOfLoadingEnemySoldiersFromTempFile()
 		}
 	}
 
-	UINT8 saved_sector_id;
-	FileRead(f, &saved_sector_id, 1);
+	UINT8 const saved_sector_id{f->read<UINT8>()};
 	if (saved_sector_id != SECTOR(x, y))
 	{
 		throw std::runtime_error("Sector ID mismatch");
@@ -504,8 +492,7 @@ void NewWayOfLoadingCiviliansFromTempFile()
 	// STEP TWO:  Determine whether or not we should use this data.  Because it
 	// is the demo, it is automatically used.
 
-	INT16 saved_y;
-	FileRead(f, &saved_y, 2);
+	INT16 const saved_y{f->read<INT16>()};
 	if (y != saved_y)
 	{
 		throw std::runtime_error("Sector Y mismatch");
@@ -515,23 +502,19 @@ void NewWayOfLoadingCiviliansFromTempFile()
 
 	// STEP THREE:  read the data
 
-	INT16 saved_x;
-	FileRead(f, &saved_x, 2);
+	INT16 const saved_x{f->read<INT16>()};
 	if (x != saved_x)
 	{
 		throw std::runtime_error("Sector X mismatch");
 	}
 
-	INT32 saved_slots;
-	FileRead(f, &saved_slots, 4);
+	INT32 const saved_slots{f->read<INT32>()};
 	INT32 const slots = saved_slots;
 
-	UINT32 timestamp;
-	FileRead(f, &timestamp, 4);
+	UINT32 const timestamp{f->read<UINT32>()};
 	UINT32 const time_since_last_loaded = GetWorldTotalMin() - timestamp;
 
-	INT8 saved_z;
-	FileRead(f, &saved_z, 1);
+	INT8 const saved_z{f->read<INT8>()};
 	if (z != saved_z)
 	{
 		throw std::runtime_error("Sector Z mismatch");
@@ -637,8 +620,7 @@ void NewWayOfLoadingCiviliansFromTempFile()
 		RemoveSoldierNodeFromInitList(curr);
 	}
 
-	UINT8 saved_sector_id;
-	FileRead(f, &saved_sector_id, 1);
+	[[maybe_unused]] UINT8 const saved_sector_id{f->read<UINT8>()};
 #if 0 // XXX was commented out
 	if (saved_sector_id != SECTOR(sSectorX, sSectorY))
 	{
@@ -782,14 +764,14 @@ void NewWayOfSavingEnemyAndCivliansToTempFile(INT16 const sSectorX, INT16 const 
 
 	AutoSGPFile f(FileMan::openForWriting(GetMapTempFileName(file_flag, sSectorX, sSectorY, bSectorZ)));
 
-	FileWrite(f, &sSectorY, 2);
-
 	// STEP THREE:  Save the data
+
+	f->write(sSectorY);
 
 	// This works for both civs and enemies
 	SaveSoldierInitListLinks(f);
 
-	FileWrite(f, &sSectorX, 2);
+	f->write(sSectorX);
 
 	// This check may appear confusing.  It is intended to abort if the player is
 	// saving the game.  It is only supposed to preserve the links to the
@@ -801,12 +783,11 @@ void NewWayOfSavingEnemyAndCivliansToTempFile(INT16 const sSectorX, INT16 const 
 		slots = 0;
 	}
 
-	FileWrite(f, &slots, 4);
+	f->write(slots);
 
-	UINT32 const timestamp = GetWorldTotalMin();
-	FileWrite(f, &timestamp, 4);
+	f->write(GetWorldTotalMin());
 
-	FileWrite(f, &bSectorZ, 1);
+	f->write(bSectorZ);
 
 	// If we are saving the game, we don't need to preserve the soldier
 	// information, just preserve the links to the placement list.
@@ -827,12 +808,10 @@ void NewWayOfSavingEnemyAndCivliansToTempFile(INT16 const sSectorX, INT16 const 
 			SOLDIERCREATE_STRUCT const* const dp = curr->pDetailedPlacement;
 			InjectSoldierCreateIntoFile(f, dp);
 			// Insert a checksum equation (anti-hack)
-			UINT16 const checksum = CalcSoldierCreateCheckSum(dp);
-			FileWrite(f, &checksum, 2);
+			f->write(CalcSoldierCreateCheckSum(dp));
 		}
 
-		UINT8 const sector_id = SECTOR(sSectorX, sSectorY);
-		FileWrite(f, &sector_id, 1);
+		f->write(SECTOR(sSectorX, sSectorY));
 	}
 
 	SetSectorFlag(sSectorX, sSectorY, bSectorZ, file_flag);
@@ -857,8 +836,7 @@ static void CountNumberOfElitesRegularsAdminsAndCreaturesFromEnemySoldiersTempFi
 	// STEP TWO: Determine whether or not we should use this data.  Because it
 	// is the demo, it is automatically used.
 
-	INT16 saved_y;
-	FileRead(f, &saved_y, 2);
+	INT16 const saved_y{f->read<INT16>()};
 	if (y != saved_y)
 	{
 		throw std::runtime_error("Sector Y mismatch");
@@ -868,22 +846,19 @@ static void CountNumberOfElitesRegularsAdminsAndCreaturesFromEnemySoldiersTempFi
 
 	// STEP THREE: Read the data
 
-	INT16 saved_x;
-	FileRead(f, &saved_x, 2);
+	INT16 const saved_x{f->read<INT16>()};
 	if (x != saved_x)
 	{
 		throw std::runtime_error("Sector X mismatch");
 	}
 
-	INT32 saved_slots = 0;
-	FileRead(f, &saved_slots, 4);
+	INT32 const saved_slots{f->read<INT32>()};
 	INT32 slots = saved_slots;
 
 	// Skip timestamp
 	FileSeek(f, 4, FILE_SEEK_FROM_CURRENT);
 
-	INT8 saved_z;
-	FileRead(f, &saved_z, 1);
+	INT8 const saved_z{f->read<INT8>()};
 	if (z != saved_z)
 	{
 		throw std::runtime_error("Sector Z mismatch");
@@ -925,8 +900,7 @@ static void CountNumberOfElitesRegularsAdminsAndCreaturesFromEnemySoldiersTempFi
 		}
 	}
 
-	UINT8 saved_sector_id;
-	FileRead(f, &saved_sector_id, 1);
+	UINT8 const saved_sector_id{f->read<UINT8>()};
 	if (saved_sector_id != SECTOR(x, y))
 	{
 		throw std::runtime_error("Sector ID mismatch");

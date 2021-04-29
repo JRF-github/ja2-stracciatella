@@ -4104,8 +4104,7 @@ void SaveLeaveItemList(HWFILE const f)
 		if (head)
 		{
 			// Save to specify that a node DOES exist
-			BOOLEAN const node_exists = TRUE;
-			FileWrite(f, &node_exists, sizeof(BOOLEAN));
+			f->write<BOOLEAN>(TRUE);
 
 			// Save number of items
 			UINT32 n_items = 0;
@@ -4113,7 +4112,7 @@ void SaveLeaveItemList(HWFILE const f)
 			{
 				++n_items;
 			}
-			FileWrite(f, &n_items, sizeof(UINT32));
+			f->write(n_items);
 
 			for (MERC_LEAVE_ITEM const* i = head; i; i = i->pNext)
 			{
@@ -4129,15 +4128,14 @@ void SaveLeaveItemList(HWFILE const f)
 		else
 		{
 			// Save to specify that a node DOENST exist
-			BOOLEAN const node_exists = FALSE;
-			FileWrite(f, &node_exists, sizeof(BOOLEAN));
+			f->write<BOOLEAN>(FALSE);
 		}
 	}
 
 	// Save the leave list profile IDs
 	for (INT32 i = 0; i < NUM_LEAVE_LIST_SLOTS; ++i)
 	{
-		FileWrite(f, &guiLeaveListOwnerProfileId[i], sizeof(UINT32));
+		f->write(guiLeaveListOwnerProfileId[i]);
 	}
 }
 
@@ -4150,13 +4148,10 @@ void LoadLeaveItemList(HWFILE const f)
 	for (INT32 i = 0; i < NUM_LEAVE_LIST_SLOTS; ++i)
 	{
 		// Load flag which specifies whether a node exists
-		BOOLEAN	node_exists;
-		FileRead(f, &node_exists, sizeof(BOOLEAN));
-		if (!node_exists) continue;
+		if (!f->read<BOOLEAN>()) continue;
 
 		// Load the number specifing how many items there are in the list
-		UINT32 n_items;
-		FileRead(f, &n_items, sizeof(UINT32));
+		UINT32 const n_items{f->read<UINT32>()};
 
 		MERC_LEAVE_ITEM** anchor = &gpLeaveListHead[i];
 		for (UINT32 n = n_items; n != 0; --n)
@@ -4180,7 +4175,7 @@ void LoadLeaveItemList(HWFILE const f)
 	// Load the leave list profile IDs
 	for (INT32 i = 0; i < NUM_LEAVE_LIST_SLOTS; ++i)
 	{
-		FileRead(f, &guiLeaveListOwnerProfileId[i], sizeof(UINT32));
+		guiLeaveListOwnerProfileId[i] = f->read<UINT32>();
 	}
 }
 

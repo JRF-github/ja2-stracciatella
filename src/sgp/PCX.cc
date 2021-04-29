@@ -37,8 +37,7 @@ SGPImage* LoadPCXFileToImage(const ST::string filename, UINT16 const contents)
 {
 	AutoSGPFile f(GCM->openGameResForReading(filename));
 
-	PcxHeader header;
-	FileRead(f, &header, sizeof(header));
+	PcxHeader const header{f->read<PcxHeader>()};
 	if (header.ubManufacturer != 10 || header.ubEncoding != 1)
 	{
 		throw std::runtime_error("PCX file has invalid header");

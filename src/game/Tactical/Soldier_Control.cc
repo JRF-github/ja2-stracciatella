@@ -4998,7 +4998,7 @@ void LoadPaletteData()
 	AutoSGPFile hFile(GCM->openGameResForReading(PALETTEFILENAME));
 
 	// Read # of types
-	FileRead(hFile, &guiNumPaletteSubRanges, sizeof(guiNumPaletteSubRanges));
+	guiNumPaletteSubRanges = hFile->read<UINT32>();
 
 	// Malloc!
 	gpPaletteSubRanges          = new PaletteSubRangeType[guiNumPaletteSubRanges]{};
@@ -5007,19 +5007,18 @@ void LoadPaletteData()
 	// Read # of types for each!
 	for ( cnt = 0; cnt < guiNumPaletteSubRanges; cnt++ )
 	{
-		FileRead(hFile, &gubpNumReplacementsPerRange[cnt], sizeof(UINT8));
+		gubpNumReplacementsPerRange[cnt] = hFile->read<UINT8>();
 	}
 
 	// Loop for each one, read in data
 	for ( cnt = 0; cnt < guiNumPaletteSubRanges; cnt++ )
 	{
-		FileRead(hFile, &gpPaletteSubRanges[cnt].ubStart, sizeof(UINT8));
-		FileRead(hFile, &gpPaletteSubRanges[cnt].ubEnd,   sizeof(UINT8));
+		gpPaletteSubRanges[cnt].ubStart = hFile->read<UINT8>();
+		gpPaletteSubRanges[cnt].ubEnd   = hFile->read<UINT8>();
 	}
 
-
 	// Read # of palettes
-	FileRead(hFile, &guiNumReplacements, sizeof(guiNumReplacements));
+	guiNumReplacements = hFile->read<UINT32>();
 
 	// Malloc!
 	gpPalRep = new PaletteReplacementType[guiNumReplacements]{};
@@ -5028,23 +5027,23 @@ void LoadPaletteData()
 	for ( cnt = 0; cnt < guiNumReplacements; cnt++ )
 	{
 		// type
-		FileRead(hFile, &gpPalRep[cnt].ubType, sizeof(gpPalRep[cnt].ubType));
+		gpPalRep[cnt].ubType = hFile->read<UINT8>();
 
 		ST::char_buffer buf{PaletteRepID_LENGTH, '\0'};
 		FileRead(hFile, buf.data(), buf.size() * sizeof(char));
 		gpPalRep[cnt].ID = ST::string(buf.c_str(), ST_AUTO_SIZE, ST::substitute_invalid);
 
 		// # entries
-		FileRead(hFile, &gpPalRep[cnt].ubPaletteSize, sizeof(gpPalRep[cnt].ubPaletteSize));
+		gpPalRep[cnt].ubPaletteSize = hFile->read<UINT8>();
 
 		SGPPaletteEntry* const Pal = new SGPPaletteEntry[gpPalRep[cnt].ubPaletteSize]{};
 		gpPalRep[cnt].rgb = Pal;
 
 		for( cnt2 = 0; cnt2 < gpPalRep[ cnt ].ubPaletteSize; cnt2++ )
 		{
-			FileRead(hFile, &Pal[cnt2].r, sizeof(Pal[cnt2].r));
-			FileRead(hFile, &Pal[cnt2].g, sizeof(Pal[cnt2].g));
-			FileRead(hFile, &Pal[cnt2].b, sizeof(Pal[cnt2].b));
+			Pal[cnt2].r = hFile->read<Uint8>();
+			Pal[cnt2].g = hFile->read<Uint8>();
+			Pal[cnt2].b = hFile->read<Uint8>();
 		}
 
 	}

@@ -20,8 +20,7 @@ SGPImage* LoadSTCIFileToImage(const ST::string filename, UINT16 const fContents)
 {
 	AutoSGPFile f(GCM->openGameResForReading(filename));
 
-	STCIHeader header;
-	FileRead(f, &header, sizeof(header));
+	STCIHeader const header{f->read<STCIHeader>()};
 	if (memcmp(header.cID, STCI_ID_STRING, STCI_ID_LEN) != 0)
 	{
 		throw std::runtime_error("STCI file has invalid header");

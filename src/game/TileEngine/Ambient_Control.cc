@@ -25,12 +25,12 @@ try
 	AutoSGPFile hFile(GCM->openGameResForReading(zFilename));
 
 	// READ #
-	FileRead(hFile, &gsNumAmbData, sizeof(INT16));
+	gsNumAmbData = hFile->read<INT16>();
 
 	// LOOP FOR OTHERS
 	for (INT32 cnt = 0; cnt < gsNumAmbData; cnt++)
 	{
-		FileRead(hFile, &gAmbData[cnt], sizeof(AMBIENTDATA_STRUCT));
+		gAmbData[cnt] = hFile->read<AMBIENTDATA_STRUCT>();
 
 		zFilename = ST::format("{}/{}", AMBIENTDIR, gAmbData[cnt].zFilename);
 		if (zFilename.size() > SGPFILENAME_LEN) throw std::runtime_error("ambient file name too long");
