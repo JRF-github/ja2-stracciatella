@@ -242,9 +242,6 @@ static void LoadStructureData(char const* const filename, STRUCTURE_FILE_REF* co
 {
 	AutoSGPFile f(GCM->openGameResForReading(filename));
 
-	BYTE data[16];
-	FileRead(f, data, sizeof(data));
-
 	char   id[4];
 	UINT16 n_structures;
 	UINT16 n_structures_stored;
@@ -252,7 +249,7 @@ static void LoadStructureData(char const* const filename, STRUCTURE_FILE_REF* co
 	UINT8  flags;
 	UINT16 n_tile_locs_stored;
 
-	DataReader d{data};
+	FileDataReader d{16, f};
 	EXTR_STR(d, id, lengthof(id))
 	EXTR_U16(d, n_structures);
 	EXTR_U16( d, n_structures_stored)
@@ -260,7 +257,6 @@ static void LoadStructureData(char const* const filename, STRUCTURE_FILE_REF* co
 	EXTR_U8(  d, flags)
 	EXTR_SKIP(d, 3)
 	EXTR_U16( d, n_tile_locs_stored)
-	Assert(d.getConsumed() == lengthof(data));
 
 	if (strncmp(id, STRUCTURE_FILE_ID, STRUCTURE_FILE_ID_LEN) != 0 ||
 			n_structures == 0)

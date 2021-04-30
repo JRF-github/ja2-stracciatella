@@ -9,10 +9,7 @@
 
 void ExtractVehicleTypeFromFile(HWFILE const file, VEHICLETYPE* const v, UINT32 const savegame_version)
 {
-	BYTE data[128];
-	FileRead(file, data, sizeof(data));
-
-	DataReader d{data};
+	FileDataReader d{128, file};
 	EXTR_PTR(d, v->pMercPath)
 	EXTR_U8(d, v->ubMovementGroup)
 	EXTR_U8(d, v->ubVehicleType)
@@ -38,15 +35,12 @@ void ExtractVehicleTypeFromFile(HWFILE const file, VEHICLETYPE* const v, UINT32 
 	EXTR_SKIP(d, 1)
 	EXTR_BOOL(d, v->fValid)
 	EXTR_SKIP(d, 2)
-	Assert(d.getConsumed() == lengthof(data));
 }
 
 
 void InjectVehicleTypeIntoFile(HWFILE const file, VEHICLETYPE const* const v)
 {
-	BYTE data[128];
-
-	DataWriter d{data};
+	FileDataWriter d{128, file};
 	INJ_PTR(d, v->pMercPath)
 	INJ_U8(d, v->ubMovementGroup)
 	INJ_U8(d, v->ubVehicleType)
@@ -70,7 +64,4 @@ void InjectVehicleTypeIntoFile(HWFILE const file, VEHICLETYPE const* const v)
 	INJ_SKIP(d, 1)
 	INJ_BOOL(d, v->fValid)
 	INJ_SKIP(d, 2)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(file, data, sizeof(data));
 }

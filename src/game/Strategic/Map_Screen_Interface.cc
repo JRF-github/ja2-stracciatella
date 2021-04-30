@@ -4117,13 +4117,9 @@ void SaveLeaveItemList(HWFILE const f)
 
 			for (MERC_LEAVE_ITEM const* i = head; i; i = i->pNext)
 			{
-				BYTE  data[40];
-				DataWriter d{data};
+				FileDataWriter d{40, f};
 				InjectObject(d, &i->o);
 				INJ_SKIP(d, 4)
-				Assert(d.getConsumed() == lengthof(data));
-
-				FileWrite(f, data, sizeof(data));
 			}
 		}
 		else
@@ -4163,13 +4159,9 @@ void LoadLeaveItemList(HWFILE const f)
 		{
 			MERC_LEAVE_ITEM* const li = new MERC_LEAVE_ITEM{};
 
-			BYTE  data[40];
-			FileRead(f, data, sizeof(data));
-
-			DataReader d{data};
+			FileDataReader d{40, f};
 			ExtractObject(d, &li->o);
 			EXTR_SKIP(d, 4)
-			Assert(d.getConsumed() == lengthof(data));
 
 			// Append node to list
 			*anchor = li;

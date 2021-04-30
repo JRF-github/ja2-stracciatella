@@ -753,18 +753,14 @@ static void AppendHistoryToEndOfFile(void)
 
 	const HistoryUnit* const h = pHistoryListHead;
 
-	BYTE  data[12];
-	DataWriter d{data};
-	INJ_U8(d, h->ubCode)
-	INJ_U8(d, h->ubSecondCode)
-	INJ_U32(d, h->uiDate)
-	INJ_I16(d, h->sSectorX)
-	INJ_I16(d, h->sSectorY)
-	INJ_I8(d, h->bSectorZ)
-	INJ_SKIP(d, 1)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter{12, f}
+	  << h->ubCode
+	  << h->ubSecondCode
+	  << h->uiDate
+	  << h->sSectorX
+	  << h->sSectorY
+	  << h->bSectorZ
+	  << skip<1>;
 }
 
 

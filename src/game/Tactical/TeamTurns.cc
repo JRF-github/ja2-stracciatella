@@ -1670,44 +1670,36 @@ void ResolveInterruptsVs( SOLDIERTYPE * pSoldier, UINT8 ubInterruptType)
 
 void SaveTeamTurnsToTheSaveGameFile(HWFILE const f)
 {
-	BYTE  data[174];
-	DataWriter d{data};
+	FileDataWriter d{174, f};
 	for (size_t i = 0; i != lengthof(gOutOfTurnOrder); ++i)
 	{
-		INJ_SOLDIER(d, gOutOfTurnOrder[i])
+		d << gOutOfTurnOrder[i];
 	}
-	INJ_U8(     d, gubOutOfTurnPersons)
-	INJ_SKIP(   d, 3)
-	INJ_SOLDIER(d, gWhoThrewRock)
-	INJ_SKIP(   d, 2)
-	INJ_BOOL(   d, gfHiddenInterrupt)
-	INJ_SOLDIER(d, gLastInterruptedGuy)
-	INJ_SKIP(   d, 17)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	d << gubOutOfTurnPersons
+	  << skip<3>
+	  << gWhoThrewRock
+	  << skip<2>
+	  << gfHiddenInterrupt
+	  << gLastInterruptedGuy
+	  << skip<17>;
 }
 
 
 void LoadTeamTurnsFromTheSavedGameFile(HWFILE const f)
 {
-	BYTE data[174];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_SKIP(d, 1)
+	FileDataReader d{174, f};
+	d >> skip<1>;
 	for (size_t i = 1; i != lengthof(gOutOfTurnOrder); ++i)
 	{
-		EXTR_SOLDIER(d, gOutOfTurnOrder[i])
+		d >> gOutOfTurnOrder[i];
 	}
-	EXTR_U8(     d, gubOutOfTurnPersons)
-	EXTR_SKIP(   d, 3)
-	EXTR_SOLDIER(d, gWhoThrewRock)
-	EXTR_SKIP(   d, 2)
-	EXTR_BOOL(   d, gfHiddenInterrupt)
-	EXTR_SOLDIER(d, gLastInterruptedGuy)
-	EXTR_SKIP(   d, 17)
-	Assert(d.getConsumed() == lengthof(data));
+	d >> gubOutOfTurnPersons
+	  >> skip<3>
+	  >> gWhoThrewRock
+	  >> skip<2>
+	  >> gfHiddenInterrupt
+	  >> gLastInterruptedGuy
+	  >> skip<17>;
 }
 
 

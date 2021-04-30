@@ -17,7 +17,7 @@ static void ReplaceInvalidItem(UINT16 & usItem)
 	}
 }
 
-void ExtractObject(DataReader& d, OBJECTTYPE* const o)
+void ExtractObject(DataReader& d, OBJECTTYPE * const o)
 {
 	size_t start = d.getConsumed();
 	EXTR_U16(d, o->usItem)

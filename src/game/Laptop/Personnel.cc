@@ -1514,19 +1514,19 @@ static void DisplayTeamStats(void)
 		{
 			for (UINT CurrentList = 0; CurrentList < 3; ++CurrentList)
 			{
-				const INT16* CurrentListValue; // XXX HACK000E
+				std::array<INT16, 256> * CurrentListValue; // XXX HACK000E
 				switch (CurrentList)
 				{
-					case 0: CurrentListValue = LaptopSaveInfo.ubDeadCharactersList;  break;
-					case 1: CurrentListValue = LaptopSaveInfo.ubLeftCharactersList;  break;
-					case 2: CurrentListValue = LaptopSaveInfo.ubOtherCharactersList; break;
+					case 0: CurrentListValue = &LaptopSaveInfo.ubDeadCharactersList;  break;
+					case 1: CurrentListValue = &LaptopSaveInfo.ubLeftCharactersList;  break;
+					case 2: CurrentListValue = &LaptopSaveInfo.ubOtherCharactersList; break;
 
 					default: abort(); // HACK000E
 				}
 
 				for (UINT32 i = 0; i < 256; i++)
 				{
-					const INT32 id = CurrentListValue[i];
+					const INT32 id = (*CurrentListValue)[i];
 					if (id == -1) continue;
 
 					INT32 val; // XXX HACK000E
@@ -1612,14 +1612,9 @@ static void InitPastCharactersList(void)
 }
 
 
-static INT32 CountList(const INT16* const list)
+static INT32 CountList(std::array<INT16, 256> const& list)
 {
-	INT32 count = 0;
-	for (const INT16* i = list, * const end = list + 256; i != end; ++i)
-	{
-		if (*i != -1) ++count;
-	}
-	return count;
+	return 256 - std::count(list.begin(), list.end(), -1);
 }
 
 
@@ -1807,24 +1802,24 @@ static void DisplayPastMercsPortraits()
 	LaptopSaveInfoStruct const& l   = LaptopSaveInfo;
 	INT32                       pos = -giCurrentUpperLeftPortraitNumber;
 
-	FOR_EACH(INT16 const, i, l.ubDeadCharactersList)
+	for (INT16 const i : l.ubDeadCharactersList)
 	{
-		if (*i == -1) continue;
-		if (pos >= 0) DisplayPortraitOfPastMerc(*i, pos, TRUE);
+		if (i == -1) continue;
+		if (pos >= 0) DisplayPortraitOfPastMerc(i, pos, TRUE);
 		if (++pos == PERSONNEL_PORTRAIT_NUMBER) return;
 	}
 
-	FOR_EACH(INT16 const, i, l.ubLeftCharactersList)
+	for (INT16 const i : l.ubLeftCharactersList)
 	{
-		if (*i == -1) continue;
-		if (pos >= 0) DisplayPortraitOfPastMerc(*i, pos, FALSE);
+		if (i == -1) continue;
+		if (pos >= 0) DisplayPortraitOfPastMerc(i, pos, FALSE);
 		if (++pos == PERSONNEL_PORTRAIT_NUMBER) return;
 	}
 
-	FOR_EACH(INT16 const, i, l.ubOtherCharactersList)
+	for (INT16 const i : l.ubOtherCharactersList)
 	{
-		if (*i == -1) continue;
-		if (pos >= 0) DisplayPortraitOfPastMerc(*i, pos, FALSE);
+		if (i == -1) continue;
+		if (pos >= 0) DisplayPortraitOfPastMerc(i, pos, FALSE);
 		if (++pos == PERSONNEL_PORTRAIT_NUMBER) return;
 	}
 }
@@ -1837,20 +1832,20 @@ static PastMercInfo GetSelectedPastMercInfo(void)
 	Assert(slot < GetNumberOfPastMercsOnPlayersTeam());
 
 	LaptopSaveInfoStruct const& l = LaptopSaveInfo;
-	FOR_EACH(INT16 const, i, l.ubDeadCharactersList)
+	for (INT16 const i : l.ubDeadCharactersList)
 	{
-		if (*i == -1 || slot-- != 0) continue;
-		return PastMercInfo(&GetProfile(*i), DEPARTED_DEAD);
+		if (i == -1 || slot-- != 0) continue;
+		return PastMercInfo(&GetProfile(i), DEPARTED_DEAD);
 	}
-	FOR_EACH(INT16 const, i, l.ubLeftCharactersList)
+	for (INT16 const i : l.ubLeftCharactersList)
 	{
-		if (*i == -1 || slot-- != 0) continue;
-		return PastMercInfo(&GetProfile(*i), DEPARTED_FIRED);
+		if (i == -1 || slot-- != 0) continue;
+		return PastMercInfo(&GetProfile(i), DEPARTED_FIRED);
 	}
-	FOR_EACH(INT16 const, i, l.ubOtherCharactersList)
+	for (INT16 const i : l.ubOtherCharactersList)
 	{
-		if (*i == -1 || slot-- != 0) continue;
-		MERCPROFILESTRUCT& p     = GetProfile(*i);
+		if (i == -1 || slot-- != 0) continue;
+		MERCPROFILESTRUCT& p     = GetProfile(i);
 		MercProfile profile      = MercProfile(p);
 		INT const          state =
 			p.ubMiscFlags2 & PROFILE_MISC_FLAG2_MARRIED_TO_HICKS ? DEPARTED_MARRIED          :

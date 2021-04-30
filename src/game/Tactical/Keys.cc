@@ -1191,13 +1191,7 @@ void SaveKeyTableToSaveGameFile(HWFILE const f)
 	FOR_EACH(KEY const, i, KeyTable)
 	{
 		KEY const& k = *i;
-		BYTE       data[8];
-		DataWriter d{data};
-		INJ_SKIP(d, 4)
-		INJ_U16( d, k.usSectorFound)
-		INJ_U16( d, k.usDateFound)
-		Assert(d.getConsumed() == lengthof(data));
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{8, f} << skip<4> << k.usSectorFound << k.usDateFound;
 	}
 }
 
@@ -1206,14 +1200,8 @@ void LoadKeyTableFromSaveedGameFile(HWFILE const f)
 {
 	FOR_EACH(KEY, i, KeyTable)
 	{
-		BYTE data[8];
-		FileRead(f, data, sizeof(data));
 		KEY&  k = *i;
-		DataReader d{data};
-		EXTR_SKIP(d, 4)
-		EXTR_U16( d, k.usSectorFound)
-		EXTR_U16( d, k.usDateFound)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{8, f} >> skip<4> >> k.usSectorFound >> k.usDateFound;
 	}
 }
 

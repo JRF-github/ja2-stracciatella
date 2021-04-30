@@ -1,5 +1,7 @@
 #include "LoadSaveData.h"
 
+#include "Debug.h"
+#include "FileMan.h"
 #include <string_theory/format>
 #include <string_theory/string>
 
@@ -160,3 +162,33 @@ size_t DataReader::getConsumed() const
 ////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////
+#include <stdlib.h>
+
+FileDataWriter::FileDataWriter(size_t const size, SGPFile * const file)
+	: DataWriter{&buf_[0]}, file_{file}, size_{size}
+{
+	Assert(size > 0 && size <= sizeof(buf_));
+}
+
+
+FileDataWriter::~FileDataWriter()
+{
+	if (getConsumed() != size_) 	{ printf("!!!!!!!!!!!!!! %d %d\n", (int)getConsumed(), (int)size_); abort();}
+
+	FileWrite(file_, &buf_[0], size_);
+}
+
+
+FileDataReader::FileDataReader(size_t const size, SGPFile * const file)
+	: DataReader{&buf_[0]}, size_{size}
+{
+	Assert(size > 0 && size <= sizeof(buf_));
+	FileRead(file, &buf_[0], size);
+}
+
+
+FileDataReader::~FileDataReader()
+{
+	if (getConsumed() != size_) 
+	{ printf("!!!!!!!!!!!!!! %d %d\n", (int)getConsumed(), (int)size_); abort();}
+}

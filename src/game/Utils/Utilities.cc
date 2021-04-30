@@ -23,18 +23,12 @@ try
 {
 	AutoSGPFile f(GCM->openGameResForReading(col_file));
 
-	BYTE data[776];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
+	FileDataReader d{776, f};
 	EXTR_SKIP(d, 8); // skip header
 	for (UINT i = 0; i != 256; ++i)
 	{
-		EXTR_U8(d, pal[i].r)
-		EXTR_U8(d, pal[i].g)
-		EXTR_U8(d, pal[i].b)
+		d >> pal[i].r >> pal[i].g >> pal[i].b;
 	}
-	Assert(d.getConsumed() == lengthof(data));
 
 	return TRUE;
 }

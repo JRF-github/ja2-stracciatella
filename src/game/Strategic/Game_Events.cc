@@ -345,19 +345,15 @@ void SaveStrategicEventsToSavedGame(HWFILE const f)
 
 	for (STRATEGICEVENT* i = gpEventList; i; i = i->next)
 	{
-		BYTE  data[28];
-		DataWriter d{data};
-		INJ_SKIP(d, 4)
-		INJ_U32( d, i->uiTimeStamp)
-		INJ_U32( d, i->uiParam)
-		INJ_U32( d, i->uiTimeOffset)
-		INJ_U8(  d, i->ubEventType)
-		INJ_U8(  d, i->ubCallbackID)
-		INJ_U8(  d, i->ubFlags)
-		INJ_SKIP(d, 9)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{28, f}
+		  << skip<4>
+		  << i->uiTimeStamp
+		  << i->uiParam
+		  << i->uiTimeOffset
+		  << i->ubEventType
+		  << i->ubCallbackID
+		  << i->ubFlags
+		  << skip<9>;
 	}
 }
 
@@ -374,20 +370,16 @@ void LoadStrategicEventsFromSavedGame(HWFILE const f)
 	STRATEGICEVENT** anchor = &gpEventList;
 	for (size_t n = n_game_events; n != 0; --n)
 	{
-		BYTE data[28];
-		FileRead(f, data, sizeof(data));
-
 		STRATEGICEVENT* const sev = new STRATEGICEVENT{};
-		DataReader d{data};
-		EXTR_SKIP(d, 4)
-		EXTR_U32( d, sev->uiTimeStamp)
-		EXTR_U32( d, sev->uiParam)
-		EXTR_U32( d, sev->uiTimeOffset)
-		EXTR_U8(  d, sev->ubEventType)
-		EXTR_U8(  d, sev->ubCallbackID)
-		EXTR_U8(  d, sev->ubFlags)
-		EXTR_SKIP(d, 9)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{28, f}
+		  >> skip<4>
+		  >> sev->uiTimeStamp
+		  >> sev->uiParam
+		  >> sev->uiTimeOffset
+		  >> sev->ubEventType
+		  >> sev->ubCallbackID
+		  >> sev->ubFlags
+		  >> skip<9>;
 
 		*anchor = sev;
 		anchor  = &sev->next;

@@ -697,18 +697,14 @@ void SaveStrategicTownLoyaltyToSaveGameFile(HWFILE const f)
 	//Save the Town Loyalty
 	FOR_EACH(TOWN_LOYALTY const, i, gTownLoyalty)
 	{
-		BYTE  data[26];
-		DataWriter d{data};
-		INJ_U8(  d, i->ubRating)
-		INJ_SKIP(d, 1)
-		INJ_I16( d, i->sChange)
-		INJ_BOOL(d, i->fStarted)
-		INJ_SKIP(d, 1)
-		INJ_BOOL(d, i->fLiberatedAlready)
-		INJ_SKIP(d, 19)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{26, f}
+		  << i->ubRating
+		  << skip<1>
+		  << i->sChange
+		  << i->fStarted
+		  << skip<1>
+		  << i->fLiberatedAlready
+		  << skip<19>;
 	}
 }
 
@@ -718,10 +714,7 @@ void LoadStrategicTownLoyaltyFromSavedGameFile(HWFILE const f)
 	//Restore the Town Loyalty
 	FOR_EACH(TOWN_LOYALTY, i, gTownLoyalty)
 	{
-		BYTE data[26];
-		FileRead(f, data, sizeof(data));
-
-		DataReader d{data};
+		FileDataReader d{26, f};
 		EXTR_U8(  d, i->ubRating)
 		EXTR_SKIP(d, 1)
 		EXTR_I16( d, i->sChange)
@@ -729,7 +722,6 @@ void LoadStrategicTownLoyaltyFromSavedGameFile(HWFILE const f)
 		EXTR_SKIP(d, 1)
 		EXTR_BOOL(d, i->fLiberatedAlready)
 		EXTR_SKIP(d, 19)
-		Assert(d.getConsumed() == lengthof(data));
 	}
 }
 

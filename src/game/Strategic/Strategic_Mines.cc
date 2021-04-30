@@ -631,29 +631,25 @@ void SaveMineStatusToSaveGameFile(HWFILE const f)
 {
 	for (MINE_STATUS_TYPE i : gMineStatus)
 	{
-		BYTE  data[44];
-		DataWriter d{data};
-		INJ_U8(  d, i.ubMineType)
-		INJ_SKIP(d, 3)
-		INJ_U32( d, i.uiMaxRemovalRate)
-		INJ_U32( d, i.uiRemainingOreSupply)
-		INJ_U32( d, i.uiOreRunningOutPoint)
-		INJ_BOOL(d, i.fEmpty)
-		INJ_BOOL(d, i.fRunningOut)
-		INJ_BOOL(d, i.fWarnedOfRunningOut)
-		INJ_BOOL(d, i.fShutDownIsPermanent)
-		INJ_BOOL(d, i.fShutDown)
-		INJ_BOOL(d, i.fPrevInvadedByMonsters)
-		INJ_BOOL(d, i.fSpokeToHeadMiner)
-		INJ_BOOL(d, i.fMineHasProducedForPlayer)
-		INJ_BOOL(d, i.fQueenRetookProducingMine)
-		INJ_BOOL(d, i.fAttackedHeadMiner)
-		INJ_SKIP(d, 2)
-		INJ_U32( d, i.uiTimePlayerProductionStarted)
-		INJ_SKIP(d, 12)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{44, f}
+		  << i.ubMineType
+		  << skip<3>
+		  << i.uiMaxRemovalRate
+		  << i.uiRemainingOreSupply
+		  << i.uiOreRunningOutPoint
+		  << i.fEmpty
+		  << i.fRunningOut
+		  << i.fWarnedOfRunningOut
+		  << i.fShutDownIsPermanent
+		  << i.fShutDown
+		  << i.fPrevInvadedByMonsters
+		  << i.fSpokeToHeadMiner
+		  << i.fMineHasProducedForPlayer
+		  << i.fQueenRetookProducingMine
+		  << i.fAttackedHeadMiner
+		  << skip<2>
+		  << i.uiTimePlayerProductionStarted
+		  << skip<12>;
 	}
 }
 
@@ -665,29 +661,25 @@ void LoadMineStatusFromSavedGameFile(HWFILE const f)
 	gMineStatus.resize(GCM->getMines().size());
 	for (auto& i : gMineStatus)
 	{
-		BYTE  data[44];
-		FileRead(f, data, sizeof(data));
-
-		DataReader d{data};
-		EXTR_U8(  d, i.ubMineType)
-		EXTR_SKIP(d, 3)
-		EXTR_U32( d, i.uiMaxRemovalRate)
-		EXTR_U32( d, i.uiRemainingOreSupply)
-		EXTR_U32( d, i.uiOreRunningOutPoint)
-		EXTR_BOOL(d, i.fEmpty)
-		EXTR_BOOL(d, i.fRunningOut)
-		EXTR_BOOL(d, i.fWarnedOfRunningOut)
-		EXTR_BOOL(d, i.fShutDownIsPermanent)
-		EXTR_BOOL(d, i.fShutDown)
-		EXTR_BOOL(d, i.fPrevInvadedByMonsters)
-		EXTR_BOOL(d, i.fSpokeToHeadMiner)
-		EXTR_BOOL(d, i.fMineHasProducedForPlayer)
-		EXTR_BOOL(d, i.fQueenRetookProducingMine)
-		EXTR_BOOL(d, i.fAttackedHeadMiner)
-		EXTR_SKIP(d, 2)
-		EXTR_U32( d, i.uiTimePlayerProductionStarted)
-		EXTR_SKIP(d, 12)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{44, f}
+		  >> i.ubMineType
+		  >> skip<3>
+		  >> i.uiMaxRemovalRate
+		  >> i.uiRemainingOreSupply
+		  >> i.uiOreRunningOutPoint
+		  >> i.fEmpty
+		  >> i.fRunningOut
+		  >> i.fWarnedOfRunningOut
+		  >> i.fShutDownIsPermanent
+		  >> i.fShutDown
+		  >> i.fPrevInvadedByMonsters
+		  >> i.fSpokeToHeadMiner
+		  >> i.fMineHasProducedForPlayer
+		  >> i.fQueenRetookProducingMine
+		  >> i.fAttackedHeadMiner
+		  >> skip<2>
+		  >> i.uiTimePlayerProductionStarted
+		  >> skip<12>;
 	}
 }
 

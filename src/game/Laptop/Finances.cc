@@ -906,16 +906,12 @@ static void AppendFinanceToEndOfFile(void)
 	AutoSGPFile f(GCM->openTempFileForAppend(NEWTMP_FINANCES_DATA_FILE));
 
 	const FinanceUnit* const fu = pFinanceListHead;
-	BYTE  data[FINANCE_RECORD_SIZE];
-	DataWriter d{data};
-	INJ_U8(d, fu->ubCode);
-	INJ_U8(d, fu->ubSecondCode);
-	INJ_U32(d, fu->uiDate);
-	INJ_I32(d, fu->iAmount);
-	INJ_I32(d, fu->iBalanceToDate);
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter{FINANCE_RECORD_SIZE, f}
+	  << fu->ubCode
+	  << fu->ubSecondCode
+	  << fu->uiDate
+	  << fu->iAmount
+	  << fu->iBalanceToDate;
 }
 
 
@@ -976,21 +972,18 @@ static void LoadInRecords(UINT32 const page)
 	if (records > NUM_RECORDS_PER_PAGE) records = NUM_RECORDS_PER_PAGE;
 	for (; records > 0; --records)
 	{
-		BYTE data[FINANCE_RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
 
 		UINT8  code;
 		UINT8  second_code;
 		UINT32 date;
 		INT32  amount;
 		INT32  balance_to_date;
-		DataReader d{data};
-		EXTR_U8(d, code);
-		EXTR_U8(d, second_code);
-		EXTR_U32(d, date);
-		EXTR_I32(d, amount);
-		EXTR_I32(d, balance_to_date);
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{FINANCE_RECORD_SIZE, f}
+		  >> code
+		  >> second_code
+		  >> date
+		  >> amount
+		  >> balance_to_date;
 
 		ProcessAndEnterAFinacialRecord(code, date, amount, second_code, balance_to_date);
 	}
@@ -1048,17 +1041,14 @@ static INT32 GetPreviousDaysBalance(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT32 date;
 		INT32 balance_to_date;
-		DataReader d{data};
 		EXTR_SKIP(d, 2);
 		EXTR_U32(d, date);
 		EXTR_SKIP(d, 4);
 		EXTR_I32(d, balance_to_date);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// check to see if we are far enough
 		if (date / (24 * 60) == date_in_days - 2)
@@ -1088,17 +1078,14 @@ static INT32 GetTodaysBalance(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT32 date;
 		INT32 balance_to_date;
-		DataReader d{data};
 		EXTR_SKIP(d, 2);
 		EXTR_U32(d, date);
 		EXTR_SKIP(d, 4);
 		EXTR_I32(d, balance_to_date);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// check to see if we are far enough
 		if (date / (24 * 60) == date_in_days - 1)
@@ -1129,19 +1116,16 @@ static INT32 GetPreviousDaysIncome(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT8  code;
 		UINT32 date;
 		INT32  amount;
-		DataReader d{data};
 		EXTR_U8(d, code);
 		EXTR_SKIP(d, 1);
 		EXTR_U32(d, date);
 		EXTR_I32(d, amount);
 		EXTR_SKIP(d, 4);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// now ok to increment amount
 		if (date / (24 * 60) == date_in_days - 1) fOkToIncrement = TRUE;
@@ -1174,19 +1158,16 @@ static INT32 GetTodaysDaysIncome(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT8  code;
 		UINT32 date;
 		INT32  amount;
-		DataReader d{data};
 		EXTR_U8(d, code);
 		EXTR_SKIP(d, 1);
 		EXTR_U32(d, date);
 		EXTR_I32(d, amount);
 		EXTR_SKIP(d, 4);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// now ok to increment amount
 		if (date / (24 * 60) > date_in_days - 1) fOkToIncrement = TRUE;
@@ -1235,19 +1216,16 @@ static INT32 GetTodaysOtherDeposits(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT8  code;
 		UINT32 date;
 		INT32  amount;
-		DataReader d{data};
 		EXTR_U8(d, code);
 		EXTR_SKIP(d, 1);
 		EXTR_U32(d, date);
 		EXTR_I32(d, amount);
 		EXTR_SKIP(d, 4);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// now ok to increment amount
 		if (date / (24 * 60) > date_in_days - 1) fOkToIncrement = TRUE;
@@ -1284,19 +1262,16 @@ static INT32 GetYesterdaysOtherDeposits(void)
 	{
 		FileSeek(f, pos -= RECORD_SIZE, FILE_SEEK_FROM_START);
 
-		BYTE data[RECORD_SIZE];
-		FileRead(f, data, sizeof(data));
+		FileDataReader d{RECORD_SIZE, f};
 
 		UINT8  code;
 		UINT32 date;
 		INT32  amount;
-		DataReader d{data};
 		EXTR_U8(d, code);
 		EXTR_SKIP(d, 1);
 		EXTR_U32(d, date);
 		EXTR_I32(d, amount);
 		EXTR_SKIP(d, 4);
-		Assert(d.getConsumed() == lengthof(data));
 
 		// now ok to increment amount
 		if (date / (24 * 60) == date_in_days - 1) fOkToIncrement = TRUE;

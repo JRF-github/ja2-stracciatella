@@ -2517,14 +2517,11 @@ void SaveExplosionTableToSaveGameFile(HWFILE const hFile)
 	FOR_EACH(ExplosionQueueElement const, i, gExplosionQueue)
 	{
 		ExplosionQueueElement const& e = *i;
-		BYTE  data[12];
-		DataWriter d{data};
-		INJ_U32( d, e.uiWorldBombIndex)
-		INJ_U32( d, e.uiTimeStamp)
-		INJ_U8(  d, e.fExists)
-		INJ_SKIP(d, 3)
-		Assert(d.getConsumed() == lengthof(data));
-		FileWrite(hFile, data, sizeof(data));
+		FileDataWriter{12, hFile}
+		  << e.uiWorldBombIndex
+		  << e.uiTimeStamp
+		  << e.fExists
+		  << skip<3>;
 	}
 
 	//
@@ -2569,15 +2566,12 @@ void LoadExplosionTableFromSavedGameFile(HWFILE const hFile)
 	//loop through read all the active explosions fro the file
 	FOR_EACH(ExplosionQueueElement, i, gExplosionQueue)
 	{
-		BYTE  data[12];
-		FileRead(hFile, data, sizeof(data));
-		DataReader d{data};
 		ExplosionQueueElement& e = *i;
-		EXTR_U32( d, e.uiWorldBombIndex)
-		EXTR_U32( d, e.uiTimeStamp)
-		EXTR_U8(  d, e.fExists)
-		EXTR_SKIP(d, 3)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{12, hFile}
+		  >> e.uiWorldBombIndex
+		  >> e.uiTimeStamp
+		  >> e.fExists
+		  >> skip<3>;
 	}
 
 	//

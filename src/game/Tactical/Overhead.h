@@ -2,7 +2,9 @@
 #define __OVERHEAD_H
 
 #include "Debug.h"
+#include "LoadSaveData.h"
 #include "Soldier_Control.h"
+#include <array>
 
 
 #define MAX_REALTIME_SPEED_VAL		10
@@ -51,7 +53,7 @@ struct TacticalStatusType
 	SOLDIERTYPE*     the_chosen_one;
 	UINT32           uiTimeOfLastInput;
 	UINT32           uiTimeSinceDemoOn;
-	BOOLEAN          fCivGroupHostile[ NUM_CIV_GROUPS ];
+	std::array<BOOLEAN, NUM_CIV_GROUPS> fCivGroupHostile;
 	UINT8            ubLastBattleSectorX;
 	UINT8            ubLastBattleSectorY;
 	BOOLEAN          fLastBattleWon;
@@ -74,9 +76,9 @@ struct TacticalStatusType
 	INT8             bConsNumTurnsNotSeen;
 	UINT8            ubArmyGuysKilled;
 
-	INT16            sPanicTriggerGridNo[NUM_PANIC_TRIGGERS];
-	INT8             bPanicTriggerIsAlarm[NUM_PANIC_TRIGGERS];
-	UINT8            ubPanicTolerance[NUM_PANIC_TRIGGERS];
+	std::array<INT16, NUM_PANIC_TRIGGERS> sPanicTriggerGridNo;
+	std::array<INT8,  NUM_PANIC_TRIGGERS> bPanicTriggerIsAlarm;
+	std::array<UINT8, NUM_PANIC_TRIGGERS> ubPanicTolerance;
 	BOOLEAN          fAtLeastOneGuyOnMultiSelect;
 	BOOLEAN          fKilledEnemyOnAttack;
 	SOLDIERTYPE*     enemy_killed_on_attack;
@@ -96,7 +98,7 @@ struct TacticalStatusType
 	UINT8            ubLastRequesterTargetID;
 	UINT8            ubNumCrowsPossible;
 	BOOLEAN          fUnLockUIAfterHiddenInterrupt;
-	INT8             bNumFoughtInBattle[ MAXTEAMS ];
+	std::array<INT8, MAXTEAMS> bNumFoughtInBattle;
 	UINT32           uiDecayBloodLastUpdate;
 	UINT32           uiTimeSinceLastInTactical;
 	BOOLEAN          fHasAGameBeenStarted;
@@ -147,6 +149,32 @@ static inline SoldierID Soldier2ID(const SOLDIERTYPE* const s)
 static inline SOLDIERTYPE* ID2Soldier(const SoldierID id)
 {
 	return id != NOBODY ? &GetMan(id) : 0;
+}
+
+// DataWriter support for saving SOLDIERTYPE pointers
+static inline DataWriter & operator<<(DataWriter & d, SOLDIERTYPE const* const& s)
+{
+	d.write<SoldierID>(Soldier2ID(s));
+	return d;
+}
+
+static inline DataWriter & operator<<(DataWriter & d, SOLDIERTYPE * const& s)
+{
+	d.write<SoldierID>(Soldier2ID(s));
+	return d;
+}
+
+// DataReader support for loading SOLDIERTYPE pointers
+static inline DataReader & operator>>(DataReader & d, SOLDIERTYPE const* & s)
+{
+	s = ID2Soldier(d.read<SoldierID>());
+	return d;
+}
+
+static inline DataReader & operator>>(DataReader & d, SOLDIERTYPE * & s)
+{
+	s = ID2Soldier(d.read<SoldierID>());
+	return d;
 }
 
 // For temporary use

@@ -2464,38 +2464,35 @@ void SaveStrategicMovementGroupsToSaveGameFile(HWFILE const f)
 
 	CFOR_EACH_GROUP(g)
 	{
-		BYTE data[84];
-		DataWriter d{data};
-		INJ_BOOL(d, g->fDebugGroup)
-		INJ_BOOL(d, g->fPlayer)
-		INJ_BOOL(d, g->fVehicle)
-		INJ_BOOL(d, g->fPersistant)
-		INJ_U8(d, g->ubGroupID)
-		INJ_U8(d, g->ubGroupSize)
-		INJ_U8(d, g->ubSectorX)
-		INJ_U8(d, g->ubSectorY)
-		INJ_U8(d, g->ubSectorZ)
-		INJ_U8(d, g->ubNextX)
-		INJ_U8(d, g->ubNextY)
-		INJ_U8(d, g->ubPrevX)
-		INJ_U8(d, g->ubPrevY)
-		INJ_U8(d, g->ubOriginalSector)
-		INJ_BOOL(d, g->fBetweenSectors)
-		INJ_U8(d, g->ubMoveType)
-		INJ_U8(d, g->ubNextWaypointID)
-		INJ_SKIP(d, 3)
-		INJ_U32(d, g->uiArrivalTime)
-		INJ_U32(d, g->uiTraverseTime)
-		INJ_SKIP(d, 8)
-		INJ_U8(d, g->ubTransportationMask)
-		INJ_SKIP(d, 3)
-		INJ_U32(d, g->uiFlags)
-		INJ_U8(d, g->ubCreatedSectorID)
-		INJ_U8(d, g->ubSectorIDOfLastReassignment)
-		INJ_SKIP(d, 38)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		{ FileDataWriter{84, f}
+		  << g->fDebugGroup
+		  << g->fPlayer
+		  << g->fVehicle
+		  << g->fPersistant
+		  << g->ubGroupID
+		  << g->ubGroupSize
+		  << g->ubSectorX
+		  << g->ubSectorY
+		  << g->ubSectorZ
+		  << g->ubNextX
+		  << g->ubNextY
+		  << g->ubPrevX
+		  << g->ubPrevY
+		  << g->ubOriginalSector
+		  << g->fBetweenSectors
+		  << g->ubMoveType
+		  << g->ubNextWaypointID
+		  << skip<3>
+		  << g->uiArrivalTime
+		  << g->uiTraverseTime
+		  << skip<8>
+		  << g->ubTransportationMask
+		  << skip<3>
+		  << g->uiFlags
+		  << g->ubCreatedSectorID
+		  << g->ubSectorIDOfLastReassignment
+		  << skip<38>;
+		}
 
 		// Save the linked list, for the current type of group
 		if (g->fPlayer)
@@ -2534,38 +2531,34 @@ void LoadStrategicMovementGroupsFromSavedGameFile(HWFILE const f)
 	{
 		GROUP* const g = new GROUP{};
 
-		BYTE data[84];
-		FileRead(f, data, sizeof(data));
-
-		DataReader d{data};
-		EXTR_BOOL(d, g->fDebugGroup)
-		EXTR_BOOL(d, g->fPlayer)
-		EXTR_BOOL(d, g->fVehicle)
-		EXTR_BOOL(d, g->fPersistant)
-		EXTR_U8(d, g->ubGroupID)
-		EXTR_U8(d, g->ubGroupSize)
-		EXTR_U8(d, g->ubSectorX)
-		EXTR_U8(d, g->ubSectorY)
-		EXTR_U8(d, g->ubSectorZ)
-		EXTR_U8(d, g->ubNextX)
-		EXTR_U8(d, g->ubNextY)
-		EXTR_U8(d, g->ubPrevX)
-		EXTR_U8(d, g->ubPrevY)
-		EXTR_U8(d, g->ubOriginalSector)
-		EXTR_BOOL(d, g->fBetweenSectors)
-		EXTR_U8(d, g->ubMoveType)
-		EXTR_U8(d, g->ubNextWaypointID)
-		EXTR_SKIP(d, 3)
-		EXTR_U32(d, g->uiArrivalTime)
-		EXTR_U32(d, g->uiTraverseTime)
-		EXTR_SKIP(d, 8)
-		EXTR_U8(d, g->ubTransportationMask)
-		EXTR_SKIP(d, 3)
-		EXTR_U32(d, g->uiFlags)
-		EXTR_U8(d, g->ubCreatedSectorID)
-		EXTR_U8(d, g->ubSectorIDOfLastReassignment)
-		EXTR_SKIP(d, 38)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{84, f}
+		  >> g->fDebugGroup
+		  >> g->fPlayer
+		  >> g->fVehicle
+		  >> g->fPersistant
+		  >> g->ubGroupID
+		  >> g->ubGroupSize
+		  >> g->ubSectorX
+		  >> g->ubSectorY
+		  >> g->ubSectorZ
+		  >> g->ubNextX
+		  >> g->ubNextY
+		  >> g->ubPrevX
+		  >> g->ubPrevY
+		  >> g->ubOriginalSector
+		  >> g->fBetweenSectors
+		  >> g->ubMoveType
+		  >> g->ubNextWaypointID
+		  >> skip<3>
+		  >> g->uiArrivalTime
+		  >> g->uiTraverseTime
+		  >> skip<8>
+		  >> g->ubTransportationMask
+		  >> skip<3>
+		  >> g->uiFlags
+		  >> g->ubCreatedSectorID
+		  >> g->ubSectorIDOfLastReassignment
+		  >> skip<38>;
 
 		if (g->fPlayer)
 		{
@@ -2648,44 +2641,36 @@ static void LoadPlayerGroupList(HWFILE const f, GROUP* const g)
 // Saves the enemy group struct to the saved game file
 static void SaveEnemyGroupStruct(HWFILE const f, GROUP const& g)
 {
-	BYTE              data[29];
-	DataWriter d{data};
 	ENEMYGROUP const& eg = *g.pEnemyGroup;
-	INJ_U8(  d, eg.ubNumTroops)
-	INJ_U8(  d, eg.ubNumElites)
-	INJ_U8(  d, eg.ubNumAdmins)
-	INJ_SKIP(d, 1)
-	INJ_U8(  d, eg.ubPendingReinforcements)
-	INJ_U8(  d, eg.ubAdminsInBattle)
-	INJ_U8(  d, eg.ubIntention)
-	INJ_U8(  d, eg.ubTroopsInBattle)
-	INJ_U8(  d, eg.ubElitesInBattle)
-	INJ_SKIP(d, 20)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter{29, f}
+	  << eg.ubNumTroops
+	  << eg.ubNumElites
+	  << eg.ubNumAdmins
+	  << skip<1>
+	  << eg.ubPendingReinforcements
+	  << eg.ubAdminsInBattle
+	  << eg.ubIntention
+	  << eg.ubTroopsInBattle
+	  << eg.ubElitesInBattle
+	  << skip<20>;
 }
 
 
 // Loads the enemy group struct from the saved game file
 static void LoadEnemyGroupStructFromSavedGame(HWFILE const f, GROUP& g)
 {
-	BYTE data[29];
-	FileRead(f, data, sizeof(data));
-
 	ENEMYGROUP* const eg = new ENEMYGROUP{};
-	DataReader d{data};
-	EXTR_U8(  d, eg->ubNumTroops)
-	EXTR_U8(  d, eg->ubNumElites)
-	EXTR_U8(  d, eg->ubNumAdmins)
-	EXTR_SKIP(d, 1)
-	EXTR_U8(  d, eg->ubPendingReinforcements)
-	EXTR_U8(  d, eg->ubAdminsInBattle)
-	EXTR_U8(  d, eg->ubIntention)
-	EXTR_U8(  d, eg->ubTroopsInBattle)
-	EXTR_U8(  d, eg->ubElitesInBattle)
-	EXTR_SKIP(d, 20)
-	Assert(d.getConsumed() == lengthof(data));
+	FileDataReader{29, f}
+	  >> eg->ubNumTroops
+	  >> eg->ubNumElites
+	  >> eg->ubNumAdmins
+	  >> skip<1>
+	  >> eg->ubPendingReinforcements
+	  >> eg->ubAdminsInBattle
+	  >> eg->ubIntention
+	  >> eg->ubTroopsInBattle
+	  >> eg->ubElitesInBattle
+	  >> skip<20>;
 
 	g.pEnemyGroup = eg;
 }
@@ -2703,14 +2688,7 @@ static void SaveWayPointList(HWFILE const f, GROUP const* const g)
 
 	for (const WAYPOINT* w = g->pWaypoints; w != NULL; w = w->next)
 	{
-		BYTE  data[8];
-		DataWriter d{data};
-		INJ_U8(  d, w->x)
-		INJ_U8(  d, w->y)
-		INJ_SKIP(d, 6)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{8, f} << w->x << w->y << skip<6>;
 	}
 }
 
@@ -2726,14 +2704,7 @@ static void LoadWayPointList(HWFILE const f, GROUP* const g)
 	{
 		WAYPOINT* const w = new WAYPOINT{};
 
-		BYTE data[8];
-		FileRead(f, data, sizeof(data));
-
-		DataReader d{data};
-		EXTR_U8(  d, w->x)
-		EXTR_U8(  d, w->y)
-		EXTR_SKIP(d, 6)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{8, f} >> w->x >> w->y >> skip<6>;
 
 		// Add the node to the list
 		*anchor = w;

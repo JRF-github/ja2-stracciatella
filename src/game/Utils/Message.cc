@@ -535,17 +535,13 @@ static ScrollStringSt* ExtractScrollStringFromFile(HWFILE const f, bool stracLin
 		}
 	}
 
-	BYTE data[28];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_SKIP(d, 4)
-	EXTR_U32(d, s->uiTimeOfLastUpdate)
-	EXTR_SKIP(d, 16)
-	EXTR_U16(d, s->usColor)
-	EXTR_BOOL(d, s->fBeginningOfNewString)
-	EXTR_SKIP(d, 1)
-	Assert(d.getConsumed() == lengthof(data));
+	FileDataReader{28, f}
+	  >> skip<4>
+	  >> s->uiTimeOfLastUpdate
+	  >> skip<16>
+	  >> s->usColor
+	  >> s->fBeginningOfNewString
+	  >> skip<1>;
 
 	return s.Release();
 }
@@ -565,17 +561,13 @@ static void InjectScrollStringIntoFile(HWFILE const f, ScrollStringSt const* con
 	FileWrite(f, &size, sizeof(size));
 	FileWrite(f, utf16data.c_str(), size);
 
-	BYTE data[28];
-	DataWriter d{data};
+	FileDataWriter d{28, f};
 	INJ_SKIP(d, 4)
 	INJ_U32(d, s->uiTimeOfLastUpdate)
 	INJ_SKIP(d, 16)
 	INJ_U16(d, s->usColor)
 	INJ_BOOL(d, s->fBeginningOfNewString)
 	INJ_SKIP(d, 1)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
 }
 
 

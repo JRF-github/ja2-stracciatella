@@ -511,7 +511,7 @@ static void EnterLaptop(void)
 	fFirstTimeInLaptop = TRUE;
 
 	// reset all bookmark visits
-	std::fill(std::begin(LaptopSaveInfo.fVisitedBookmarkAlready), std::end(LaptopSaveInfo.fVisitedBookmarkAlready), 0);
+	LaptopSaveInfo.fVisitedBookmarkAlready.fill(FALSE);
 
 	// init program states
 	std::fill(std::begin(gLaptopProgramStates), std::end(gLaptopProgramStates), LAPTOP_PROGRAM_MINIMIZED);
@@ -1626,7 +1626,7 @@ static void FilesRegionButtonCallback(GUI_BUTTON *btn, INT32 reason)
 static void InitBookMarkList(void)
 {
 	// sets bookmark list to -1
-	std::fill(std::begin(LaptopSaveInfo.iBookMarkList), std::end(LaptopSaveInfo.iBookMarkList), -1);
+	LaptopSaveInfo.iBookMarkList.fill(-1);
 }
 
 
@@ -3273,12 +3273,12 @@ void ClearOutTempLaptopFiles(void)
 static void InjectStoreInvetory(DataWriter& d, STORE_INVENTORY const& i)
 {
 	size_t start = d.getConsumed();
-	INJ_U16( d, i.usItemIndex)
-	INJ_U8(  d, i.ubQtyOnHand)
-	INJ_U8(  d, i.ubQtyOnOrder)
-	INJ_U8(  d, i.ubItemQuality)
-	INJ_BOOL(d, i.fPreviouslyEligible)
-	INJ_SKIP(d, 2)
+	d << i.usItemIndex
+	  << i.ubQtyOnHand
+	  << i.ubQtyOnOrder
+	  << i.ubItemQuality
+	  << i.fPreviouslyEligible
+	  << skip<2>;
 	Assert(d.getConsumed() == start + 8);
 }
 
@@ -3286,12 +3286,12 @@ static void InjectStoreInvetory(DataWriter& d, STORE_INVENTORY const& i)
 static void ExtractStoreInvetory(DataReader& d, STORE_INVENTORY& i)
 {
 	size_t start = d.getConsumed();
-	EXTR_U16( d, i.usItemIndex)
-	EXTR_U8(  d, i.ubQtyOnHand)
-	EXTR_U8(  d, i.ubQtyOnOrder)
-	EXTR_U8(  d, i.ubItemQuality)
-	EXTR_BOOL(d, i.fPreviouslyEligible)
-	EXTR_SKIP(d, 2)
+	d >> i.usItemIndex
+	  >> i.ubQtyOnHand
+	  >> i.ubQtyOnOrder
+	  >> i.ubItemQuality
+	  >> i.fPreviouslyEligible
+	  >> skip<2>;
 	Assert(d.getConsumed() == start + 8);
 }
 
@@ -3300,23 +3300,22 @@ void SaveLaptopInfoToSavedGame(HWFILE const f)
 {
 	LaptopSaveInfoStruct const& l = LaptopSaveInfo;
 
-	BYTE  data[7440];
-	DataWriter d{data};
-	INJ_BOOL( d, l.gfNewGameLaptop)
-	INJ_BOOLA(d, l.fVisitedBookmarkAlready, lengthof(l.fVisitedBookmarkAlready))
-	INJ_SKIP( d, 3)
-	INJ_I32A( d, l.iBookMarkList, lengthof(l.iBookMarkList))
-	INJ_I32(  d, l.iCurrentBalance)
-	INJ_BOOL( d, l.fIMPCompletedFlag)
-	INJ_BOOL( d, l.fSentImpWarningAlready)
-	INJ_I16A( d, l.ubDeadCharactersList, lengthof(l.ubDeadCharactersList))
-	INJ_I16A( d, l.ubLeftCharactersList, lengthof(l.ubLeftCharactersList))
-	INJ_I16A( d, l.ubOtherCharactersList, lengthof(l.ubOtherCharactersList))
-	INJ_U8(   d, l.gubPlayersMercAccountStatus)
-	INJ_SKIP( d, 1)
-	INJ_U32(  d, l.guiPlayersMercAccountNumber)
-	INJ_U8(   d, l.gubLastMercIndex)
-	INJ_SKIP( d, 1)
+	{ FileDataWriter d{7440, f};
+	d << l.gfNewGameLaptop
+	  << l.fVisitedBookmarkAlready
+	  << skip<3>
+	  << l.iBookMarkList
+	  << l.iCurrentBalance
+	  << l.fIMPCompletedFlag
+	  << l.fSentImpWarningAlready
+	  << l.ubDeadCharactersList
+	  << l.ubLeftCharactersList
+	  << l.ubOtherCharactersList
+	  << l.gubPlayersMercAccountStatus
+	  << skip<1>
+	  << l.guiPlayersMercAccountNumber
+	  << l.gubLastMercIndex
+	  << skip<1>;
 	FOR_EACH(STORE_INVENTORY const, i, l.BobbyRayInventory)
 	{
 		InjectStoreInvetory(d, *i);
@@ -3325,44 +3324,42 @@ void SaveLaptopInfoToSavedGame(HWFILE const f)
 	{
 		InjectStoreInvetory(d, *i);
 	}
-	INJ_SKIP( d, 6)
+	d << skip<6>;
 	Assert(l.BobbyRayOrdersOnDeliveryArray.size() <= UINT8_MAX);
-	INJ_U8(   d, static_cast<UINT8>(l.BobbyRayOrdersOnDeliveryArray.size()))
-	INJ_U8(   d, l.usNumberOfBobbyRayOrderUsed)
-	INJ_SKIP( d, 6)
+	d << static_cast<UINT8>(l.BobbyRayOrdersOnDeliveryArray.size())
+	  << l.usNumberOfBobbyRayOrderUsed
+	  << skip<6>;
 	Assert(l.pLifeInsurancePayouts.size() <= UINT8_MAX);
-	INJ_U8(   d, static_cast<UINT8>(l.pLifeInsurancePayouts.size()))
+	d << static_cast<UINT8>(l.pLifeInsurancePayouts.size());
 	Assert(l.ubNumberLifeInsurancePayoutUsed <= l.pLifeInsurancePayouts.size());
-	INJ_U8(   d, l.ubNumberLifeInsurancePayoutUsed)
-	INJ_BOOL( d, l.fBobbyRSiteCanBeAccessed)
-	INJ_U8(   d, l.ubPlayerBeenToMercSiteStatus)
-	INJ_BOOL( d, l.fFirstVisitSinceServerWentDown)
-	INJ_BOOL( d, l.fNewMercsAvailableAtMercSite)
-	INJ_BOOL( d, l.fSaidGenericOpeningInMercSite)
-	INJ_BOOL( d, l.fSpeckSaidFloMarriedCousinQuote)
-	INJ_BOOL( d, l.fHasAMercDiedAtMercSite)
-	INJ_SKIP( d, 11)
-	INJ_U16A( d, l.usInventoryListLength, lengthof(l.usInventoryListLength))
-	INJ_I32(  d, l.iVoiceId)
-	INJ_U8(   d, l.ubHaveBeenToBobbyRaysAtLeastOnceWhileUnderConstruction)
-	INJ_BOOL( d, l.fMercSiteHasGoneDownYet)
-	INJ_U8(   d, l.ubSpeckCanSayPlayersLostQuote)
-	INJ_SKIP( d, 1)
-	INJ_BOOL( d, l.sLastHiredMerc.fHaveDisplayedPopUpInLaptop)
-	INJ_SKIP( d, 3)
-	INJ_I32(  d, l.sLastHiredMerc.iIdOfMerc)
-	INJ_U32(  d, l.sLastHiredMerc.uiArrivalTime)
-	INJ_I32(  d, l.iCurrentHistoryPage)
-	INJ_I32(  d, l.iCurrentFinancesPage)
-	INJ_I32(  d, l.iCurrentEmailPage)
-	INJ_U32(  d, l.uiSpeckQuoteFlags)
-	INJ_U32(  d, l.uiFlowerOrderNumber)
-	INJ_U32(  d, l.uiTotalMoneyPaidToSpeck)
-	INJ_U8(   d, l.ubLastMercAvailableId)
-	INJ_SKIP( d, 87)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	d << l.ubNumberLifeInsurancePayoutUsed
+	  << l.fBobbyRSiteCanBeAccessed
+	  << l.ubPlayerBeenToMercSiteStatus
+	  << l.fFirstVisitSinceServerWentDown
+	  << l.fNewMercsAvailableAtMercSite
+	  << l.fSaidGenericOpeningInMercSite
+	  << l.fSpeckSaidFloMarriedCousinQuote
+	  << l.fHasAMercDiedAtMercSite
+	  << skip<11>
+	  << l.usInventoryListLength
+	  << l.iVoiceId
+	  << l.ubHaveBeenToBobbyRaysAtLeastOnceWhileUnderConstruction
+	  << l.fMercSiteHasGoneDownYet
+	  << l.ubSpeckCanSayPlayersLostQuote
+	  << skip<1>
+	  << l.sLastHiredMerc.fHaveDisplayedPopUpInLaptop
+	  << skip<3>
+	  << l.sLastHiredMerc.iIdOfMerc
+	  << l.sLastHiredMerc.uiArrivalTime
+	  << l.iCurrentHistoryPage
+	  << l.iCurrentFinancesPage
+	  << l.iCurrentEmailPage
+	  << l.uiSpeckQuoteFlags
+	  << l.uiFlowerOrderNumber
+	  << l.uiTotalMoneyPaidToSpeck
+	  << l.ubLastMercAvailableId
+	  << skip<87>;
+	}
 
 	if (l.usNumberOfBobbyRayOrderUsed != 0)
 	{ // There is anything in the Bobby Ray Orders on delivery
@@ -3385,25 +3382,22 @@ void LoadLaptopInfoFromSavedGame(HWFILE const f)
 
 	l.pLifeInsurancePayouts.clear();
 
-	BYTE data[7440];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_BOOL( d, l.gfNewGameLaptop)
-	EXTR_BOOLA(d, l.fVisitedBookmarkAlready, lengthof(l.fVisitedBookmarkAlready))
-	EXTR_SKIP( d, 3)
-	EXTR_I32A( d, l.iBookMarkList, lengthof(l.iBookMarkList))
-	EXTR_I32(  d, l.iCurrentBalance)
-	EXTR_BOOL( d, l.fIMPCompletedFlag)
-	EXTR_BOOL( d, l.fSentImpWarningAlready)
-	EXTR_I16A( d, l.ubDeadCharactersList, lengthof(l.ubDeadCharactersList))
-	EXTR_I16A( d, l.ubLeftCharactersList, lengthof(l.ubLeftCharactersList))
-	EXTR_I16A( d, l.ubOtherCharactersList, lengthof(l.ubOtherCharactersList))
-	EXTR_U8(   d, l.gubPlayersMercAccountStatus)
-	EXTR_SKIP( d, 1)
-	EXTR_U32(  d, l.guiPlayersMercAccountNumber)
-	EXTR_U8(   d, l.gubLastMercIndex)
-	EXTR_SKIP( d, 1)
+	FileDataReader d{7440, f};
+	d >> l.gfNewGameLaptop
+	  >> l.fVisitedBookmarkAlready
+	  >> skip<3>
+	  >> l.iBookMarkList
+	  >> l.iCurrentBalance
+	  >> l.fIMPCompletedFlag
+	  >> l.fSentImpWarningAlready
+	  >> l.ubDeadCharactersList
+	  >> l.ubLeftCharactersList
+	  >> l.ubOtherCharactersList
+	  >> l.gubPlayersMercAccountStatus
+	  >> skip<1>
+	  >> l.guiPlayersMercAccountNumber
+	  >> l.gubLastMercIndex
+	  >> skip<1>;
 	FOR_EACH(STORE_INVENTORY, i, l.BobbyRayInventory)
 	{
 		ExtractStoreInvetory(d, *i);
@@ -3412,42 +3406,41 @@ void LoadLaptopInfoFromSavedGame(HWFILE const f)
 	{
 		ExtractStoreInvetory(d, *i);
 	}
-	EXTR_SKIP( d, 6)
+	d >> skip<6>;
 	UINT8 BobbyRayOrdersOnDeliveryArraySize;
-	EXTR_U8(   d, BobbyRayOrdersOnDeliveryArraySize)
-	EXTR_U8(   d, l.usNumberOfBobbyRayOrderUsed)
-	EXTR_SKIP( d, 6)
+	d >> BobbyRayOrdersOnDeliveryArraySize
+	  >> l.usNumberOfBobbyRayOrderUsed
+	  >> skip<6>;
 	UINT8 numLifeInsurancePayouts;
-	EXTR_U8(   d, numLifeInsurancePayouts)
-	EXTR_U8(   d, l.ubNumberLifeInsurancePayoutUsed)
+	d >> numLifeInsurancePayouts
+	  >> l.ubNumberLifeInsurancePayoutUsed;
 	Assert(l.ubNumberLifeInsurancePayoutUsed <= numLifeInsurancePayouts);
-	EXTR_BOOL( d, l.fBobbyRSiteCanBeAccessed)
-	EXTR_U8(   d, l.ubPlayerBeenToMercSiteStatus)
-	EXTR_BOOL( d, l.fFirstVisitSinceServerWentDown)
-	EXTR_BOOL( d, l.fNewMercsAvailableAtMercSite)
-	EXTR_BOOL( d, l.fSaidGenericOpeningInMercSite)
-	EXTR_BOOL( d, l.fSpeckSaidFloMarriedCousinQuote)
-	EXTR_BOOL( d, l.fHasAMercDiedAtMercSite)
-	EXTR_SKIP( d, 11)
-	EXTR_U16A( d, l.usInventoryListLength, lengthof(l.usInventoryListLength))
-	EXTR_I32(  d, l.iVoiceId)
-	EXTR_U8(   d, l.ubHaveBeenToBobbyRaysAtLeastOnceWhileUnderConstruction)
-	EXTR_BOOL( d, l.fMercSiteHasGoneDownYet)
-	EXTR_U8(   d, l.ubSpeckCanSayPlayersLostQuote)
-	EXTR_SKIP( d, 1)
-	EXTR_BOOL( d, l.sLastHiredMerc.fHaveDisplayedPopUpInLaptop)
-	EXTR_SKIP( d, 3)
-	EXTR_I32(  d, l.sLastHiredMerc.iIdOfMerc)
-	EXTR_U32(  d, l.sLastHiredMerc.uiArrivalTime)
-	EXTR_I32(  d, l.iCurrentHistoryPage)
-	EXTR_I32(  d, l.iCurrentFinancesPage)
-	EXTR_I32(  d, l.iCurrentEmailPage)
-	EXTR_U32(  d, l.uiSpeckQuoteFlags)
-	EXTR_U32(  d, l.uiFlowerOrderNumber)
-	EXTR_U32(  d, l.uiTotalMoneyPaidToSpeck)
-	EXTR_U8(   d, l.ubLastMercAvailableId)
-	EXTR_SKIP( d, 87)
-	Assert(d.getConsumed() == lengthof(data));
+	d >> l.fBobbyRSiteCanBeAccessed
+	  >> l.ubPlayerBeenToMercSiteStatus
+	  >> l.fFirstVisitSinceServerWentDown
+	  >> l.fNewMercsAvailableAtMercSite
+	  >> l.fSaidGenericOpeningInMercSite
+	  >> l.fSpeckSaidFloMarriedCousinQuote
+	  >> l.fHasAMercDiedAtMercSite
+	  >> skip<11>
+	  >> l.usInventoryListLength
+	  >> l.iVoiceId
+	  >> l.ubHaveBeenToBobbyRaysAtLeastOnceWhileUnderConstruction
+	  >> l.fMercSiteHasGoneDownYet
+	  >> l.ubSpeckCanSayPlayersLostQuote
+	  >> skip<1>
+	  >> l.sLastHiredMerc.fHaveDisplayedPopUpInLaptop
+	  >> skip<3>
+	  >> l.sLastHiredMerc.iIdOfMerc
+	  >> l.sLastHiredMerc.uiArrivalTime
+	  >> l.iCurrentHistoryPage
+	  >> l.iCurrentFinancesPage
+	  >> l.iCurrentEmailPage
+	  >> l.uiSpeckQuoteFlags
+	  >> l.uiFlowerOrderNumber
+	  >> l.uiTotalMoneyPaidToSpeck
+	  >> l.ubLastMercAvailableId
+	  >> skip<87>;
 
 	// Handle old saves in M.E.R.C. module
 	SyncLastMercFromSaveGame();

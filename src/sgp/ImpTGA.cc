@@ -52,18 +52,14 @@ static SGPImage* ReadUncompRGBImage(HWFILE const f, UINT8 const uiImgID, UINT8 c
 	UINT16	uiHeight;
 	UINT8		uiImagePixelSize;
 
-	BYTE data[15];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_SKIP(d, 2)              // colour map origin
-	EXTR_U16(d, uiColMapLength)
-	EXTR_SKIP(d, 5)              // colour map entry size, x origin, y origin
-	EXTR_U16(d, uiWidth)         // XXX unaligned
-	EXTR_U16(d, uiHeight)        // XXX unaligned
-	EXTR_U8(d, uiImagePixelSize)
-	EXTR_SKIP(d, 1)              // image descriptor
-	Assert(d.getConsumed() == lengthof(data));
+	FileDataReader{15, f}
+	  >> skip<2>         // colour map origin
+	  >> uiColMapLength
+	  >> skip<5>         // colour map entry size, x origin, y origin
+	  >> uiWidth         // XXX unaligned
+	  >> uiHeight        // XXX unaligned
+	  >> uiImagePixelSize
+	  >> skip<1>;        // image descriptor
 
 	// skip the id
 	FileSeek(f, uiImgID, FILE_SEEK_FROM_CURRENT);

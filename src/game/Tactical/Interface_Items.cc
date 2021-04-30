@@ -5329,18 +5329,14 @@ void CancelItemPointer( )
 
 void LoadItemCursorFromSavedGame(HWFILE const f)
 {
-	BYTE data[44];
-	FileRead(f, data, sizeof(data));
-
 	BOOLEAN      active;
 	SOLDIERTYPE* soldier;
-	DataReader d{data};
+	FileDataReader d{44, f};
 	ExtractObject(d, &gItemPointer);
-	EXTR_SOLDIER(d, soldier)
-	EXTR_U8(     d, gbItemPointerSrcSlot)
-	EXTR_BOOL(   d, active)
-	EXTR_SKIP(   d, 5)
-	Assert(d.getConsumed() == lengthof(data));
+	d >> soldier
+	  >> gbItemPointerSrcSlot
+	  >> active
+	  >> skip<5>;
 
 	if (active)
 	{
@@ -5357,16 +5353,12 @@ void LoadItemCursorFromSavedGame(HWFILE const f)
 
 void SaveItemCursorToSavedGame(HWFILE const f)
 {
-	BYTE  data[44];
-	DataWriter d{data};
+	FileDataWriter d{44, f};
 	InjectObject(d, &gItemPointer);
-	INJ_SOLDIER(d, gpItemPointerSoldier)
-	INJ_U8(     d, gbItemPointerSrcSlot)
-	INJ_BOOL(   d, gpItemPointer != 0)
-	INJ_SKIP(   d, 5)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	d << Soldier2ID(gpItemPointerSoldier)
+	  << gbItemPointerSrcSlot
+	  << static_cast<BOOLEAN>(gpItemPointer != 0)
+	  << skip<5>;
 }
 
 

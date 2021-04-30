@@ -18,22 +18,15 @@ static void LoadEMailFromFile(HWFILE const File)
 	UINT32	uiSecondData;
 	BOOLEAN fRead;
 
-	BYTE Data[44];
-	FileRead(File, Data, sizeof(Data));
-
-	DataReader S{Data};
-	EXTR_U16(S, usOffset)
-	EXTR_U16(S, usLength)
-	EXTR_U8(S, ubSender)
-	EXTR_SKIP(S, 3)
-	EXTR_U32(S, iDate)
-	EXTR_SKIP(S, 4)
-	EXTR_I32(S, iFirstData)
-	EXTR_U32(S, uiSecondData)
-	EXTR_SKIP(S, 16)
-	EXTR_BOOL(S, fRead)
-	EXTR_SKIP(S, 3)
-	Assert(S.getConsumed() == lengthof(Data));
+	FileDataReader{44, File}
+	  >> usOffset >> usLength >> ubSender
+	  >> skip<3>
+	  >> iDate
+	  >> skip<4>
+	  >> iFirstData >> uiSecondData
+	  >> skip<16>
+	  >> fRead
+	  >> skip<3>;
 
 	AddEmailMessage(usOffset, usLength, iDate, ubSender, fRead, iFirstData, uiSecondData);
 }
@@ -55,24 +48,19 @@ void LoadEmailFromSavedGame(HWFILE const File)
 
 static void SaveEMailIntoFile(HWFILE const File, Email const* const Mail)
 {
-	BYTE Data[48];
-
-	DataWriter D{Data};
-	INJ_U32(D, 0) // was size of subject
-	INJ_U16(D, Mail->usOffset)
-	INJ_U16(D, Mail->usLength)
-	INJ_U8(D, Mail->ubSender)
-	INJ_SKIP(D, 3)
-	INJ_U32(D, Mail->iDate)
-	INJ_SKIP(D, 4)
-	INJ_I32(D, Mail->iFirstData)
-	INJ_U32(D, Mail->uiSecondData)
-	INJ_SKIP(D, 16)
-	INJ_BOOL(D, Mail->fRead)
-	INJ_SKIP(D, 3)
-	Assert(D.getConsumed() == lengthof(Data));
-
-	FileWrite(File, Data, sizeof(Data));
+	FileDataWriter{48, File}
+	  << (UINT32)0	// was size of subject
+	  << Mail->usOffset
+	  << Mail->usLength
+	  << Mail->ubSender
+	  << skip<3>
+	  << Mail->iDate
+	  << skip<4>
+	  << Mail->iFirstData
+	  << Mail->uiSecondData
+	  << skip<16>
+	  << Mail->fRead
+	  << skip<3>;
 }
 
 

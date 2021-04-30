@@ -156,11 +156,11 @@ static void LoadTempFileFromSavedGame(const char* tempFileName, HWFILE const hFi
 static void ExtractGameOptions(DataReader& d, GAME_OPTIONS& g)
 {
 	size_t start = d.getConsumed();
-	EXTR_BOOL( d, g.fGunNut)
-	EXTR_BOOL( d, g.fSciFi)
-	EXTR_U8(   d, g.ubDifficultyLevel)
-	EXTR_BOOL( d, g.fTurnTimeLimit)
-	EXTR_U8(   d, g.ubGameSaveMode)
+	d >> g.fGunNut
+	  >> g.fSciFi
+	  >> g.ubDifficultyLevel
+	  >> g.fTurnTimeLimit
+	  >> g.ubGameSaveMode;
 	EXTR_SKIP( d, 7)
 	Assert(d.getConsumed() == start + 12);
 }
@@ -169,11 +169,11 @@ static void ExtractGameOptions(DataReader& d, GAME_OPTIONS& g)
 static void InjectGameOptions(DataWriter& d, GAME_OPTIONS const& g)
 {
 	size_t start = d.getConsumed();
-	INJ_BOOL( d, g.fGunNut)
-	INJ_BOOL( d, g.fSciFi)
-	INJ_U8(   d, g.ubDifficultyLevel)
-	INJ_BOOL( d, g.fTurnTimeLimit)
-	INJ_U8(   d, g.ubGameSaveMode)
+	d << g.fGunNut
+	  << g.fSciFi
+	  << g.ubDifficultyLevel
+	  << g.fTurnTimeLimit
+	  << g.ubGameSaveMode;
 	INJ_SKIP( d, 7)
 	Assert(d.getConsumed() == start + 12);
 }
@@ -309,31 +309,28 @@ BOOLEAN SaveGame(UINT8 ubSaveGameID, const ST::string& gameDesc)
 		header.uiRandom = Random(RAND_MAX);
 
 		// Save the savegame header
-		BYTE  data[432];
-		DataWriter d{data};
+		{ FileDataWriter d{432, f};
 		INJ_U32(   d, header.uiSavedGameVersion)
 		INJ_STR(   d, header.zGameVersionNumber, lengthof(header.zGameVersionNumber))
 		d.writeUTF16(header.sSavedGameDesc, SIZE_OF_SAVE_GAME_DESC);
 		INJ_SKIP(  d, 4)
-		INJ_U32(   d, header.uiDay)
-		INJ_U8(    d, header.ubHour)
-		INJ_U8(    d, header.ubMin)
-		INJ_I16(   d, header.sSectorX)
-		INJ_I16(   d, header.sSectorY)
-		INJ_I8(    d, header.bSectorZ)
-		INJ_U8(    d, header.ubNumOfMercsOnPlayersTeam)
-		INJ_I32(   d, header.iCurrentBalance)
-		INJ_U32(   d, header.uiCurrentScreen)
-		INJ_BOOL(  d, header.fAlternateSector)
-		INJ_BOOL(  d, header.fWorldLoaded)
-		INJ_U8(    d, header.ubLoadScreenID)
+		d << header.uiDay
+		  << header.ubHour
+		  << header.ubMin
+		  << header.sSectorX
+		  << header.sSectorY
+		  << header.bSectorZ
+		  << header.ubNumOfMercsOnPlayersTeam
+		  << header.iCurrentBalance
+		  << header.uiCurrentScreen
+		  << header.fAlternateSector
+		  << header.fWorldLoaded
+		  << header.ubLoadScreenID;
 		InjectGameOptions(d, header.sInitialGameOptions);
 		INJ_SKIP(  d, 1)
 		INJ_U32(   d, header.uiRandom)
 		INJ_SKIP(  d, 112)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		}
 
 		CalcJA2EncryptionSet(header);
 
@@ -490,18 +487,18 @@ void ParseSavedGameHeader(const BYTE *data, SAVED_GAME_HEADER& h, bool stracLinu
 		h.sSavedGameDesc = d.readUTF16(SIZE_OF_SAVE_GAME_DESC);
 	}
 	EXTR_SKIP(  d, 4)
-	EXTR_U32(   d, h.uiDay)
-	EXTR_U8(    d, h.ubHour)
-	EXTR_U8(    d, h.ubMin)
-	EXTR_I16(   d, h.sSectorX)
-	EXTR_I16(   d, h.sSectorY)
-	EXTR_I8(    d, h.bSectorZ)
-	EXTR_U8(    d, h.ubNumOfMercsOnPlayersTeam)
-	EXTR_I32(   d, h.iCurrentBalance)
-	EXTR_U32(   d, h.uiCurrentScreen)
-	EXTR_BOOL(  d, h.fAlternateSector)
-	EXTR_BOOL(  d, h.fWorldLoaded)
-	EXTR_U8(    d, h.ubLoadScreenID)
+	d >> h.uiDay
+	  >> h.ubHour
+	  >> h.ubMin
+	  >> h.sSectorX
+	  >> h.sSectorY
+	  >> h.bSectorZ
+	  >> h.ubNumOfMercsOnPlayersTeam
+	  >> h.iCurrentBalance
+	  >> h.uiCurrentScreen
+	  >> h.fAlternateSector
+	  >> h.fWorldLoaded
+	  >> h.ubLoadScreenID;
 	ExtractGameOptions(d, h.sInitialGameOptions);
 	EXTR_SKIP(  d, 1)
 	EXTR_U32(   d, h.uiRandom)
@@ -1231,10 +1228,11 @@ static void LoadSavedMercProfiles(HWFILE const f, UINT32 const savegame_version,
 	FOR_EACH(MERCPROFILESTRUCT, i, gMercProfiles)
 	{
 		UINT32 checksum;
+		// Reserve enough space for the bigger of the two formats
+		BYTE data[MERC_PROFILE_SIZE_STRAC_LINUX];
 		UINT32 dataSize = stracLinuxFormat ? MERC_PROFILE_SIZE_STRAC_LINUX : MERC_PROFILE_SIZE;
-		std::vector<BYTE> data(dataSize);
-		reader(f, data.data(), dataSize);
-		ExtractMercProfile(data.data(), *i, stracLinuxFormat, &checksum, NULL);
+		reader(f, data, dataSize);
+		ExtractMercProfile(data, *i, stracLinuxFormat, &checksum, NULL);
 		if (checksum != SoldierProfileChecksum(*i))
 		{
 			throw std::runtime_error("Merc profile checksum mismatch");
@@ -1484,14 +1482,7 @@ static void SaveTacticalStatusToSavedGame(HWFILE const f)
 	InjectTacticalStatusTypeIntoFile(f);
 
 	// Save the current sector location
-	BYTE  data[5];
-	DataWriter d{data};
-	INJ_I16(d, gWorldSectorX)
-	INJ_I16(d, gWorldSectorY)
-	INJ_I8( d, gbWorldSectorZ)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter{5, f} << gWorldSectorX << gWorldSectorY << gbWorldSectorZ;
 }
 
 
@@ -1500,14 +1491,7 @@ static void LoadTacticalStatusFromSavedGame(HWFILE const f, bool stracLinuxForma
 	ExtractTacticalStatusTypeFromFile(f, stracLinuxFormat);
 
 	// Load the current sector location
-	BYTE data[5];
-	FileRead(f, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_I16(d, gWorldSectorX)
-	EXTR_I16(d, gWorldSectorY)
-	EXTR_I8( d, gbWorldSectorZ)
-	Assert(d.getConsumed() == lengthof(data));
+	FileDataReader{5, f} >> gWorldSectorX >> gWorldSectorY >> gbWorldSectorZ;
 }
 
 
@@ -1663,13 +1647,7 @@ void SaveMercPath(HWFILE const f, PathSt const* const head)
 
 	for (const PathSt* p = head; p != NULL; p = p->pNext)
 	{
-		BYTE  data[20];
-		DataWriter d{data};
-		INJ_U32(d, p->uiSectorId)
-		INJ_SKIP(d, 16)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{20, f} << p->uiSectorId << skip<16>;
 	}
 }
 
@@ -1686,13 +1664,7 @@ void LoadMercPath(HWFILE const hFile, PathSt** const head)
 	{
 		PathSt* const n = new PathSt{};
 
-		BYTE data[20];
-		FileRead(hFile, data, sizeof(data));
-
-		DataReader d{data};
-		EXTR_U32(d, n->uiSectorId)
-		EXTR_SKIP(d, 16)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{20, hFile} >> n->uiSectorId >> skip<16>;
 
 		n->pPrev = path;
 		n->pNext = NULL;
@@ -1714,11 +1686,11 @@ void LoadMercPath(HWFILE const hFile, PathSt** const head)
 static void InjectMeanwhileDefinition(DataWriter& d, MEANWHILE_DEFINITION const& m)
 {
 	size_t start = d.getConsumed();
-	INJ_I16(d, m.sSectorX)
-	INJ_I16(d, m.sSectorY)
-	INJ_U16(d, m.usTriggerEvent)
-	INJ_U8( d, m.ubMeanwhileID)
-	INJ_U8( d, m.ubNPCNumber)
+	d << m.sSectorX
+	  << m.sSectorY
+	  << m.usTriggerEvent
+	  << m.ubMeanwhileID
+	  << m.ubNPCNumber;
 	Assert(d.getConsumed() == start + 8);
 }
 
@@ -1726,19 +1698,18 @@ static void InjectMeanwhileDefinition(DataWriter& d, MEANWHILE_DEFINITION const&
 static void ExtractMeanwhileDefinition(DataReader& d, MEANWHILE_DEFINITION& m)
 {
 	size_t start = d.getConsumed();
-	EXTR_I16(d, m.sSectorX)
-	EXTR_I16(d, m.sSectorY)
-	EXTR_U16(d, m.usTriggerEvent)
-	EXTR_U8( d, m.ubMeanwhileID)
-	EXTR_U8( d, m.ubNPCNumber)
+	d >> m.sSectorX
+	  >> m.sSectorY
+	  >> m.usTriggerEvent
+	  >> m.ubMeanwhileID
+	  >> m.ubNPCNumber;
 	Assert(d.getConsumed() == start + 8);
 }
 
 
 static void SaveGeneralInfo(HWFILE const f)
 {
-	BYTE  data[1024];
-	DataWriter d{data};
+	FileDataWriter d{1024, f};
 	INJ_U32(  d, guiPreviousOptionScreen)
 	INJ_U32(  d, guiCurrentUniqueSoldierId)
 	INJ_U8(   d, (UINT8)gubMusicMode)
@@ -1860,19 +1831,13 @@ static void SaveGeneralInfo(HWFILE const f)
 	INJ_I8(   d, gfPlayerTeamSawJoey)
 	INJ_I8(   d, gfMikeShouldSayHi)
 	INJ_SKIP( d, 550)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(f, data, sizeof(data));
 }
 
 
 static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 {
-	BYTE data[1024];
-	FileRead(f, data, sizeof(data));
+	FileDataReader d{1024, f};
 	UINT8 ubMusicModeToPlay = 0;
-
-	DataReader d{data};
 	UINT32 screen_after_loading;
 	EXTR_U32(  d, screen_after_loading)
 	guiScreenToGotoAfterLoadingSavedGame = static_cast<ScreenID>(screen_after_loading); // XXX TODO001A unchecked conversion
@@ -2020,7 +1985,6 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 	EXTR_I8(   d, gfPlayerTeamSawJoey)
 	EXTR_I8(   d, gfMikeShouldSayHi)
 	EXTR_SKIP( d, 550)
-	Assert(d.getConsumed() == lengthof(data));
 }
 
 
@@ -2058,11 +2022,8 @@ static void LoadMeanwhileDefsFromSaveGameFile(HWFILE const f, UINT32 const saveg
 	}
 	for (MEANWHILE_DEFINITION* i = gMeanwhileDef; i != end; ++i)
 	{
-		BYTE data[8];
-		FileRead(f, data, sizeof(data));
-		DataReader d{data};
+		FileDataReader d{8, f};
 		ExtractMeanwhileDefinition(d, *i);
-		Assert(d.getConsumed() == lengthof(data));
 	}
 }
 
@@ -2071,10 +2032,8 @@ static void SaveMeanwhileDefsToSaveGameFile(HWFILE const f)
 {
 	FOR_EACH(MEANWHILE_DEFINITION, i, gMeanwhileDef)
 	{
-		BYTE data[8];
-		DataWriter d{data};
+		FileDataWriter d{8, f};
 		InjectMeanwhileDefinition(d, *i);
-		FileWrite(f, data, sizeof(data));
 	}
 }
 

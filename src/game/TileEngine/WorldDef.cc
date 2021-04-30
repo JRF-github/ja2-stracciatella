@@ -1334,12 +1334,7 @@ static void WriteLevelNode(HWFILE const f, LEVELNODE const* const n)
 	UINT16 const idx            = n->usIndex;
 	UINT32 const type           = GetTileType(idx);
 	UINT8  const type_sub_index = (UINT8)GetTypeSubIndexFromTileIndex(type, idx);
-	BYTE  data[2];
-	DataWriter d{data};
-	INJ_U8(d, (UINT8)type)
-	INJ_U8(d, (UINT8)type_sub_index)
-	Assert(d.getConsumed() == lengthof(data));
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter{2, f} << (UINT8)type << (UINT8)type_sub_index;
 }
 
 
@@ -1522,12 +1517,7 @@ try
 			 * because the ROADPIECES slot contains more than 256 subindices. */
 			UINT16 const type_sub_index = GetTypeSubIndexFromTileIndex(type, i->usIndex);
 
-			BYTE  data[3];
-			DataWriter d{data};
-			INJ_U8( d, (UINT8)type)
-			INJ_U16(d, type_sub_index) // XXX misaligned
-			Assert(d.getConsumed() == lengthof(data));
-			FileWrite(f, data, sizeof(data));
+			FileDataWriter{3, f} << (UINT8)type << type_sub_index;
 		}
 	}
 
@@ -2145,15 +2135,9 @@ try
 	{
 		for (INT32 n = bCounts[cnt][0]; n != 0; --n)
 		{
-			BYTE data[2];
-			FileRead(f, data, sizeof(data));
-
-			UINT8       ubType;
-			UINT8       ubSubIndex;
-			DataReader d{data};
-			EXTR_U8(d, ubType)
-			EXTR_U8(d, ubSubIndex)
-			Assert(d.getConsumed() == lengthof(data));
+			FileDataReader d{2, f};
+			UINT8 const ubType    {d.read<UINT8>()};
+			UINT8 const ubSubIndex{d.read<UINT8>()};
 
 			UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
 			AddLandToHead(cnt, usTileIndex);
@@ -2169,15 +2153,9 @@ try
 		{
 			for (INT32 n = bCounts[cnt][1]; n != 0; --n)
 			{
-				BYTE data[2];
-				FileRead(f, data, sizeof(data));
-
-				UINT8       ubType;
-				UINT8       ubSubIndex;
-				DataReader d{data};
-				EXTR_U8(d, ubType)
-				EXTR_U8(d, ubSubIndex)
-				Assert(d.getConsumed() == lengthof(data));
+				FileDataReader d{2, f};
+				UINT8 const ubType    {d.read<UINT8>()};
+				UINT8 const ubSubIndex{d.read<UINT8>()};
 
 				if (ubType >= FIRSTPOINTERS) continue;
 				UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
@@ -2192,15 +2170,9 @@ try
 		{
 			for (INT32 n = bCounts[cnt][1]; n != 0; --n)
 			{
-				BYTE data[3];
-				FileRead(f, data, sizeof(data));
-
-				UINT8       ubType;
-				UINT16      usTypeSubIndex;
-				DataReader d{data};
-				EXTR_U8( d, ubType)
-				EXTR_U16(d, usTypeSubIndex)
-				Assert(d.getConsumed() == lengthof(data));
+				FileDataReader d{3, f};
+				UINT8  const ubType        {d.read<UINT8>()};
+				UINT16 const usTypeSubIndex{d.read<UINT16>()};
 
 				if (ubType >= FIRSTPOINTERS) continue;
 				UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, usTypeSubIndex);
@@ -2216,15 +2188,9 @@ try
 	{ // Set structs
 		for (INT32 n = bCounts[cnt][2]; n != 0; --n)
 		{
-			BYTE data[2];
-			FileRead(f, data, sizeof(data));
-
-			UINT8       ubType;
-			UINT8       ubSubIndex;
-			DataReader d{data};
-			EXTR_U8(d, ubType)
-			EXTR_U8(d, ubSubIndex)
-			Assert(d.getConsumed() == lengthof(data));
+			FileDataReader d{2, f};
+			UINT8 const ubType    {d.read<UINT8>()};
+			UINT8 const ubSubIndex{d.read<UINT8>()};
 
 			UINT16 usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
 
@@ -2259,15 +2225,9 @@ try
 	{
 		for (INT32 n = bCounts[cnt][3]; n != 0; --n)
 		{
-			BYTE data[2];
-			FileRead(f, data, sizeof(data));
-
-			UINT8       ubType;
-			UINT8       ubSubIndex;
-			DataReader d{data};
-			EXTR_U8(d, ubType)
-			EXTR_U8(d, ubSubIndex)
-			Assert(d.getConsumed() == lengthof(data));
+			FileDataReader d{2, f};
+			UINT8 const ubType    {d.read<UINT8>()};
+			UINT8 const ubSubIndex{d.read<UINT8>()};
 
 			UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
 			AddShadowToTail(cnt, usTileIndex);
@@ -2281,15 +2241,9 @@ try
 	{
 		for (INT32 n = bCounts[cnt][4]; n != 0; --n)
 		{
-			BYTE data[2];
-			FileRead(f, data, sizeof(data));
-
-			UINT8       ubType;
-			UINT8       ubSubIndex;
-			DataReader d{data};
-			EXTR_U8(d, ubType)
-			EXTR_U8(d, ubSubIndex)
-			Assert(d.getConsumed() == lengthof(data));
+			FileDataReader d{2, f};
+			UINT8 const ubType    {d.read<UINT8>()};
+			UINT8 const ubSubIndex{d.read<UINT8>()};
 
 			UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
 			AddRoofToTail(cnt, usTileIndex);
@@ -2303,15 +2257,9 @@ try
 	{
 		for (INT32 n = bCounts[cnt][5]; n != 0; --n)
 		{
-			BYTE data[2];
-			FileRead(f, data, sizeof(data));
-
-			UINT8       ubType;
-			UINT8       ubSubIndex;
-			DataReader d{data};
-			EXTR_U8(d, ubType)
-			EXTR_U8(d, ubSubIndex)
-			Assert(d.getConsumed() == lengthof(data));
+			FileDataReader d{2, f};
+			UINT8 const ubType    {d.read<UINT8>()};
+			UINT8 const ubSubIndex{d.read<UINT8>()};
 
 			UINT16 const usTileIndex = GetTileIndexFromTypeSubIndex(ubType, ubSubIndex);
 			AddOnRoofToTail(cnt, usTileIndex);

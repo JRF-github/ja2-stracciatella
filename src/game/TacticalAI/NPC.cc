@@ -167,43 +167,39 @@ static NPCQuoteInfo* ExtractNPCQuoteInfoArrayFromFile(HWFILE const f)
 	SGP::Buffer<NPCQuoteInfo> buf(NUM_NPC_QUOTE_RECORDS);
 	for (NPCQuoteInfo* i = buf; i != buf + NUM_NPC_QUOTE_RECORDS; ++i)
 	{
-		BYTE data[32];
-		FileRead(f, data, sizeof(data));
-
-		DataReader d{data};
+		FileDataReader d{32, f};
 		if(isRussianVersion())
 		{
-			EXTR_U32( d, i->ubIdentifier);
+			d >> i->ubIdentifier;
 		}
 		else
 		{
 			i->ubIdentifier = 0;
 		}
-		EXTR_U16( d, i->fFlags)
-		EXTR_I16( d, i->sRequiredItem)
-		EXTR_U16( d, i->usFactMustBeTrue)
-		EXTR_U16( d, i->usFactMustBeFalse)
-		EXTR_U8(  d, i->ubQuest)
-		EXTR_U8(  d, i->ubFirstDay)
-		EXTR_U8(  d, i->ubLastDay)
-		EXTR_U8(  d, i->ubApproachRequired)
-		EXTR_U8(  d, i->ubOpinionRequired)
-		EXTR_U8(  d, i->ubQuoteNum)
-		EXTR_U8(  d, i->ubNumQuotes)
-		EXTR_U8(  d, i->ubStartQuest)
-		EXTR_U8(  d, i->ubEndQuest)
-		EXTR_U8(  d, i->ubTriggerNPC)
-		EXTR_U8(  d, i->ubTriggerNPCRec)
+		d >> i->fFlags
+		  >> i->sRequiredItem
+		  >> i->usFactMustBeTrue
+		  >> i->usFactMustBeFalse
+		  >> i->ubQuest
+		  >> i->ubFirstDay
+		  >> i->ubLastDay
+		  >> i->ubApproachRequired
+		  >> i->ubOpinionRequired
+		  >> i->ubQuoteNum
+		  >> i->ubNumQuotes
+		  >> i->ubStartQuest
+		  >> i->ubEndQuest
+		  >> i->ubTriggerNPC
+		  >> i->ubTriggerNPCRec;
 		EXTR_SKIP(d, 1)
-		EXTR_U16( d, i->usSetFactTrue)
-		EXTR_U16( d, i->usGiftItem)
-		EXTR_U16( d, i->usGoToGridno)
-		EXTR_I16( d, i->sActionData)
+		d >> i->usSetFactTrue
+		  >> i->usGiftItem
+		  >> i->usGoToGridno
+		  >> i->sActionData;
 		if(!isRussianVersion())
 		{
 			EXTR_SKIP(d, 4);
 		}
-		Assert(d.getConsumed() == lengthof(data));
 	}
 	return buf.Release();
 }
@@ -233,38 +229,35 @@ static void ConditionalInjectNPCQuoteInfoArrayIntoFile(HWFILE const f, NPCQuoteI
 
 	for (NPCQuoteInfo const* i = q; i != q + NUM_NPC_QUOTE_RECORDS; ++i)
 	{
-		BYTE  data[32];
-		DataWriter d{data};
+		FileDataWriter d{32, f};
 		if(isRussianVersion())
 		{
-			INJ_U32( d, i->ubIdentifier);
+			d << i->ubIdentifier;
 		}
-		INJ_U16( d, i->fFlags)
-		INJ_I16( d, i->sRequiredItem)
-		INJ_U16( d, i->usFactMustBeTrue)
-		INJ_U16( d, i->usFactMustBeFalse)
-		INJ_U8(  d, i->ubQuest)
-		INJ_U8(  d, i->ubFirstDay)
-		INJ_U8(  d, i->ubLastDay)
-		INJ_U8(  d, i->ubApproachRequired)
-		INJ_U8(  d, i->ubOpinionRequired)
-		INJ_U8(  d, i->ubQuoteNum)
-		INJ_U8(  d, i->ubNumQuotes)
-		INJ_U8(  d, i->ubStartQuest)
-		INJ_U8(  d, i->ubEndQuest)
-		INJ_U8(  d, i->ubTriggerNPC)
-		INJ_U8(  d, i->ubTriggerNPCRec)
-		INJ_SKIP(d, 1)
-		INJ_U16( d, i->usSetFactTrue)
-		INJ_U16( d, i->usGiftItem)
-		INJ_U16( d, i->usGoToGridno)
-		INJ_I16( d, i->sActionData)
+		d << i->fFlags
+		  << i->sRequiredItem
+		  << i->usFactMustBeTrue
+		  << i->usFactMustBeFalse
+		  << i->ubQuest
+		  << i->ubFirstDay
+		  << i->ubLastDay
+		  << i->ubApproachRequired
+		  << i->ubOpinionRequired
+		  << i->ubQuoteNum
+		  << i->ubNumQuotes
+		  << i->ubStartQuest
+		  << i->ubEndQuest
+		  << i->ubTriggerNPC
+		  << i->ubTriggerNPCRec
+		  << skip<1>
+		  << i->usSetFactTrue
+		  << i->usGiftItem
+		  << i->usGoToGridno
+		  << i->sActionData;
 		if(!isRussianVersion())
 		{
 			INJ_SKIP(d, 4);
 		}
-		Assert(d.getConsumed() == lengthof(data));
-		FileWrite(f, data, sizeof(data));
 	}
 }
 

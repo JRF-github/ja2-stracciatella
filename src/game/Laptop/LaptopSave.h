@@ -3,7 +3,7 @@
 
 #include "Item_Types.h"
 #include "Store_Inventory.h"
-
+#include <array>
 #include <vector>
 
 #define MAX_BOOKMARKS			20
@@ -67,8 +67,8 @@ struct LaptopSaveInfoStruct
 {
 	//General Laptop Info
 	BOOLEAN gfNewGameLaptop; //Is it the firs time in Laptop
-	BOOLEAN fVisitedBookmarkAlready[20]; // have we visitied this site already?
-	INT32   iBookMarkList[MAX_BOOKMARKS];
+	std::array<BOOLEAN, 20> fVisitedBookmarkAlready; // have we visitied this site already?
+	std::array<INT32, MAX_BOOKMARKS> iBookMarkList;
 
 
 	INT32   iCurrentBalance; // current players balance
@@ -80,9 +80,9 @@ struct LaptopSaveInfoStruct
 
 
 	//Personnel Info
-	INT16 ubDeadCharactersList[ 256 ];
-	INT16 ubLeftCharactersList[ 256 ];
-	INT16 ubOtherCharactersList[ 256 ];
+	std::array<INT16, 256> ubDeadCharactersList;
+	std::array<INT16, 256> ubLeftCharactersList;
+	std::array<INT16, 256> ubOtherCharactersList;
 
 
 	// MERC site info
@@ -118,7 +118,7 @@ struct LaptopSaveInfoStruct
 	BOOLEAN fSpeckSaidFloMarriedCousinQuote;
 	BOOLEAN fHasAMercDiedAtMercSite;
 
-	UINT16  usInventoryListLength[BOBBY_RAY_LISTS];
+	std::array<UINT16, BOBBY_RAY_LISTS> usInventoryListLength;
 
 	INT32   iVoiceId;
 

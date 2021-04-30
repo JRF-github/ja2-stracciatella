@@ -7,6 +7,7 @@
 #include <string_theory/string>
 
 #include <algorithm>
+#include <array>
 #include <type_traits>
 
 
@@ -64,6 +65,33 @@ public:
 		size_t numBytes = len * sizeof(T);
 		memcpy(m_buf, arr, numBytes);
 		move(numBytes);
+	}
+
+	template<typename T>
+	DataWriter & operator<<(T const value)
+	{
+		if constexpr (std::is_pointer<T>::value)
+		{
+			skip(4);
+		}
+		else
+		{
+			static_assert(std::is_arithmetic<T>::value);
+			write<T>(value);
+		}
+		return *this;
+	}
+
+	template<typename T, size_t N>
+	DataWriter & operator<<(std::array<T, N> const& value)
+	{
+		writeArray<T>(&value[0], N);
+		return *this;
+	}
+
+	DataWriter & operator<<(DataWriter & (*manipulator) (DataWriter &))
+	{
+		return manipulator(*this);
 	}
 
 	/* Write zeroed bytes. */
@@ -143,6 +171,34 @@ public:
 		move(numBytes);
 	}
 
+	template<typename T>
+	DataReader & operator>>(T& value)
+	{
+		if constexpr (std::is_pointer<T>::value)
+		{
+			value = nullptr;
+			skip(4);
+		}
+		else
+		{
+			static_assert(std::is_arithmetic<T>::value);
+			value = read<T>();
+		}
+		return *this;
+	}
+
+	template<typename T, size_t N>
+	DataReader & operator>>(std::array<T, N> & value)
+	{
+		readArray<T>(&value[0], N);
+		return *this;
+	}
+
+	DataReader & operator>>(DataReader & (*manipulator) (DataReader &))
+	{
+		return manipulator(*this);
+	}
+
 	/* Read and discard bytes. */
 	void skip(size_t numBytes);
 
@@ -158,6 +214,50 @@ protected:
 };
 
 
+// DataWriter / DataReader manipulator for operator<< / operator>>
+template<size_t N, typename T>
+inline T & skip(T & reader_or_writer)
+{
+	reader_or_writer.skip(N);
+	return reader_or_writer;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// FileDataWriter
+////////////////////////////////////////////////////////////////////////////
+
+
+class FileDataWriter : public DataWriter
+{
+	SGPFile * const file_;
+	size_t    const size_;
+	// At the time of this writing, 7440 bytes is the largest buffer size
+	// required (by Laptop.cc). Feel free to change this number if necessary.
+	std::array<uint8_t, 7440> buf_;
+
+public:
+	FileDataWriter(size_t, SGPFile *);
+	~FileDataWriter();
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+// FileDataReader
+////////////////////////////////////////////////////////////////////////////
+
+
+class FileDataReader : public DataReader
+{
+	size_t const size_;
+	std::array<uint8_t, 7440> buf_;
+
+public:
+	FileDataReader(size_t, SGPFile *);
+	~FileDataReader();
+};
+
+
 #define INJ_STR(D, S, Size)  (D).writeArray<char>((S), (Size));
 #define INJ_BOOLA(D, S, Size)  (D).writeArray<BOOLEAN>((S), (Size));
 #define INJ_I8A(D, S, Size)  (D).writeArray<INT8>((S), (Size));
@@ -166,7 +266,6 @@ protected:
 #define INJ_U16A(D, S, Size) (D).writeArray<UINT16>((S), (Size));
 #define INJ_I32A(D, S, Size) (D).writeArray<INT32>((S), (Size));
 #define INJ_BOOL(D, S)   (D).write<BOOLEAN>((S));
-#define INJ_BYTE(D, S)   (D).write<BYTE>((S));
 #define INJ_I8(D, S)     (D).write<INT8>((S));
 #define INJ_U8(D, S)     (D).write<UINT8>((S));
 #define INJ_I16(D, S)    (D).write<INT16>((S));
@@ -181,7 +280,6 @@ protected:
 #define INJ_SKIP_I32(D)   (D).skip(4);
 #define INJ_SKIP_U8(D)    (D).skip(1);
 #define INJ_SOLDIER(D, S) (D).write<SoldierID>(Soldier2ID((S)));
-#define INJ_VEC3(D, S) INJ_FLOAT(D, (S).x); INJ_FLOAT(D, (S).y); INJ_FLOAT(D, (S).z);
 
 #define EXTR_STR(S, D, Size)  (S).readArray<char>((D), (Size));
 #define EXTR_BOOLA(S, D, Size) (S).readArray<BOOLEAN>((D), (Size));
@@ -191,7 +289,6 @@ protected:
 #define EXTR_U16A(S, D, Size) (S).readArray<UINT16>((D), (Size));
 #define EXTR_I32A(S, D, Size) (S).readArray<INT32>((D), (Size));
 #define EXTR_BOOL(S, D)   (D) = (S).read<BOOLEAN>();
-#define EXTR_BYTE(S, D)   (D) = (S).read<BYTE>();
 #define EXTR_I8(S, D)     (D) = (S).read<INT8>();
 #define EXTR_U8(S, D)     (D) = (S).read<UINT8>();
 #define EXTR_I16(S, D)    (D) = (S).read<INT16>();
@@ -206,6 +303,5 @@ protected:
 #define EXTR_SKIP_I32(S)   (S).skip(4);
 #define EXTR_SKIP_U8(S)    (S).skip(1);
 #define EXTR_SOLDIER(S, D) (D) = ID2Soldier((S).read<SoldierID>());
-#define EXTR_VEC3(S, D) EXTR_FLOAT(S, (D).x); EXTR_FLOAT(S, (D).y); EXTR_FLOAT(S, (D).z);
 
 #endif

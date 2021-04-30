@@ -423,7 +423,7 @@ void InitOverhead()
 	t.uiTimeOfLastInput       = GetJA2Clock();
 	t.uiTimeSinceDemoOn       = GetJA2Clock();
 	t.bRealtimeSpeed          = MAX_REALTIME_SPEED_VAL / 2;
-	FOR_EACH(INT16, i, t.sPanicTriggerGridNo) *i = NOWHERE;
+	t.sPanicTriggerGridNo.fill(NOWHERE);
 	t.fDidGameJustStart       = TRUE;
 	t.ubLastRequesterTargetID = NO_PROFILE;
 
@@ -3921,7 +3921,7 @@ void CommonEnterCombatModeCode( )
 	//gTacticalStatus.ubAttackBusyCount = 0;
 
 	// Reset num enemies fought flag...
-	std::fill_n(gTacticalStatus.bNumFoughtInBattle, MAXTEAMS, 0);
+	gTacticalStatus.bNumFoughtInBattle.fill(0);
 	gTacticalStatus.ubLastBattleSectorX = (UINT8) gWorldSectorX;
 	gTacticalStatus.ubLastBattleSectorY = (UINT8) gWorldSectorY;
 	gTacticalStatus.fLastBattleWon      = FALSE;
@@ -5999,12 +5999,10 @@ void InitializeTacticalStatusAtBattleStart(void)
 
 	gTacticalStatus.fPanicFlags = 0;
 	gTacticalStatus.fEnemyFlags = 0;
-	for (INT8 i = 0; i < NUM_PANIC_TRIGGERS; ++i)
-	{
-		gTacticalStatus.sPanicTriggerGridNo[i]  = NOWHERE;
-		gTacticalStatus.bPanicTriggerIsAlarm[i] = FALSE;
-		gTacticalStatus.ubPanicTolerance[i]     = 0;
-	}
+
+	gTacticalStatus.sPanicTriggerGridNo.fill(NOWHERE);
+	gTacticalStatus.bPanicTriggerIsAlarm.fill(FALSE);
+	gTacticalStatus.ubPanicTolerance.fill(0);
 
 	for (INT32 i = 0; i < MAXTEAMS; ++i)
 	{

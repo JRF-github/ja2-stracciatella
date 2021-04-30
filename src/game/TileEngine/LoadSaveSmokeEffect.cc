@@ -8,42 +8,33 @@
 
 void ExtractSmokeEffectFromFile(HWFILE const file, SMOKEEFFECT* const s)
 {
-	BYTE data[16];
-	FileRead(file, data, sizeof(data));
-
-	DataReader d{data};
-	EXTR_I16(d, s->sGridNo)
-	EXTR_U8(d, s->ubDuration)
-	EXTR_U8(d, s->ubRadius)
-	EXTR_U8(d, s->bFlags)
-	EXTR_I8(d, s->bAge)
-	EXTR_BOOL(d, s->fAllocated)
-	EXTR_I8(d, s->bType)
-	EXTR_U16(d, s->usItem)
-	EXTR_SOLDIER(d, s->owner)
-	EXTR_SKIP(d, 1)
-	EXTR_U32(d, s->uiTimeOfLastUpdate)
-	Assert(d.getConsumed() == lengthof(data));
+	FileDataReader d{16, file};
+	d >> s->sGridNo
+	  >> s->ubDuration
+	  >> s->ubRadius
+	  >> s->bFlags
+	  >> s->bAge
+	  >> s->fAllocated
+	  >> s->bType
+	  >> s->usItem
+	  >> s->owner
+	  >> skip<1>
+	  >> s->uiTimeOfLastUpdate;
 }
 
 
 void InjectSmokeEffectIntoFile(HWFILE const file, SMOKEEFFECT const* const s)
 {
-	BYTE data[16];
-
-	DataWriter d{data};
-	INJ_I16(d, s->sGridNo)
-	INJ_U8(d, s->ubDuration)
-	INJ_U8(d, s->ubRadius)
-	INJ_U8(d, s->bFlags)
-	INJ_I8(d, s->bAge)
-	INJ_BOOL(d, s->fAllocated)
-	INJ_I8(d, s->bType)
-	INJ_U16(d, s->usItem)
-	INJ_SOLDIER(d, s->owner)
-	INJ_SKIP(d, 1)
-	INJ_U32(d, s->uiTimeOfLastUpdate)
-	Assert(d.getConsumed() == lengthof(data));
-
-	FileWrite(file, data, sizeof(data));
+	FileDataWriter{16, file}
+	  << s->sGridNo
+	  << s->ubDuration
+	  << s->ubRadius
+	  << s->bFlags
+	  << s->bAge
+	  << s->fAllocated
+	  << s->bType
+	  << s->usItem
+	  << Soldier2ID(s->owner)
+	  << skip<1>
+	  << s->uiTimeOfLastUpdate;
 }

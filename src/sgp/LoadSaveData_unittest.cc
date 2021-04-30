@@ -204,3 +204,47 @@ TEST(LoadSaveData, floatAndDoubleFormat)
 		ASSERT_EQ(S.getConsumed(), sizeof(double) * 5);
 	}
 }
+
+
+#include "../game/Tactical/Overhead.h"
+
+TEST(LoadSaveData, overloadedOperators)
+{
+	uint8_t buf[100];
+	// Required setup for Soldier2ID and ID2Soldier
+	Menptr[5].ubID = 5;
+	Menptr[8].ubID = 8;
+
+	int i{4};
+	int16_t i16{-2};
+	uint8_t ui8{20};
+	double d{7.5};
+	float f{-0.25};
+	SOLDIERTYPE *stp{&Menptr[5]};
+	SOLDIERTYPE const *stcp{&Menptr[8]};
+	void *vp{(void*)0x12345678};
+	std::array<int8_t, 3> i8a{-1, 5, 80};
+
+	DataWriter dw{buf};
+	dw << i << i16 << ui8 << d << skip<10> << (int32_t)0 << f << stp << stcp << vp << i8a;
+	EXPECT_EQ(dw.getConsumed(), 42);
+
+	i = i16 = ui8 = d = f = 0;
+	stcp = stp = nullptr;
+	i8a = { 0, 0, 0};
+	vp = (void*)0xcafe; // assign some non-null value to check that pointers get set to nullptr
+
+	DataReader dr{buf};
+	dr >> i >> i16 >> ui8 >> d >> skip<14> >> f >> stp >> stcp >> vp >> i8a;
+	EXPECT_EQ(dr.getConsumed(), 42);
+
+	EXPECT_EQ(i, 4);
+	EXPECT_EQ(i16, -2);
+	EXPECT_EQ(ui8, 20);
+	EXPECT_EQ(d, 7.5);
+	EXPECT_EQ(f, -0.25);
+	EXPECT_EQ(stp, &Menptr[5]);
+	EXPECT_EQ(stcp, &Menptr[8]);
+	EXPECT_EQ(vp, nullptr);
+	EXPECT_EQ(i8a[2], 80);
+}

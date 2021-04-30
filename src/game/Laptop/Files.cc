@@ -368,17 +368,10 @@ static void OpenAndReadFilesFile(void)
 	// file exists, read in data, continue until file end
 	for (UINT i = FileGetSize(f) / FILE_ENTRY_SIZE; i != 0; --i)
 	{
-		BYTE data[FILE_ENTRY_SIZE];
-		FileRead(f, data, sizeof(data));
-
 		UINT8 code;
 		UINT8 already_read;
 
-		DataReader d{data};
-		EXTR_U8(d, code)
-		EXTR_SKIP(d, 261)
-		EXTR_U8(d, already_read)
-		Assert(d.getConsumed() == lengthof(data));
+		FileDataReader{FILE_ENTRY_SIZE, f} >> code >> skip<261> >> already_read;
 
 		ProcessAndEnterAFilesRecord(code, already_read);
 	}
@@ -391,14 +384,7 @@ static void OpenAndWriteFilesFile(void)
 
 	for (const FilesUnit* i = pFilesListHead; i; i = i->Next)
 	{
-		BYTE  data[FILE_ENTRY_SIZE];
-		DataWriter d{data};
-		INJ_U8(d, i->ubCode)
-		INJ_SKIP(d, 261)
-		INJ_U8(d, i->fRead)
-		Assert(d.getConsumed() == lengthof(data));
-
-		FileWrite(f, data, sizeof(data));
+		FileDataWriter{FILE_ENTRY_SIZE, f} << i->ubCode << skip<261> << i->fRead;
 	}
 
 	ClearFilesList();

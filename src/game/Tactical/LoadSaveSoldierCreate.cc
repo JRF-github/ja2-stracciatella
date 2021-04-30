@@ -38,9 +38,8 @@ UINT16 CalcSoldierCreateCheckSum(const SOLDIERCREATE_STRUCT* const s)
 }
 
 
-static void ExtractSoldierCreate(const BYTE* const data, SOLDIERCREATE_STRUCT* const c, bool stracLinuxFormat)
+static void ExtractSoldierCreate(DataReader & d, SOLDIERCREATE_STRUCT* const c, bool stracLinuxFormat)
 {
-	DataReader d{data};
 	EXTR_BOOL(d, c->fStatic)
 	EXTR_U8(d, c->ubProfile)
 	EXTR_SKIP(d, 2)
@@ -100,31 +99,13 @@ static void ExtractSoldierCreate(const BYTE* const data, SOLDIERCREATE_STRUCT* c
 	EXTR_I8(d, c->bUseGivenVehicleID)
 	EXTR_BOOL(d, c->fHasKeys)
 	EXTR_SKIP(d, 117)
-	if(stracLinuxFormat)
-	{
-		Assert(d.getConsumed() == 1060);
-	}
-	else
-	{
-		Assert(d.getConsumed() == 1040);
-	}
 }
 
 
 void ExtractSoldierCreateFromFile(HWFILE const f, SOLDIERCREATE_STRUCT* const c, bool stracLinuxFormat)
 {
-	if(stracLinuxFormat)
-	{
-		BYTE data[1060];
-		FileRead(f, data, sizeof(data));
-		ExtractSoldierCreate(data, c, stracLinuxFormat);
-	}
-	else
-	{
-		BYTE data[1040];
-		FileRead(f, data, sizeof(data));
-		ExtractSoldierCreate(data, c, stracLinuxFormat);
-	}
+	FileDataReader d{stracLinuxFormat ? 1060u : 1040u, f};
+	ExtractSoldierCreate(d, c, stracLinuxFormat);
 }
 
 /**
@@ -152,9 +133,8 @@ void ExtractSoldierCreateFromFileWithChecksumAndGuess(HWFILE f, SOLDIERCREATE_ST
 	}
 }
 
-static void InjectSoldierCreate(BYTE* const data, const SOLDIERCREATE_STRUCT* const c)
+static void InjectSoldierCreate(DataWriter & d, const SOLDIERCREATE_STRUCT* const c)
 {
-	DataWriter d{data};
 	INJ_BOOL(d, c->fStatic)
 	INJ_U8(d, c->ubProfile)
 	INJ_SKIP(d, 2)
@@ -207,13 +187,11 @@ static void InjectSoldierCreate(BYTE* const data, const SOLDIERCREATE_STRUCT* co
 	INJ_I8(d, c->bUseGivenVehicleID)
 	INJ_BOOL(d, c->fHasKeys)
 	INJ_SKIP(d, 117)
-	Assert(d.getConsumed() == 1040);
 }
 
 
 void InjectSoldierCreateIntoFile(HWFILE const f, SOLDIERCREATE_STRUCT const* const c)
 {
-	BYTE data[1040];
-	InjectSoldierCreate(data, c);
-	FileWrite(f, data, sizeof(data));
+	FileDataWriter d{1040, f};
+	InjectSoldierCreate(d, c);
 }

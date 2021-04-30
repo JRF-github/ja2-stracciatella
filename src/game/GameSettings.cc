@@ -31,6 +31,7 @@
 
 
 #define GAME_SETTINGS_FILE "../Ja2.set"
+constexpr size_t GAME_SETTINGS_FILE_SIZE = 76;
 
 GAME_SETTINGS		gGameSettings;
 GAME_OPTIONS		gGameOptions;
@@ -49,16 +50,14 @@ void LoadGameSettings(void)
 	{
 		AutoSGPFile f(GCM->openUserPrivateFileForReading(GAME_SETTINGS_FILE));
 
-		BYTE data[76];
-		if (FileGetSize(f) != sizeof(data)) goto fail;
-		FileRead(f, data, sizeof(data));
+		if (FileGetSize(f) != GAME_SETTINGS_FILE_SIZE) goto fail;
 
 		UINT8          music_volume;
 		UINT8          sound_volume;
 		UINT8          speech_volume;
 		UINT32         settings_version;
 		GAME_SETTINGS& g = gGameSettings;
-		DataReader d{data};
+		FileDataReader d{GAME_SETTINGS_FILE_SIZE, f};
 		EXTR_I8(  d, g.bLastSavedGameSlot)
 		EXTR_U8(  d, music_volume)
 		EXTR_U8(  d, sound_volume)
@@ -72,7 +71,6 @@ void LoadGameSettings(void)
 		EXTR_U8(  d, g.ubSizeOfDisplayCover)
 		EXTR_U8(  d, g.ubSizeOfLOS)
 		EXTR_SKIP(d, 20)
-		Assert(d.getConsumed() == lengthof(data));
 
 		if (settings_version < GAME_SETTING_CURRENT_VERSION) goto fail;
 
@@ -114,8 +112,8 @@ void SaveGameSettings(void)
 	// Record the current settings into the game settins structure
 	GAME_SETTINGS& g = gGameSettings;
 
-	BYTE  data[76];
-	DataWriter d{data};
+	AutoSGPFile f(FileMan::openForWriting(GAME_SETTINGS_FILE));
+	FileDataWriter d{GAME_SETTINGS_FILE_SIZE, f};
 	INJ_I8(  d, g.bLastSavedGameSlot)
 	UINT8 const music_volume  = MusicGetVolume();
 	INJ_U8(  d, music_volume)
@@ -133,10 +131,6 @@ void SaveGameSettings(void)
 	INJ_U8(  d, g.ubSizeOfDisplayCover)
 	INJ_U8(  d, g.ubSizeOfLOS)
 	INJ_SKIP(d, 20)
-	Assert(d.getConsumed() == lengthof(data));
-
-	AutoSGPFile f(FileMan::openForWriting(GAME_SETTINGS_FILE));
-	FileWrite(f, data, sizeof(data));
 }
 
 
