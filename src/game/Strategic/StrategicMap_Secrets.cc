@@ -92,7 +92,7 @@ const StrategicMapSecretModel* GetMapSecretBySectorID(UINT8 const ubSectorID)
 }
 
 
-void InjectSAMSitesFoundToSavedFile(DataWriter& d)
+DataWriter & InjectSAMSitesFoundToSavedFile(DataWriter& d)
 {
 	std::vector<BOOLEAN> fSAMFound;
 	for (auto s : GCM->getMapSecrets())
@@ -104,9 +104,10 @@ void InjectSAMSitesFoundToSavedFile(DataWriter& d)
 		}
 	}
 	INJ_BOOLA(d, fSAMFound.data(), fSAMFound.size());
+	return d;
 }
 
-void ExtractSAMSitesFoundFromSavedFile(DataReader& d)
+DataReader & ExtractSAMSitesFoundFromSavedFile(DataReader& d)
 {
 	std::vector<const StrategicMapSecretModel*> secretSAMSites;
 	for (auto s : GCM->getMapSecrets())
@@ -123,6 +124,7 @@ void ExtractSAMSitesFoundFromSavedFile(DataReader& d)
 	{
 		SetSectorSecretAsFound(s->sectorID, fSAMFound[i++]);
 	}
+	return d;
 }
 
 void InjectMapSecretStateToSave(DataWriter& d, unsigned int const index)

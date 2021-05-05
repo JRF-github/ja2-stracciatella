@@ -1606,9 +1606,9 @@ static INT32 GetNumberOfPastMercsOnPlayersTeam(void)
 static void InitPastCharactersList(void)
 {
 	// inits the past characters list
-	std::fill(std::begin(LaptopSaveInfo.ubDeadCharactersList), std::end(LaptopSaveInfo.ubDeadCharactersList), -1);
-	std::fill(std::begin(LaptopSaveInfo.ubLeftCharactersList), std::end(LaptopSaveInfo.ubLeftCharactersList), -1);
-	std::fill(std::begin(LaptopSaveInfo.ubOtherCharactersList), std::end(LaptopSaveInfo.ubOtherCharactersList), -1);
+	LaptopSaveInfo.ubDeadCharactersList.fill(-1);
+	LaptopSaveInfo.ubLeftCharactersList.fill(-1);
+	LaptopSaveInfo.ubOtherCharactersList.fill(-1);
 }
 
 

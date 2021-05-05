@@ -153,29 +153,31 @@ extern		UINT32		guiCurrentUniqueSoldierId;
 static void SaveTempFileToSavedGame(const char* fileName, HWFILE const hFile);
 static void LoadTempFileFromSavedGame(const char* tempFileName, HWFILE const hFile);
 
-static void ExtractGameOptions(DataReader& d, GAME_OPTIONS& g)
+static DataReader & operator>>(DataReader & d, GAME_OPTIONS & g)
 {
 	size_t start = d.getConsumed();
 	d >> g.fGunNut
 	  >> g.fSciFi
 	  >> g.ubDifficultyLevel
 	  >> g.fTurnTimeLimit
-	  >> g.ubGameSaveMode;
-	EXTR_SKIP( d, 7)
+	  >> g.ubGameSaveMode
+	  >> skip<7>;
 	Assert(d.getConsumed() == start + 12);
+	return d;
 }
 
 
-static void InjectGameOptions(DataWriter& d, GAME_OPTIONS const& g)
+static DataWriter & operator<<(DataWriter & d, GAME_OPTIONS const& g)
 {
 	size_t start = d.getConsumed();
 	d << g.fGunNut
 	  << g.fSciFi
 	  << g.ubDifficultyLevel
 	  << g.fTurnTimeLimit
-	  << g.ubGameSaveMode;
-	INJ_SKIP( d, 7)
+	  << g.ubGameSaveMode
+	  << skip<7>;
 	Assert(d.getConsumed() == start + 12);
+	return d;
 }
 
 
@@ -313,8 +315,8 @@ BOOLEAN SaveGame(UINT8 ubSaveGameID, const ST::string& gameDesc)
 		INJ_U32(   d, header.uiSavedGameVersion)
 		INJ_STR(   d, header.zGameVersionNumber, lengthof(header.zGameVersionNumber))
 		d.writeUTF16(header.sSavedGameDesc, SIZE_OF_SAVE_GAME_DESC);
-		INJ_SKIP(  d, 4)
-		d << header.uiDay
+		d << skip<4>
+		  << header.uiDay
 		  << header.ubHour
 		  << header.ubMin
 		  << header.sSectorX
@@ -325,11 +327,11 @@ BOOLEAN SaveGame(UINT8 ubSaveGameID, const ST::string& gameDesc)
 		  << header.uiCurrentScreen
 		  << header.fAlternateSector
 		  << header.fWorldLoaded
-		  << header.ubLoadScreenID;
-		InjectGameOptions(d, header.sInitialGameOptions);
-		INJ_SKIP(  d, 1)
-		INJ_U32(   d, header.uiRandom)
-		INJ_SKIP(  d, 112)
+		  << header.ubLoadScreenID
+		  << header.sInitialGameOptions
+		  << skip<1>
+		  << header.uiRandom
+		  << skip<112>;
 		}
 
 		CalcJA2EncryptionSet(header);
@@ -476,7 +478,7 @@ BOOLEAN SaveGame(UINT8 ubSaveGameID, const ST::string& gameDesc)
 void ParseSavedGameHeader(const BYTE *data, SAVED_GAME_HEADER& h, bool stracLinuxFormat)
 {
 	DataReader d{data};
-	EXTR_U32(   d, h.uiSavedGameVersion);
+	d >> h.uiSavedGameVersion;
 	EXTR_STR(   d, h.zGameVersionNumber, lengthof(h.zGameVersionNumber));
 	if(stracLinuxFormat)
 	{
@@ -486,8 +488,8 @@ void ParseSavedGameHeader(const BYTE *data, SAVED_GAME_HEADER& h, bool stracLinu
 	{
 		h.sSavedGameDesc = d.readUTF16(SIZE_OF_SAVE_GAME_DESC);
 	}
-	EXTR_SKIP(  d, 4)
-	d >> h.uiDay
+	d >> skip<4>
+	  >> h.uiDay
 	  >> h.ubHour
 	  >> h.ubMin
 	  >> h.sSectorX
@@ -498,13 +500,11 @@ void ParseSavedGameHeader(const BYTE *data, SAVED_GAME_HEADER& h, bool stracLinu
 	  >> h.uiCurrentScreen
 	  >> h.fAlternateSector
 	  >> h.fWorldLoaded
-	  >> h.ubLoadScreenID;
-	ExtractGameOptions(d, h.sInitialGameOptions);
-	EXTR_SKIP(  d, 1)
-	EXTR_U32(   d, h.uiRandom)
-	EXTR_SKIP(  d, 112)
-	// XXX: this assert doesn't work anymore
-	// Assert(d.getConsumed() == lengthof(data));
+	  >> h.ubLoadScreenID
+	  >> h.sInitialGameOptions
+	  >> skip<1>
+	  >> h.uiRandom
+	  >> skip<112>;
 }
 
 /** @brief Check if SAVED_GAME_HEADER structure contains valid data.
@@ -1293,18 +1293,9 @@ static void LoadSoldierStructure(HWFILE const f, UINT32 savegame_version, bool s
 
 		//Read in the saved soldier info into a Temp structure
 		SOLDIERTYPE SavedSoldierInfo;
-		if(stracLinuxFormat)
-		{
-			BYTE Data[2352];
-			reader(f, Data, sizeof(Data));
-			ExtractSoldierType(Data, &SavedSoldierInfo, stracLinuxFormat, savegame_version);
-		}
-		else
-		{
-			BYTE Data[2328];
-			reader(f, Data, sizeof(Data));
-			ExtractSoldierType(Data, &SavedSoldierInfo, stracLinuxFormat, savegame_version);
-		}
+		BYTE Data[2352];
+		reader(f, Data, stracLinuxFormat ? 2352 : 2328);
+		ExtractSoldierType(Data, &SavedSoldierInfo, stracLinuxFormat, savegame_version);
 
 		SOLDIERTYPE* const s = TacticalCreateSoldierFromExisting(&SavedSoldierInfo);
 		Assert(s->ubID == i);
@@ -1683,7 +1674,7 @@ void LoadMercPath(HWFILE const hFile, PathSt** const head)
 }
 
 
-static void InjectMeanwhileDefinition(DataWriter& d, MEANWHILE_DEFINITION const& m)
+static DataWriter & operator<<(DataWriter& d, MEANWHILE_DEFINITION const& m)
 {
 	size_t start = d.getConsumed();
 	d << m.sSectorX
@@ -1692,10 +1683,11 @@ static void InjectMeanwhileDefinition(DataWriter& d, MEANWHILE_DEFINITION const&
 	  << m.ubMeanwhileID
 	  << m.ubNPCNumber;
 	Assert(d.getConsumed() == start + 8);
+	return d;
 }
 
 
-static void ExtractMeanwhileDefinition(DataReader& d, MEANWHILE_DEFINITION& m)
+static DataReader & operator>>(DataReader& d, MEANWHILE_DEFINITION& m)
 {
 	size_t start = d.getConsumed();
 	d >> m.sSectorX
@@ -1704,6 +1696,7 @@ static void ExtractMeanwhileDefinition(DataReader& d, MEANWHILE_DEFINITION& m)
 	  >> m.ubMeanwhileID
 	  >> m.ubNPCNumber;
 	Assert(d.getConsumed() == start + 8);
+	return d;
 }
 
 
@@ -1748,7 +1741,7 @@ static void SaveGeneralInfo(HWFILE const f)
 	INJ_SKIP( d, 1)
 	INJ_BOOL( d, gfSkyriderSaidCongratsOnTakingSAM)
 	INJ_I16(  d, pContractReHireSoldier ? pContractReHireSoldier->ubID : -1)
-	InjectGameOptions(d, gGameOptions);
+	d << gGameOptions;
 	INJ_SKIP( d, 4)
 	INJ_U32(  d, guiBaseJA2Clock)
 	INJ_I16(  d, gsCurInterfacePanel)
@@ -1771,7 +1764,7 @@ static void SaveGeneralInfo(HWFILE const f)
 	INJ_BOOL( d, fShowCambriaHospitalHighLight)
 	INJ_BOOL( d, fSkyRiderSetUp)
 	INJ_BOOLA(d, fRefuelingSiteAvailable, lengthof(fRefuelingSiteAvailable))
-	InjectMeanwhileDefinition(d, gCurrentMeanwhileDef);
+	d << gCurrentMeanwhileDef;
 	INJ_BOOL( d, gubPlayerProgressSkyriderLastCommentedOn)
 	INJ_BOOL( d, gfMeanwhileTryingToStart)
 	INJ_BOOL( d, gfInMeanwhile)
@@ -1793,7 +1786,7 @@ static void SaveGeneralInfo(HWFILE const f)
 	INJ_BOOL( d, fNewFilesInFileViewer)
 	INJ_BOOL( d, gfLastBoxingMatchWonByPlayer)
 	INJ_SKIP( d, 7)
-	InjectSAMSitesFoundToSavedFile(d);
+	d << InjectSAMSitesFoundToSavedFile;
 	INJ_U8(   d, gubNumTerrorists)
 	INJ_U8(   d, gubCambriaMedicalObjects)
 	INJ_BOOL( d, gfDisableTacticalPanelButtons)
@@ -1881,7 +1874,7 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 	INT16 contract_rehire_soldier;
 	EXTR_I16(  d, contract_rehire_soldier)
 	pContractReHireSoldier = contract_rehire_soldier != -1 ? &GetMan(contract_rehire_soldier) : 0;
-	ExtractGameOptions(d, gGameOptions);
+	d >> gGameOptions;
 	EXTR_SKIP( d, 4)
 	EXTR_U32(  d, guiBaseJA2Clock)
 	ResetJA2ClockGlobalTimers();
@@ -1911,7 +1904,7 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 	EXTR_BOOL( d, fShowCambriaHospitalHighLight)
 	EXTR_BOOL( d, fSkyRiderSetUp)
 	EXTR_BOOLA(d, fRefuelingSiteAvailable, lengthof(fRefuelingSiteAvailable))
-	ExtractMeanwhileDefinition(d, gCurrentMeanwhileDef);
+	d >> gCurrentMeanwhileDef;
 	EXTR_BOOL( d, gubPlayerProgressSkyriderLastCommentedOn)
 	EXTR_BOOL( d, gfMeanwhileTryingToStart)
 	EXTR_BOOL( d, gfInMeanwhile)
@@ -1939,7 +1932,7 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
 	EXTR_BOOL( d, fNewFilesInFileViewer)
 	EXTR_BOOL( d, gfLastBoxingMatchWonByPlayer)
 	EXTR_SKIP( d, 7)
-	ExtractSAMSitesFoundFromSavedFile(d);
+	d >> ExtractSAMSitesFoundFromSavedFile;
 	EXTR_U8(   d, gubNumTerrorists)
 	EXTR_U8(   d, gubCambriaMedicalObjects)
 	EXTR_BOOL( d, gfDisableTacticalPanelButtons)
@@ -2022,18 +2015,16 @@ static void LoadMeanwhileDefsFromSaveGameFile(HWFILE const f, UINT32 const saveg
 	}
 	for (MEANWHILE_DEFINITION* i = gMeanwhileDef; i != end; ++i)
 	{
-		FileDataReader d{8, f};
-		ExtractMeanwhileDefinition(d, *i);
+		FileDataReader{8, f} >> nop >> *i;
 	}
 }
 
 
 static void SaveMeanwhileDefsToSaveGameFile(HWFILE const f)
 {
-	FOR_EACH(MEANWHILE_DEFINITION, i, gMeanwhileDef)
+	for (MEANWHILE_DEFINITION const& md : gMeanwhileDef)
 	{
-		FileDataWriter d{8, f};
-		InjectMeanwhileDefinition(d, *i);
+		FileDataWriter{8, f} << nop << md;
 	}
 }
 

@@ -231,7 +231,7 @@ TEST(LoadSaveData, overloadedOperators)
 
 	i = i16 = ui8 = d = f = 0;
 	stcp = stp = nullptr;
-	i8a = { 0, 0, 0};
+	i8a.fill(0);
 	vp = (void*)0xcafe; // assign some non-null value to check that pointers get set to nullptr
 
 	DataReader dr{buf};

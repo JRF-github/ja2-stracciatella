@@ -28,10 +28,10 @@ void SetSectorSecretAsFound(UINT8 ubSectorID, BOOLEAN fFound = TRUE);
 const StrategicMapSecretModel* GetMapSecretBySectorID(UINT8 ubSectorID);
 
 // writes the map secret states of all SAM sites
-void InjectSAMSitesFoundToSavedFile(DataWriter& d);
+DataWriter & InjectSAMSitesFoundToSavedFile(DataWriter& d);
 
 // reads the map secret states for all SAM sites
-void ExtractSAMSitesFoundFromSavedFile(DataReader& d);
+DataReader & ExtractSAMSitesFoundFromSavedFile(DataReader& d);
 
 // write the state of a non-SAM-site map secret at the given index
 void InjectMapSecretStateToSave(DataWriter& d, unsigned int index);

@@ -85,6 +85,7 @@ public:
 	template<typename T, size_t N>
 	DataWriter & operator<<(std::array<T, N> const& value)
 	{
+		static_assert(std::is_arithmetic<T>::value);
 		writeArray<T>(&value[0], N);
 		return *this;
 	}
@@ -190,6 +191,7 @@ public:
 	template<typename T, size_t N>
 	DataReader & operator>>(std::array<T, N> & value)
 	{
+		static_assert(std::is_arithmetic<T>::value);
 		readArray<T>(&value[0], N);
 		return *this;
 	}
@@ -222,6 +224,14 @@ inline T & skip(T & reader_or_writer)
 	return reader_or_writer;
 }
 
+// Turn a FileDataReader or FileDataWriter into a DataReader or DataWriter.
+// Needed when using an overloaded operator as the first element after
+// a FileDataReader or FileDataWriter definition.
+template<typename T>
+inline T & nop(T & reader_or_writer)
+{
+	return reader_or_writer;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // FileDataWriter
@@ -264,7 +274,6 @@ public:
 #define INJ_U8A(D, S, Size)  (D).writeArray<UINT8>((S), (Size));
 #define INJ_I16A(D, S, Size) (D).writeArray<INT16>((S), (Size));
 #define INJ_U16A(D, S, Size) (D).writeArray<UINT16>((S), (Size));
-#define INJ_I32A(D, S, Size) (D).writeArray<INT32>((S), (Size));
 #define INJ_BOOL(D, S)   (D).write<BOOLEAN>((S));
 #define INJ_I8(D, S)     (D).write<INT8>((S));
 #define INJ_U8(D, S)     (D).write<UINT8>((S));
@@ -287,7 +296,6 @@ public:
 #define EXTR_U8A(S, D, Size)  (S).readArray<UINT8>((D), (Size));
 #define EXTR_I16A(S, D, Size) (S).readArray<INT16>((D), (Size));
 #define EXTR_U16A(S, D, Size) (S).readArray<UINT16>((D), (Size));
-#define EXTR_I32A(S, D, Size) (S).readArray<INT32>((D), (Size));
 #define EXTR_BOOL(S, D)   (D) = (S).read<BOOLEAN>();
 #define EXTR_I8(S, D)     (D) = (S).read<INT8>();
 #define EXTR_U8(S, D)     (D) = (S).read<UINT8>();

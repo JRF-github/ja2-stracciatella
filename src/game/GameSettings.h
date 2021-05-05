@@ -3,7 +3,7 @@
 
 #include "VanillaDataStructures.h"
 #include "MessageBoxScreen.h"
-
+#include <array>
 #include <string_theory/string>
 
 
@@ -63,7 +63,7 @@ struct GAME_SETTINGS
 	ST::string sCurrentSavedGameName; // The name of the current Savegame goes here. Only relevant for Dead is Dead games
 
 	//The following are set from the status of the toggle boxes in the Options Screen
-	UINT8				fOptions[ NUM_ALL_GAME_OPTIONS ];
+	std::array<UINT8, NUM_ALL_GAME_OPTIONS> fOptions;
 
 	UINT32			uiMeanwhileScenesSeenFlags;
 

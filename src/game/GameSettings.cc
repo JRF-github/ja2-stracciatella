@@ -30,15 +30,15 @@
 #include <string_theory/format>
 
 
-#define GAME_SETTINGS_FILE "../Ja2.set"
-constexpr size_t GAME_SETTINGS_FILE_SIZE = 76;
+ST::string const GAME_SETTINGS_FILE{ST_LITERAL("../Ja2.set")};
+constexpr size_t GAME_SETTINGS_FILE_SIZE{76};
 
 GAME_SETTINGS		gGameSettings;
 GAME_OPTIONS		gGameOptions;
 
 
 //Change this number when we want any who gets the new build to reset the options
-#define GAME_SETTING_CURRENT_VERSION 522
+constexpr UINT32 GAME_SETTING_CURRENT_VERSION{522};
 
 
 static void InitGameSettings(void);
@@ -57,20 +57,20 @@ void LoadGameSettings(void)
 		UINT8          speech_volume;
 		UINT32         settings_version;
 		GAME_SETTINGS& g = gGameSettings;
-		FileDataReader d{GAME_SETTINGS_FILE_SIZE, f};
-		EXTR_I8(  d, g.bLastSavedGameSlot)
-		EXTR_U8(  d, music_volume)
-		EXTR_U8(  d, sound_volume)
-		EXTR_U8(  d, speech_volume)
-		EXTR_U8A( d, g.fOptions, lengthof(g.fOptions))
-		EXTR_SKIP(d, lengthof(g_version_number) + 1)
-		EXTR_U32( d, settings_version)
-		EXTR_U32( d, g.uiMeanwhileScenesSeenFlags)
-		EXTR_BOOL(d, g.fHideHelpInAllScreens)
-		EXTR_SKIP(d, 1)
-		EXTR_U8(  d, g.ubSizeOfDisplayCover)
-		EXTR_U8(  d, g.ubSizeOfLOS)
-		EXTR_SKIP(d, 20)
+		FileDataReader{GAME_SETTINGS_FILE_SIZE, f}
+		  >> g.bLastSavedGameSlot
+		  >> music_volume
+		  >> sound_volume
+		  >> speech_volume
+		  >> g.fOptions
+		  >> skip<lengthof(g_version_number) + 1>
+		  >> settings_version
+		  >> g.uiMeanwhileScenesSeenFlags
+		  >> g.fHideHelpInAllScreens
+		  >> skip<1>
+		  >> g.ubSizeOfDisplayCover
+		  >> g.ubSizeOfLOS
+		  >> skip<20>;
 
 		if (settings_version < GAME_SETTING_CURRENT_VERSION) goto fail;
 
@@ -114,23 +114,20 @@ void SaveGameSettings(void)
 
 	AutoSGPFile f(FileMan::openForWriting(GAME_SETTINGS_FILE));
 	FileDataWriter d{GAME_SETTINGS_FILE_SIZE, f};
-	INJ_I8(  d, g.bLastSavedGameSlot)
-	UINT8 const music_volume  = MusicGetVolume();
-	INJ_U8(  d, music_volume)
-	UINT8 const sound_volume  = GetSoundEffectsVolume();
-	INJ_U8(  d, sound_volume)
-	UINT8 const speech_volume = GetSpeechVolume();
-	INJ_U8(  d, speech_volume)
-	INJ_U8A( d, g.fOptions,       lengthof(g.fOptions))
+	d << g.bLastSavedGameSlot
+	  << (UINT8) MusicGetVolume()
+	  << (UINT8) GetSoundEffectsVolume()
+	  << (UINT8) GetSpeechVolume()
+	  << g.fOptions;
 	INJ_STR( d, g_version_number, lengthof(g_version_number))
-	INJ_SKIP(d, 1)
-	INJ_U32( d, GAME_SETTING_CURRENT_VERSION)
-	INJ_U32( d, g.uiMeanwhileScenesSeenFlags)
-	INJ_BOOL(d, g.fHideHelpInAllScreens)
-	INJ_SKIP(d, 1)
-	INJ_U8(  d, g.ubSizeOfDisplayCover)
-	INJ_U8(  d, g.ubSizeOfLOS)
-	INJ_SKIP(d, 20)
+	d << skip<1>
+	  << GAME_SETTING_CURRENT_VERSION
+	  << g.uiMeanwhileScenesSeenFlags
+	  << g.fHideHelpInAllScreens
+	  << skip<1>
+	  << g.ubSizeOfDisplayCover
+	  << g.ubSizeOfLOS
+	  << skip<20>;
 }
 
 

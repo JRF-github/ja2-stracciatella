@@ -2591,8 +2591,6 @@ static void EvolveQueenPriorityPhase(BOOLEAN fForceChange)
 	INT32 index, num, iFactor;
 	INT32 iChange, iNew, iNumSoldiers, iNumPromotions;
 	SECTORINFO *pSector;
-	std::vector<UINT8> ubOwned;
-	std::vector<UINT8> ubTotal;
 	UINT8 ubNewPhase;
 	ubNewPhase = CurrentPlayerProgressPercentage() / 10;
 	auto origArmyComp = GCM->getArmyCompositions();
@@ -2622,8 +2620,8 @@ static void EvolveQueenPriorityPhase(BOOLEAN fForceChange)
 	//are controlled by her, the desired number will be increased as well as the priority.  On the other
 	//hand, if she doesn't own those sectors, the values will be decreased instead.  All values are based off of
 	//the originals.
-	std::fill_n(std::back_inserter(ubOwned), gArmyComp.size(), 0);
-	std::fill_n(std::back_inserter(ubTotal), gArmyComp.size(), 0);
+	std::vector<UINT8> ubOwned(gArmyComp.size(), 0);
+	std::vector<UINT8> ubTotal(gArmyComp.size(), 0);
 
 	//Record the values required to calculate the percentage of each composition type that the queen controls.
 	for( size_t i = 0; i < gGarrisonGroup.size(); i++ )
