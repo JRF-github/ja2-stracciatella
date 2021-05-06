@@ -15,7 +15,7 @@
 
 #include "JA2Types.h"
 #include "Types.h"
-
+#include <array>
 #include <string_theory/string>
 
 
@@ -72,7 +72,7 @@ struct MOUSE_REGION
 	MOUSE_CALLBACK ButtonCallback; // Pointer to callback function if button action occured in this region
 	union // User Data, can be set to anything!
 	{
-		INT32 data[4];
+		std::array<INT32, 4> data;
 		void* ptr;
 	} user;
 
@@ -160,10 +160,10 @@ void MSYS_DefineRegion(MOUSE_REGION *region,UINT16 tlx,UINT16 tly,UINT16 brx,UIN
 void MSYS_RemoveRegion(MOUSE_REGION *region);
 
 /* Set one of the user data entries in a mouse region */
-void MSYS_SetRegionUserData(MOUSE_REGION*, UINT32 index, INT32 userdata);
+#define MSYS_SetRegionUserData(region, index, value) std::get<(index)>((region)->user.data) = (value)
 
 /* Retrieve one of the user data entries in a mouse region */
-INT32 MSYS_GetRegionUserData(MOUSE_REGION const*, UINT32 index);
+#define MSYS_GetRegionUserData(region, index) std::get<(index)>((region)->user.data)
 
 // This function will force a re-evaluation of mous regions
 // Usually used to force change of mouse cursor if panels switch, etc
