@@ -1063,8 +1063,7 @@ static void AddEnemiesToBattle(GROUP const& g, UINT8 const strategic_insertion_c
 
 	UINT8            n_total   = n_admins + n_troops + n_elites;
 	UINT8            curr_slot = 0;
-	MAPEDGEPOINTINFO edgepoint_info;
-	ChooseMapEdgepoints(&edgepoint_info, strategic_insertion_code, n_total);
+	EdgepointsVector const edgepoint_info{ChooseMapEdgepoints(strategic_insertion_code, n_total)};
 	while (n_total != 0)
 	{
 		UINT32       const roll = Random(n_total--);
@@ -1077,10 +1076,10 @@ static void AddEnemiesToBattle(GROUP const& g, UINT8 const strategic_insertion_c
 		s.ubGroupID = g.ubGroupID;
 		s.ubInsertionDirection = desired_direction;
 		// Setup the position
-		if (curr_slot < edgepoint_info.ubNumPoints)
+		if (curr_slot < edgepoint_info.size())
 		{ // Use an edgepoint
 			s.ubStrategicInsertionCode = INSERTION_CODE_GRIDNO;
-			s.usStrategicInsertionData = edgepoint_info.sGridNo[curr_slot++];
+			s.usStrategicInsertionData = edgepoint_info[curr_slot++];
 		}
 		else
 		{ // No edgepoints left, so put him at the entrypoint

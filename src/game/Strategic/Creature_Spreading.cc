@@ -447,10 +447,10 @@ static void AddCreaturesToBattle(UINT8 n_young_males, UINT8 n_young_females, UIN
 		default: throw std::logic_error("Invalid direction passed to AddCreaturesToBattle()");
 	}
 
-	MAPEDGEPOINTINFO edgepoint_info;
+	EdgepointsVector edgepoint_info;
 	if (insertion_code != INSERTION_CODE_GRIDNO)
 	{
-		ChooseMapEdgepoints(&edgepoint_info, insertion_code, n_young_males + n_young_females + n_adult_males + n_adult_females);
+		edgepoint_info = ChooseMapEdgepoints(insertion_code, n_young_males + n_young_females + n_adult_males + n_adult_females);
 	}
 
 	std::vector<SoldierBodyType> bodies;
@@ -471,9 +471,9 @@ static void AddCreaturesToBattle(UINT8 n_young_males, UINT8 n_young_females, UIN
 		{
 			s->usStrategicInsertionData = gsCreatureInsertionGridNo;
 		}
-		else if (slot < edgepoint_info.ubNumPoints)
+		else if (slot < edgepoint_info.size())
 		{ // Use an edgepoint
-			s->usStrategicInsertionData = edgepoint_info.sGridNo[slot++];
+			s->usStrategicInsertionData = edgepoint_info[slot++];
 		}
 		else
 		{ // No edgepoints left, so put him at the entrypoint

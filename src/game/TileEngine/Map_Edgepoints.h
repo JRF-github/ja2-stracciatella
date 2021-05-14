@@ -5,15 +5,10 @@
 
 #include <vector>
 
-struct MAPEDGEPOINTINFO
-{
-	UINT8 ubNumPoints;
-	UINT8 ubStrategicInsertionCode;
-	UINT16 sGridNo[ 32 ];
-};
+using EdgepointsVector = std::vector<INT16>;
 
 UINT16 ChooseMapEdgepoint( UINT8 ubStrategicInsertionCode );
-void ChooseMapEdgepoints( MAPEDGEPOINTINFO *pMapEdgepointInfo, UINT8 ubStrategicInsertionCode, UINT8 ubNumDesiredPoints );
+EdgepointsVector ChooseMapEdgepoints( UINT8 ubStrategicInsertionCode, UINT8 ubNumDesiredPoints );
 void GenerateMapEdgepoints(void);
 
 void SaveMapEdgepoints(HWFILE);

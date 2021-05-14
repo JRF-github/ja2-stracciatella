@@ -19,6 +19,7 @@
 
 #include "Message.h"
 
+#include <algorithm>
 #include <vector>
 
 
@@ -836,30 +837,30 @@ bool LoadMapEdgepoints(HWFILE const f)
 }
 
 
-UINT16 ChooseMapEdgepoint( UINT8 ubStrategicInsertionCode )
+static EdgepointsVector * MapInsertionCode(UINT8 const ubStrategicInsertionCode)
 {
-	std::vector<INT16>* pEdgepoints = nullptr;
-
 	//First validate and get access to the correct array based on strategic direction.
 	//We will use the selected array to choose insertion gridno's.
 	switch( ubStrategicInsertionCode )
 	{
 		case INSERTION_CODE_NORTH:
-			pEdgepoints = &gps1stNorthEdgepointArray;
-			break;
+			return &gps1stNorthEdgepointArray;
 		case INSERTION_CODE_EAST:
-			pEdgepoints = &gps1stEastEdgepointArray;
-			break;
+			return &gps1stEastEdgepointArray;
 		case INSERTION_CODE_SOUTH:
-			pEdgepoints = &gps1stSouthEdgepointArray;
-			break;
+			return &gps1stSouthEdgepointArray;
 		case INSERTION_CODE_WEST:
-			pEdgepoints = &gps1stWestEdgepointArray;
-			break;
+			return &gps1stWestEdgepointArray;
 		default:
-			SLOGA("ChooseMapEdgepoints:  Failed to pass a valid strategic insertion code." );
-			break;
+			SLOGA("ChooseMapEdgepoint(s):  Failed to pass a valid strategic insertion code." );
+			return nullptr;
 	}
+}
+
+
+UINT16 ChooseMapEdgepoint( UINT8 ubStrategicInsertionCode )
+{
+	EdgepointsVector const * const pEdgepoints{MapInsertionCode(ubStrategicInsertionCode)};
 	if (!pEdgepoints || pEdgepoints->size() == 0)
 	{
 		return NOWHERE;
@@ -869,46 +870,19 @@ UINT16 ChooseMapEdgepoint( UINT8 ubStrategicInsertionCode )
 }
 
 
-void ChooseMapEdgepoints(MAPEDGEPOINTINFO* const pMapEdgepointInfo, const UINT8 ubStrategicInsertionCode, UINT8 ubNumDesiredPoints)
+EdgepointsVector ChooseMapEdgepoints(UINT8 const ubStrategicInsertionCode, UINT8 const ubNumDesiredPoints)
 {
-	AssertMsg(ubNumDesiredPoints > 0 && ubNumDesiredPoints <= 32, String("ChooseMapEdgepoints:  Desired points = %d, valid range is 1-32", ubNumDesiredPoints));
+	AssertMsg(ubNumDesiredPoints > 0, "ChooseMapEdgepoints: 0 desired points");
+	EdgepointsVector usableEdgepoints;
 
-	/* First validate and get access to the correct array based on strategic
-	 * direction.  We will use the selected array to choose insertion gridno's. */
-	std::vector<INT16>* pEdgepoints = nullptr;
-	switch (ubStrategicInsertionCode)
-	{
-		case INSERTION_CODE_NORTH:
-			pEdgepoints = &gps1stNorthEdgepointArray;
-			break;
-
-		case INSERTION_CODE_EAST:
-			pEdgepoints = &gps1stEastEdgepointArray;
-			break;
-
-		case INSERTION_CODE_SOUTH:
-			pEdgepoints = &gps1stSouthEdgepointArray;
-			break;
-
-		case INSERTION_CODE_WEST:
-			pEdgepoints = &gps1stWestEdgepointArray;
-			break;
-
-		default:
-			SLOGA("ChooseMapEdgepoints:  Failed to pass a valid strategic insertion code.");
-			break;
-	}
-	pMapEdgepointInfo->ubStrategicInsertionCode = ubStrategicInsertionCode;
-
+	EdgepointsVector const * const pEdgepoints{MapInsertionCode(ubStrategicInsertionCode)};
 	if (!pEdgepoints || pEdgepoints->size() == 0)
 	{
-		pMapEdgepointInfo->ubNumPoints = 0;
-		return;
+		return usableEdgepoints;
 	}
 
 	/* JA2 Gold: don't place people in the water.  If any of the waypoints is on a
 	 * water spot, we're going to have to remove it */
-	std::vector<INT16> usableEdgepoints;
 	for (INT16 edgepoint : *pEdgepoints)
 	{
 		const UINT8 terrain = GetTerrainType(edgepoint);
@@ -917,31 +891,14 @@ void ChooseMapEdgepoints(MAPEDGEPOINTINFO* const pMapEdgepointInfo, const UINT8 
 		usableEdgepoints.push_back(edgepoint);
 	}
 
-	if (ubNumDesiredPoints >= usableEdgepoints.size())
-	{ //We don't have enough points for everyone, return them all.
-		Assert(usableEdgepoints.size() <= UINT8_MAX);
-		pMapEdgepointInfo->ubNumPoints = static_cast<UINT8>(usableEdgepoints.size());
-		for (size_t i = 0; i < usableEdgepoints.size(); ++i)
-		{
-			pMapEdgepointInfo->sGridNo[i] = usableEdgepoints[i];
-		}
-		return;
+	if (ubNumDesiredPoints < usableEdgepoints.size())
+	{
+		// We have more than enough points for everyone, so choose them randomly.
+		std::shuffle(usableEdgepoints.begin(), usableEdgepoints.end(), gRandomEngine);
+		usableEdgepoints.resize(ubNumDesiredPoints);
 	}
 
-	// We have more points, so choose them randomly.
-	Assert(usableEdgepoints.size() <= UINT16_MAX);
-	UINT16 usSlots    = static_cast<UINT16>(usableEdgepoints.size());
-	UINT16 usCurrSlot = 0;
-	pMapEdgepointInfo->ubNumPoints = ubNumDesiredPoints;
-	for (size_t i = 0; i < usableEdgepoints.size(); ++i)
-	{
-		if (Random(usSlots) < ubNumDesiredPoints)
-		{
-			pMapEdgepointInfo->sGridNo[usCurrSlot++] = usableEdgepoints[i];
-			--ubNumDesiredPoints;
-		}
-		--usSlots;
-	}
+	return usableEdgepoints;
 }
 
 
@@ -1420,7 +1377,7 @@ UINT8 CalcMapEdgepointClassInsertionCode( INT16 sGridNo )
 }
 
 
-static bool ShowMapEdgepoint(std::vector<INT16>& edgepoints, UINT16 const idx)
+static INT32 ShowMapEdgepoint(std::vector<INT16>& edgepoints, UINT16 const idx)
 {
 	INT32              n_illegal = 0;
 	for (INT16 edgepoint : edgepoints)
